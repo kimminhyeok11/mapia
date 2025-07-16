@@ -191,6 +191,8 @@
         const GAME_ID = typeof __app_id !== 'undefined' ? __app_id : 'samjin_mafia_genesis_v2';
         const ADMIN_PASSWORD = '5882';
         const PLAYER_NAMES = ["마리오", "스파이더맨", "맹구"];
+        const PLAYER_AVATAR_COLORS = ["bg-orange-500", "bg-blue-500", "bg-emerald-500"];
+        const CHAT_NAME_COLORS = ["text-orange-400", "text-blue-400", "text-emerald-400"];
 
         const App = {
             State: {
@@ -336,13 +338,10 @@
                         avatarDiv.textContent = name.substring(0, 1);
                         
                         if (isSlotTaken) {
-                            if (isOnline) {
-                                avatarDiv.classList.add(isAlive ? 'border-blue-500' : 'border-red-600', 'bg-gray-700');
-                                if (isMe) avatarDiv.classList.add('ring-2', 'ring-offset-2', 'ring-offset-[var(--container-bg)]', 'ring-[var(--primary-color)]');
-                            } else { // Offline
-                                avatarDiv.classList.add('border-gray-600', 'bg-gray-800', 'opacity-50');
-                            }
-                            if (!isAlive) avatarDiv.classList.add('opacity-50');
+                            avatarDiv.classList.add(player.color || 'bg-gray-700');
+                            avatarDiv.style.borderColor = isAlive ? 'var(--primary-color)' : '#DC2626';
+                            if (!isOnline || !isAlive) avatarDiv.classList.add('opacity-50');
+                            if (isMe) avatarDiv.classList.add('ring-2', 'ring-offset-2', 'ring-offset-[var(--container-bg)]', 'ring-[var(--primary-color)]');
                         } else { // Empty slot
                             avatarDiv.classList.add('border-gray-700', 'bg-gray-800');
                         }
@@ -495,7 +494,14 @@
                     App.State.isPlayer = true;
                     const newGameState = {
                         id: GAME_ID, state: 'waiting',
-                        players: [{ name: App.State.myPlayerName, userId: App.State.myUserId, wantsRematch: false, isAlive: true }],
+                        players: [{ 
+                            name: App.State.myPlayerName, 
+                            userId: App.State.myUserId, 
+                            wantsRematch: false, 
+                            isAlive: true,
+                            color: PLAYER_AVATAR_COLORS[0],
+                            chatColor: CHAT_NAME_COLORS[0]
+                        }],
                         design_theme: null, moderator_profile: null,
                     };
                     await dbClient.from('games').upsert(newGameState);
@@ -507,6 +513,12 @@
                     // Channel for DB changes
                     App.State.dbChannel = dbClient.channel(`db-${GAME_ID}`)
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'games', filter: `id=eq.${GAME_ID}` }, payload => {
+                            if (payload.eventType === 'DELETE') {
+                                App.UI.showToast("방이 초기화되었습니다. 새로고침합니다.", "info");
+                                setTimeout(() => window.location.reload(), 2000);
+                                return;
+                            }
+                            
                             const oldState = App.State.game.state;
                             const oldPlayerLength = App.State.game.players?.length || 0;
                             
@@ -621,9 +633,17 @@
                     if (currentGame.players.length >= 3) {
                         App.UI.showToast('자리가 꽉 찼습니다!', 'error'); return;
                     }
-
-                    const assignedName = PLAYER_NAMES[currentGame.players.length];
-                    const newPlayer = { name: assignedName, userId: App.State.myUserId, wantsRematch: false, isAlive: true };
+                    
+                    const playerIndex = currentGame.players.length;
+                    const assignedName = PLAYER_NAMES[playerIndex];
+                    const newPlayer = { 
+                        name: assignedName, 
+                        userId: App.State.myUserId, 
+                        wantsRematch: false, 
+                        isAlive: true,
+                        color: PLAYER_AVATAR_COLORS[playerIndex],
+                        chatColor: CHAT_NAME_COLORS[playerIndex]
+                    };
                     const updatedPlayers = [...currentGame.players, newPlayer];
 
                     const { error: updateError } = await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
@@ -791,7 +811,7 @@
                     bubble.className = `chat-bubble max-w-xs md:max-w-sm p-3 rounded-2xl ${isMe ? 'bg-blue-600 rounded-br-lg' : 'bg-gray-700 rounded-bl-lg'}`;
                     
                     const senderName = document.createElement('p');
-                    senderName.className = `text-xs font-bold mb-1 ${isMe ? 'text-blue-200' : 'text-emerald-300'}`;
+                    senderName.className = `text-xs font-bold mb-1 ${sender.chatColor || 'text-gray-400'}`;
                     
                     let displayName = sender.name;
                     if (App.State.game.state === 'finished' && sender.role === 'mafia') {
@@ -829,9 +849,9 @@
                     if (!sender) {
                          const onlineUser = App.State.onlineUsers[msg.user_id]?.[0];
                          if (onlineUser) {
-                             sender = { name: onlineUser.name, userId: msg.user_id, role: 'observer' };
+                             sender = { name: onlineUser.name, userId: msg.user_id, role: 'observer', chatColor: 'text-gray-400' };
                          } else {
-                             sender = { name: '나간 유저', userId: msg.user_id, role: 'unknown' };
+                             sender = { name: '나간 유저', userId: msg.user_id, role: 'unknown', chatColor: 'text-gray-500' };
                          }
                     }
                     
@@ -907,7 +927,7 @@
                     ui.assetManagerBtn.addEventListener('click', () => App.AssetManager.open());
                     
                     ui.forceResetBtn.addEventListener('click', () => {
-                        if (window.confirm('정말로 모든 플레이어 데이터를 초기화하고 게임을 리셋하시겠습니까? (디자인/사회자는 유지됩니다)')) {
+                        if (window.confirm('정말로 모든 플레이어 데이터를 초기화하고 게임을 리셋하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                             this.forceResetGame();
                         }
                     });
