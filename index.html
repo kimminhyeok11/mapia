@@ -61,18 +61,15 @@
         }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* 사회자 UI 스타일 */
         #moderator-view {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
-        /* 에셋 관리자 스타일 */
         .asset-item { cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
         .asset-item.selected { border-color: var(--primary-color); }
     </style>
 </head>
 <body>
     
-    <!-- 사회자 뷰 -->
     <div id="moderator-view" class="fixed top-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center space-x-4 opacity-0 -translate-y-full">
         <img id="moderator-image" src="" alt="사회자" class="w-16 h-16 rounded-full border-2 border-yellow-400 object-cover">
         <div class="text-left">
@@ -81,10 +78,7 @@
         </div>
     </div>
 
-
-    <!-- 게임 컨테이너 -->
     <div id="game-container" class="game-container w-full max-w-md h-full flex flex-col rounded-2xl shadow-2xl overflow-hidden">
-        <!-- 상단 헤더 -->
         <header class="p-4 border-b border-[var(--border-color)] shrink-0">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
@@ -92,35 +86,31 @@
                     <h1 id="game-title" class="text-xl font-bold">삼진 마피아 게임</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div id="observer-count" class="text-xs text-[var(--text-muted-color)] flex items-center space-x-1"></div>
+                    <div id="online-count" class="text-xs text-[var(--text-muted-color)] flex items-center space-x-1"></div>
                     <div id="timer-display" class="text-xl font-mono text-red-500"></div>
                 </div>
             </div>
             <p class="text-xs text-[var(--text-muted-color)] mt-1">내 이름: <span id="user-id-display" class="font-mono">...</span></p>
         </header>
 
-        <!-- 접속자 현황판 -->
         <div id="player-status-panel" class="p-4 border-b border-[var(--border-color)] shrink-0">
             <h2 class="text-sm font-bold mb-2 text-[var(--text-muted-color)]">접속자 현황 <span id="player-count-display" class="font-mono text-sm"></span></h2>
             <div id="player-list" class="flex items-center space-x-4"></div>
         </div>
         
-        <!-- 역할 안내 -->
         <div id="role-display" class="p-3 text-center font-bold text-lg hidden shrink-0"></div>
 
-        <!-- 중앙 컨텐츠 (채팅) -->
         <div id="chat-messages" class="flex-1 min-h-0 p-4 space-y-4 overflow-y-auto"></div>
 
-        <!-- 하단 입력 -->
         <div id="chat-input-container" class="p-3 border-t border-[var(--border-color)] shrink-0">
-            <div class="flex space-x-2">
+            <button id="join-game-btn" class="hidden w-full primary-btn font-semibold px-5 py-3 rounded-xl hover:opacity-90 active:scale-95 transition-all duration-300">게임 참가하기</button>
+            <div id="chat-form" class="flex space-x-2">
                 <input type="text" id="message-input" placeholder="메시지 입력..." class="chat-input flex-1 p-3 border rounded-xl focus:outline-none transition-all duration-300">
                 <button id="send-button" class="primary-btn font-semibold px-5 py-3 rounded-xl hover:opacity-90 active:scale-95 transition-all duration-300">전송</button>
             </div>
         </div>
     </div>
     
-    <!-- 관리자 모드 UI -->
     <div id="admin-panel" class="fixed top-4 right-4 z-[100] flex flex-col items-end space-y-2">
         <div id="admin-controls" class="hidden flex-col space-y-2 p-2 bg-black/50 backdrop-blur-md rounded-lg">
             <div class="flex space-x-2">
@@ -134,19 +124,23 @@
             <div class="flex space-x-2">
                  <button id="asset-manager-btn" class="px-4 py-2 bg-orange-600 rounded-md hover:bg-orange-700 transition w-full">에셋 관리</button>
             </div>
+             <div class="flex space-x-2">
+                 <button id="force-reset-btn" class="px-4 py-2 bg-red-600 rounded-md hover:bg-red-700 transition w-full">강제 초기화</button>
+            </div>
         </div>
         <button id="admin-toggle-btn" class="w-12 h-12 bg-gray-500/50 rounded-full flex items-center justify-center hover:bg-gray-400/50 transition">
              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
     </div>
 
-    <!-- 각종 오버레이 및 모달 -->
+    <!-- Modals and Overlays -->
     <div id="password-modal" class="modal-overlay">
         <div class="bg-gray-800 rounded-xl shadow-2xl p-8 border border-[var(--border-color)] w-11/12 max-w-xs">
             <h2 class="text-xl font-bold mb-4 text-center text-[var(--primary-color)]">관리자 접속</h2>
             <p class="text-sm text-center text-[var(--text-muted-color)] mb-6">비밀번호를 입력하세요.</p>
             <input type="password" id="password-input" class="chat-input w-full mb-4 text-center" placeholder="****">
             <button id="password-submit-btn" class="primary-btn w-full py-2 font-semibold rounded-lg">접속</button>
+            <button id="password-cancel-btn" class="w-full py-2 mt-2 font-semibold rounded-lg bg-gray-600 hover:bg-gray-500">취소</button>
         </div>
     </div>
     <div id="ai-loading-overlay" class="modal-overlay">
@@ -188,8 +182,6 @@
 
 
     <script type="module">
-        // --- 설정 ---
-        // Vercel 배포 시, 아래 값들은 환경 변수로 대체하는 것이 좋습니다.
         const SUPABASE_URL = 'https://obbmtrxhmhokzvuxdqlc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iYm10cnhobWhva3p2dXhkcWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MjE5MjEsImV4cCI6MjA2NTA5NzkyMX0.xBkkJ41u6mTLu2YaUtuWUxsv5PwyQR6yyMQNM6fAPfQ';
         const GEMINI_API_KEY = "AIzaSyBcMKVcue0m4OpJ1qLDd2h9T5j1w6lzt6k"; 
@@ -200,25 +192,20 @@
         const ADMIN_PASSWORD = '5882';
         const PLAYER_NAMES = ["마리오", "스파이더맨", "맹구"];
 
-        /**
-         * 애플리케이션의 모든 상태와 로직을 관리하는 메인 객체
-         */
         const App = {
             State: {
                 isAdmin: false,
                 myUserId: localStorage.getItem(`mafia-user-id-${GAME_ID}`) || `user_${crypto.randomUUID()}`,
                 myPlayerName: null,
+                isPlayer: false,
                 isHost: false,
-                isObserver: false,
                 game: {},
+                onlineUsers: {},
                 tempDesign: null,
                 tempModerator: null,
-                selectedAssets: {
-                    backgroundUrl: null,
-                    logoUrl: null,
-                    moderatorUrl: null,
-                },
-                gameChannel: null,
+                selectedAssets: { backgroundUrl: null, logoUrl: null, moderatorUrl: null },
+                dbChannel: null,
+                presenceChannel: null,
                 chatChannel: null,
                 discussionTimerInterval: null,
             },
@@ -229,16 +216,19 @@
                         gameContainer: document.getElementById('game-container'),
                         gameLogo: document.getElementById('game-logo'),
                         gameTitle: document.getElementById('game-title'),
-                        observerCount: document.getElementById('observer-count'),
+                        onlineCount: document.getElementById('online-count'),
                         userIdDisplay: document.getElementById('user-id-display'),
                         playerList: document.getElementById('player-list'),
                         playerCountDisplay: document.getElementById('player-count-display'),
                         roleDisplay: document.getElementById('role-display'),
                         timerDisplay: document.getElementById('timer-display'),
                         chat: {
+                            container: document.getElementById('chat-input-container'),
                             messages: document.getElementById('chat-messages'),
                             input: document.getElementById('message-input'),
                             sendBtn: document.getElementById('send-button'),
+                            joinBtn: document.getElementById('join-game-btn'),
+                            chatForm: document.getElementById('chat-form'),
                         },
                         admin: {
                             panel: document.getElementById('admin-panel'),
@@ -249,9 +239,11 @@
                             generateModeratorBtn: document.getElementById('generate-moderator-btn'),
                             saveModeratorBtn: document.getElementById('save-moderator-btn'),
                             assetManagerBtn: document.getElementById('asset-manager-btn'),
+                            forceResetBtn: document.getElementById('force-reset-btn'),
                             passwordModal: document.getElementById('password-modal'),
                             passwordInput: document.getElementById('password-input'),
                             passwordSubmitBtn: document.getElementById('password-submit-btn'),
+                            passwordCancelBtn: document.getElementById('password-cancel-btn'),
                         },
                         overlays: {
                             aiLoading: document.getElementById('ai-loading-overlay'),
@@ -285,20 +277,28 @@
                 
                 render() {
                     if (!this.elements.playerList) return;
-                    
                     this.renderPlayerStatus();
-                    this.renderObserverStatus();
-                    this.updateChatAbility();
+                    this.updateInputSection();
                     this.updateOverlays();
                     App.Moderator.apply(App.State.game.moderator_profile);
                 },
 
-                updateChatAbility() {
-                    const me = App.State.game.players?.find(p => p.userId === App.State.myUserId);
-                    const isAlive = me && me.isAlive;
-                    const isDiscussion = App.State.game.state === 'discussion';
+                updateInputSection() {
+                    const isGameWaiting = App.State.game.state === 'waiting';
+                    const canJoin = App.State.game.players?.length < 3;
+
+                    if (!App.State.isPlayer && isGameWaiting && canJoin) {
+                        this.elements.chat.joinBtn.classList.remove('hidden');
+                        this.elements.chat.chatForm.classList.add('hidden');
+                    } else {
+                        this.elements.chat.joinBtn.classList.add('hidden');
+                        this.elements.chat.chatForm.classList.remove('hidden');
+                    }
                     
-                    const canChat = (isDiscussion && isAlive) || App.State.isObserver || App.State.game.state === 'finished' || App.State.game.state === 'waiting';
+                    const meAsPlayer = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                    const isAlive = meAsPlayer && meAsPlayer.isAlive;
+                    const isDiscussion = App.State.game.state === 'discussion';
+                    const canChat = (isDiscussion && isAlive) || !App.State.isPlayer || App.State.game.state === 'finished' || App.State.game.state === 'waiting';
                     
                     this.elements.chat.input.disabled = !canChat;
                     this.elements.chat.sendBtn.disabled = !canChat;
@@ -309,15 +309,22 @@
                     const playerListEl = this.elements.playerList;
                     if (!playerListEl) return;
 
-                    const playerCount = App.State.game.players?.length || 0;
+                    const dbPlayers = App.State.game.players || [];
+                    const onlineUserIds = Object.keys(App.State.onlineUsers);
+                    
+                    this.elements.onlineCount.innerHTML = `
+                        <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5"/></svg>
+                        <span>${onlineUserIds.length}</span>`;
+                    
+                    const playerCount = dbPlayers.length;
                     this.elements.playerCountDisplay.textContent = `(${playerCount}/3)`;
                     
                     playerListEl.innerHTML = '';
-                    const connectedPlayers = App.State.game.players || [];
                     
                     PLAYER_NAMES.forEach(name => {
-                        const player = connectedPlayers.find(p => p.name === name);
-                        const isConnected = !!player;
+                        const player = dbPlayers.find(p => p.name === name);
+                        const isSlotTaken = !!player;
+                        const isOnline = isSlotTaken && onlineUserIds.includes(player.userId);
                         const isAlive = player?.isAlive ?? false;
                         const isMe = player?.userId === App.State.myUserId;
 
@@ -325,41 +332,36 @@
                         playerDiv.className = 'flex flex-col items-center space-y-1 text-center';
                         
                         const avatarDiv = document.createElement('div');
-                        avatarDiv.className = `w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isMe ? 'ring-2 ring-offset-2 ring-offset-[var(--container-bg)] ring-[var(--primary-color)]' : ''}`;
+                        avatarDiv.className = `w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300`;
                         avatarDiv.textContent = name.substring(0, 1);
                         
-                        if (isConnected) {
-                            avatarDiv.classList.add(isAlive ? 'border-blue-500' : 'border-red-600', 'bg-gray-700');
+                        if (isSlotTaken) {
+                            if (isOnline) {
+                                avatarDiv.classList.add(isAlive ? 'border-blue-500' : 'border-red-600', 'bg-gray-700');
+                                if (isMe) avatarDiv.classList.add('ring-2', 'ring-offset-2', 'ring-offset-[var(--container-bg)]', 'ring-[var(--primary-color)]');
+                            } else { // Offline
+                                avatarDiv.classList.add('border-gray-600', 'bg-gray-800', 'opacity-50');
+                            }
                             if (!isAlive) avatarDiv.classList.add('opacity-50');
-                        } else {
-                            avatarDiv.classList.add('border-gray-600', 'bg-gray-800');
+                        } else { // Empty slot
+                            avatarDiv.classList.add('border-gray-700', 'bg-gray-800');
                         }
                         
                         const nameP = document.createElement('p');
-                        nameP.className = `text-xs transition-colors ${isConnected ? 'text-white' : 'text-gray-500'}`;
+                        nameP.className = `text-xs transition-colors`;
                         nameP.textContent = name;
-                        if (player && !isAlive) {
-                            nameP.textContent += ' (사망)';
+                        
+                        if (isSlotTaken) {
+                           nameP.classList.add(isOnline ? 'text-white' : 'text-gray-500');
+                           if (!isAlive) nameP.textContent += ' (사망)';
+                        } else {
+                           nameP.classList.add('text-gray-600');
                         }
                         
                         playerDiv.appendChild(avatarDiv);
                         playerDiv.appendChild(nameP);
                         playerListEl.appendChild(playerDiv);
                     });
-                },
-
-                renderObserverStatus() {
-                    const observerCountEl = this.elements.observerCount;
-                    if (!observerCountEl) return;
-                    
-                    const observerCount = App.State.game.observers?.length || 0;
-                    if (observerCount > 0) {
-                        observerCountEl.innerHTML = `
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <span>${observerCount}</span>`;
-                    } else {
-                        observerCountEl.innerHTML = '';
-                    }
                 },
 
                 updateOverlays() {
@@ -383,7 +385,7 @@
                     contentEl.innerHTML = `
                         <p class="text-sm text-[var(--text-muted-color)] mb-2">당신의 역할은...</p>
                         <h2 class="text-4xl font-bold mb-6 ${isMafia ? 'text-red-500' : 'text-cyan-400'}">${isMafia ? '마피아' : '시민'}</h2>
-                        <p class="mb-6">${isMafia ? '당신은 밤에 시민 한 명을 지목할 수 있습니다. 시민들을 속이고 최후까지 살아남으세요.' : '마피아를 찾아내 투표로 처형해야 합니다. 논리적인 토론으로 마피아를 색출하세요.'}</p>
+                        <p class="mb-6">${isMafia ? '시민들을 속이고 최후까지 살아남으세요.' : '토론으로 마피아를 찾아내 투표로 처형하세요.'}</p>
                         <button id="role-confirm-btn" class="primary-btn w-full py-3 font-semibold rounded-lg">확인했습니다</button>
                     `;
                     contentEl.querySelector('#role-confirm-btn').addEventListener('click', App.GameLogic.confirmRole);
@@ -407,11 +409,7 @@
                         <h2 class="text-2xl font-bold mb-4">마피아 투표</h2>
                         <p class="text-sm text-[var(--text-muted-color)] mb-6">마피아라고 생각되는 사람을 지목해주세요.</p>
                         <div id="vote-buttons-container" class="grid grid-cols-1 gap-3">
-                            ${alivePlayers.map(p => `
-                                <button data-vote-for="${p.name}" class="vote-btn w-full p-4 rounded-lg text-lg font-semibold transition bg-gray-700 hover:bg-gray-600 disabled:opacity-50">
-                                    ${p.name}
-                                </button>
-                            `).join('')}
+                            ${alivePlayers.map(p => `<button data-vote-for="${p.name}" class="vote-btn w-full p-4 rounded-lg text-lg font-semibold transition bg-gray-700 hover:bg-gray-600">${p.name}</button>`).join('')}
                         </div>
                     `;
                     votingContentEl.querySelectorAll('.vote-btn').forEach(btn => {
@@ -428,7 +426,7 @@
                     gameOverContentEl.innerHTML = `
                         <h2 class="text-4xl font-bold mb-4 ${winner === 'mafia' ? 'text-red-500' : 'text-cyan-400'}">${winner === 'mafia' ? '마피아 승리' : '시민 승리'}</h2>
                         <p class="mb-4">투표 결과 <strong class="font-bold">${executedPlayer || '아무도'}</strong>님이 처형되었습니다.</p>
-                        <p class="mb-6">마피아는 <strong class="font-bold text-red-400">${mafia?.name || '아무도'}</strong>님이었습니다.</p>
+                        <p class="mb-6">마피아는 <strong class="font-bold text-red-400">${mafia?.name || '??'}</strong>님이었습니다.</p>
                         <button id="rematch-btn" class="primary-btn w-full py-3 font-semibold rounded-lg mt-4">${me?.wantsRematch ? '재시작 대기 중...' : '재시작 요청'}</button>
                     `;
 
@@ -441,11 +439,7 @@
                 },
                 
                 showToast(message, type = 'info') {
-                    const bgColor = {
-                        info: 'bg-blue-500',
-                        success: 'bg-green-500',
-                        error: 'bg-red-500'
-                    }[type];
+                    const bgColor = { info: 'bg-blue-500', success: 'bg-green-500', error: 'bg-red-500' }[type];
                     const toast = document.createElement('div');
                     toast.className = `px-4 py-2 rounded-full text-white text-sm shadow-lg ${bgColor} animate-slide-in`;
                     toast.textContent = message;
@@ -459,69 +453,36 @@
             },
 
             GameLogic: {
-                // Main game logic methods
                 async init() {
                     App.UI.init();
                     App.Admin.init();
                     App.AssetManager.init();
                     localStorage.setItem(`mafia-user-id-${GAME_ID}`, App.State.myUserId);
                     
-                    await this.joinGame();
+                    await this.fetchInitialGameData();
                     await this.loadInitialMessages();
-                    this.subscribeToChanges();
+                    this.subscribeToChannels();
                     this.setupEventListeners();
                 },
                 
-                async joinGame() {
-                    // Use .limit(1) to avoid an error when no rows are found.
-                    const { data: games, error } = await dbClient.from('games').select('*').eq('id', GAME_ID).limit(1);
+                async fetchInitialGameData() {
+                    const { data: gameData, error } = await dbClient.from('games').select('*').eq('id', GAME_ID).single();
 
-                    if (error) {
-                        console.error("Error fetching game data:", error);
-                        App.UI.showToast("게임 정보를 불러오는 데 실패했습니다.", "error");
-                        return;
-                    }
-
-                    const gameData = games && games.length > 0 ? games[0] : null;
-
-                    if (!gameData) {
-                        console.log("No game found, creating new one.");
+                    if (error && error.code === 'PGRST116') { // Not found
+                        console.log("No game found, creating new one as host.");
                         App.State.isHost = true;
                         await this.createNewGame();
+                    } else if (error) {
+                        console.error("Error fetching game data:", error);
+                        App.UI.showToast("게임 정보를 불러오는 데 실패했습니다.", "error");
                     } else {
-                        const playerCountBeforeJoin = gameData.players.length;
                         App.State.game = gameData;
-                        const meAsPlayer = App.State.game.players.find(p => p.userId === App.State.myUserId);
-                        const meAsObserver = App.State.game.observers?.find(o => o.userId === App.State.myUserId);
-
-                        if (meAsPlayer) {
-                            App.State.myPlayerName = meAsPlayer.name;
-                        } else if (meAsObserver) {
-                            App.State.isObserver = true;
-                            App.State.myPlayerName = meAsObserver.name;
-                        } else {
-                            if (App.State.game.players.length < 3 && App.State.game.state === 'waiting') {
-                                const assignedName = PLAYER_NAMES[App.State.game.players.length];
-                                App.State.myPlayerName = assignedName;
-                                const newPlayer = { name: assignedName, userId: App.State.myUserId, wantsRematch: false, isAlive: true };
-                                const updatedPlayers = [...App.State.game.players, newPlayer];
-                                
-                                await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
-                                
-                                // Trigger personalized welcome message after joining
-                                if(playerCountBeforeJoin === 0) App.Moderator.speak('wait_for_two');
-                                if(playerCountBeforeJoin === 1) App.Moderator.speak('wait_for_one');
-
-                            } else {
-                                App.State.isObserver = true;
-                                App.State.myPlayerName = `관전자_${String(Math.random()).substring(2, 6)}`;
-                                const newObserver = { name: App.State.myPlayerName, userId: App.State.myUserId };
-                                const updatedObservers = [...(App.State.game.observers || []), newObserver];
-                                await dbClient.from('games').update({ observers: updatedObservers }).eq('id', GAME_ID);
-                            }
-                        }
                     }
                     
+                    const meAsPlayer = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                    App.State.isPlayer = !!meAsPlayer;
+                    App.State.myPlayerName = meAsPlayer ? meAsPlayer.name : `관전자_${String(Math.random()).substring(2, 6)}`;
+
                     App.UI.elements.userIdDisplay.textContent = App.State.myPlayerName;
                     if(App.State.game.design_theme) App.Design.apply(App.State.game.design_theme); 
                     if(App.State.game.moderator_profile) App.Moderator.apply(App.State.game.moderator_profile);
@@ -529,34 +490,35 @@
                 },
                 
                 async createNewGame() {
-                    await dbClient.from('messages').delete().neq('id', 0); // Assuming 'id' is a column that always exists and is not 0
+                    await dbClient.from('messages').delete().neq('id', -1);
                     App.State.myPlayerName = PLAYER_NAMES[0];
+                    App.State.isPlayer = true;
                     const newGameState = {
                         id: GAME_ID, state: 'waiting',
                         players: [{ name: App.State.myPlayerName, userId: App.State.myUserId, wantsRematch: false, isAlive: true }],
-                        observers: [],
-                        design_theme: null,
-                        moderator_profile: null,
+                        design_theme: null, moderator_profile: null,
                     };
                     await dbClient.from('games').upsert(newGameState);
                     App.State.game = newGameState;
+                    // This line is added to trigger the initial message for the host.
                     App.Moderator.speak('wait_for_two');
                 },
 
-                subscribeToChanges() {
-                    if (App.State.gameChannel) App.State.gameChannel.unsubscribe();
-                    App.State.gameChannel = dbClient.channel(`game-${GAME_ID}`)
+                subscribeToChannels() {
+                    // Channel for DB changes
+                    App.State.dbChannel = dbClient.channel(`db-${GAME_ID}`)
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'games', filter: `id=eq.${GAME_ID}` }, payload => {
-                            if (payload.eventType === 'DELETE') {
-                                window.location.reload();
-                                return;
-                            }
                             const oldState = App.State.game.state;
+                            const oldPlayerLength = App.State.game.players?.length || 0;
                             
-                            // Merge the new data with the existing state to prevent overwriting
                             App.State.game = { ...App.State.game, ...payload.new };
 
                             const newState = App.State.game.state;
+                            const newPlayerLength = App.State.game.players?.length || 0;
+
+                            if (oldPlayerLength < newPlayerLength) {
+                                if (newPlayerLength === 2) App.Moderator.speak('wait_for_one');
+                            }
 
                             if (oldState !== newState) {
                                 console.log(`State changed from ${oldState} to ${newState}`);
@@ -568,11 +530,34 @@
                             this.handleStateChange();
                             App.UI.render();
                         }).subscribe();
+
+                    // Channel for Presence
+                    App.State.presenceChannel = dbClient.channel(`presence-${GAME_ID}`);
+                    App.State.presenceChannel
+                        .on('presence', { event: 'sync' }, () => {
+                            App.State.onlineUsers = App.State.presenceChannel.presenceState();
+                            console.log('Presence synced:', App.State.onlineUsers);
+                            App.UI.render();
+                        })
+                        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                            console.log('Presence join:', key, newPresences);
+                            Object.assign(App.State.onlineUsers, App.State.presenceChannel.presenceState());
+                            App.UI.render();
+                        })
+                        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                            console.log('Presence leave:', key, leftPresences);
+                            delete App.State.onlineUsers[key];
+                            App.UI.render();
+                        })
+                        .subscribe(async (status) => {
+                            if (status === 'SUBSCRIBED') {
+                                await App.State.presenceChannel.track({ name: App.State.myPlayerName, online_at: new Date().toISOString() });
+                            }
+                        });
                     
-                    if (App.State.chatChannel) App.State.chatChannel.unsubscribe();
+                    // Channel for Chat
                     App.State.chatChannel = dbClient.channel(`chat-${GAME_ID}`)
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                            // Only display messages from other users. My own are handled optimistically.
                             if (payload.new.user_id !== App.State.myUserId) {
                                 this.displayChatMessage(payload.new);
                             }
@@ -580,14 +565,12 @@
                 },
                 
                 onStateEnter(newState, oldState) {
-                    // Cleanup for the state we are leaving
                     if (oldState === 'discussion') {
                         clearInterval(App.State.discussionTimerInterval);
                         App.State.discussionTimerInterval = null;
                         App.UI.elements.timerDisplay.textContent = '';
                     }
 
-                    // Setup for the new state
                     if (newState === 'discussion') {
                         this.startDiscussionTimer();
                         App.Moderator.speak('discussion');
@@ -615,7 +598,6 @@
 
                         if (remaining === 0) {
                             clearInterval(App.State.discussionTimerInterval);
-                            App.State.discussionTimerInterval = null;
                         }
                     }, 1000);
                 },
@@ -628,10 +610,37 @@
                             this.sendMessage();
                         }
                     });
+                    App.UI.elements.chat.joinBtn.addEventListener('click', () => this.handleJoinRequest());
+                },
+
+                async handleJoinRequest() {
+                    const { data: currentGame, error } = await dbClient.from('games').select('players').eq('id', GAME_ID).single();
+                    if (error || !currentGame) {
+                        App.UI.showToast('게임 정보를 가져오는데 실패했습니다.', 'error'); return;
+                    }
+
+                    if (currentGame.players.length >= 3) {
+                        App.UI.showToast('자리가 꽉 찼습니다!', 'error'); return;
+                    }
+
+                    const assignedName = PLAYER_NAMES[currentGame.players.length];
+                    const newPlayer = { name: assignedName, userId: App.State.myUserId, wantsRematch: false, isAlive: true };
+                    const updatedPlayers = [...currentGame.players, newPlayer];
+
+                    const { error: updateError } = await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
+
+                    if (updateError) {
+                        App.UI.showToast('게임 참가에 실패했습니다.', 'error');
+                    } else {
+                        App.State.isPlayer = true;
+                        App.State.myPlayerName = assignedName;
+                        App.UI.elements.userIdDisplay.textContent = App.State.myPlayerName;
+                        await App.State.presenceChannel.track({ name: App.State.myPlayerName, online_at: new Date().toISOString() });
+                    }
                 },
 
                 handleStateChange() {
-                    App.State.isHost = App.State.game.players.length > 0 && App.State.game.players[0].userId === App.State.myUserId;
+                    App.State.isHost = App.State.game.players?.length > 0 && App.State.game.players[0].userId === App.State.myUserId;
                     if (!App.State.isHost) return;
 
                     const { state, players } = App.State.game;
@@ -652,7 +661,7 @@
                             if (players.every(p => p.confirmed)) {
                                 dbClient.from('games').update({ 
                                     state: 'discussion',
-                                    discussion_end_time: new Date(Date.now() + 1 * 60 * 1000).toISOString() // 1 minute discussion
+                                    discussion_end_time: new Date(Date.now() + 1 * 60 * 1000).toISOString()
                                 }).eq('id', GAME_ID).then();
                             }
                             break;
@@ -677,6 +686,7 @@
                 },
                 
                 async runCountdown() {
+                    if (App.State.game.players.length < 3) return; // Prevent start if someone leaves during countdown
                     for (let i = 3; i > 0; i--) {
                         App.Moderator.speak('countdown', {number: i});
                         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -687,8 +697,7 @@
                         const shuffled = [...App.State.game.players].sort(() => 0.5 - Math.random());
                         const mafiaName = shuffled[0].name;
                         const updatedPlayers = App.State.game.players.map(p => ({ 
-                            ...p, 
-                            role: p.name === mafiaName ? 'mafia' : 'citizen',
+                            ...p, role: p.name === mafiaName ? 'mafia' : 'citizen',
                             isAlive: true, confirmed: false, votedFor: null, wantsRematch: false
                         }));
                         await dbClient.from('games').update({ state: 'role_assignment', players: updatedPlayers }).eq('id', GAME_ID);
@@ -720,9 +729,7 @@
                 async tallyVotes() {
                     const votes = {};
                     App.State.game.players.filter(p=>p.isAlive).forEach(p => {
-                        if(p.votedFor) {
-                            votes[p.votedFor] = (votes[p.votedFor] || 0) + 1;
-                        }
+                        if(p.votedFor) votes[p.votedFor] = (votes[p.votedFor] || 0) + 1;
                     });
                     
                     let executedPlayerName = '';
@@ -734,7 +741,6 @@
                         }
                     }
                     
-                    // In case of a tie, no one is executed.
                     if (Object.values(votes).filter(v => v === maxVotes).length > 1) {
                          await dbClient.from('games').update({ state: 'finished', winner: 'mafia', executedPlayer: '투표 동점' }).eq('id', GAME_ID);
                          return;
@@ -743,12 +749,7 @@
                     const executedPlayer = App.State.game.players.find(p => p.name === executedPlayerName);
                     const winner = executedPlayer.role === 'mafia' ? 'citizen' : 'mafia';
                     
-                    const updatedPlayers = App.State.game.players.map(p => {
-                        if(p.name === executedPlayerName) {
-                            return {...p, isAlive: false};
-                        }
-                        return p;
-                    });
+                    const updatedPlayers = App.State.game.players.map(p => p.name === executedPlayerName ? {...p, isAlive: false} : p);
 
                     await dbClient.from('games').update({ state: 'finished', winner, executedPlayer: executedPlayerName, players: updatedPlayers }).eq('id', GAME_ID);
                 },
@@ -765,26 +766,19 @@
                 },
 
                 async resetGameForRematch() {
-                    await dbClient.from('messages').delete().neq('id', 0); // Assuming 'id' is a column that always exists and is not 0
+                    await dbClient.from('messages').delete().neq('id', -1);
                     const resetPlayers = App.State.game.players.map(p => ({
-                        ...p,
-                        role: null,
-                        isAlive: true,
-                        confirmed: false,
-                        votedFor: null,
-                        wantsRematch: false
+                        ...p, role: null, isAlive: true, confirmed: false,
+                        votedFor: null, wantsRematch: false
                     }));
                     await dbClient.from('games').update({
-                        state: 'waiting',
-                        players: resetPlayers,
-                        winner: null,
-                        executedPlayer: null,
-                        discussion_end_time: null
+                        state: 'waiting', players: resetPlayers,
+                        winner: null, executedPlayer: null, discussion_end_time: null
                     }).eq('id', GAME_ID);
                 },
 
                 async loadInitialMessages() {
-                    const { data: messages, error } = await dbClient.from('messages').select('*').order('created_at', { ascending: true });
+                    const { data: messages } = await dbClient.from('messages').select('*').order('created_at', { ascending: true });
                     App.UI.elements.chat.messages.innerHTML = '';
                     if (messages) messages.forEach(msg => this.displayChatMessage(msg));
                 },
@@ -830,11 +824,16 @@
                 },
 
                 displayChatMessage(msg) {
-                    const allUsers = [...(App.State.game.players || []), ...(App.State.game.observers || [])];
-                    let sender = allUsers.find(p => p.userId === msg.user_id);
+                    const allDbUsers = App.State.game.players || [];
+                    let sender = allDbUsers.find(p => p.userId === msg.user_id);
                     
                     if (!sender) {
-                        sender = { name: App.State.myPlayerName || '나', userId: msg.user_id, role: 'unknown' };
+                         const onlineUser = App.State.onlineUsers[msg.user_id]?.[0];
+                         if (onlineUser) {
+                             sender = { name: onlineUser.name, userId: msg.user_id, role: 'observer' };
+                         } else {
+                             sender = { name: '나간 유저', userId: msg.user_id, role: 'unknown' };
+                         }
                     }
                     
                     this.renderChatMessage(msg, sender);
@@ -852,15 +851,7 @@
                         };
                         this.displayChatMessage(optimisticMessage);
 
-                        const { error } = await dbClient.from('messages').insert({ 
-                            user_id: App.State.myUserId, 
-                            content: content,
-                        });
-
-                        if (error) {
-                            console.error("Error sending message:", error);
-                            App.UI.showToast("메시지 전송 실패", "error");
-                        }
+                        await dbClient.from('messages').insert({ user_id: App.State.myUserId, content: content });
                     }
                 },
                 
@@ -869,12 +860,10 @@
                         window.speechSynthesis.cancel();
                         const utterance = new SpeechSynthesisUtterance(text);
                         utterance.lang = 'ko-KR';
-                        utterance.rate = 1.8; // Speed increased
+                        utterance.rate = 1.8;
                         utterance.pitch = 1.2;
                         window.speechSynthesis.speak(utterance);
-                    } catch (e) {
-                        console.error("Speech synthesis failed.", e);
-                    }
+                    } catch (e) { console.error("Speech synthesis failed.", e); }
                 }
             },
 
@@ -882,27 +871,34 @@
                 init() {
                     const ui = App.UI.elements.admin;
                     ui.toggleBtn.addEventListener('click', () => {
-                        if (App.State.isAdmin) {
-                            ui.controls.classList.toggle('hidden');
-                        } else {
+                        if (App.State.isAdmin) ui.controls.classList.toggle('hidden');
+                        else {
                             ui.passwordModal.classList.add('visible');
                             ui.passwordInput.focus();
                         }
                     });
 
                     const submitPassword = () => {
-                        if (ui.passwordInput.value === ADMIN_PASSWORD) {
-                            this.activate();
-                        } else {
+                        if (ui.passwordInput.value === ADMIN_PASSWORD) this.activate();
+                        else {
                             ui.passwordInput.classList.add('shake');
                             setTimeout(() => ui.passwordInput.classList.remove('shake'), 300);
                             ui.passwordInput.value = '';
                         }
                     };
 
+                    const cancelPassword = () => {
+                        App.UI.elements.admin.passwordModal.classList.remove('visible');
+                        ui.passwordInput.value = '';
+                    };
+
                     ui.passwordSubmitBtn.addEventListener('click', submitPassword);
-                    ui.passwordInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') submitPassword();
+                    ui.passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') submitPassword(); });
+                    ui.passwordCancelBtn.addEventListener('click', cancelPassword);
+                    ui.passwordModal.addEventListener('click', (e) => {
+                        if (e.target === ui.passwordModal) {
+                            cancelPassword();
+                        }
                     });
                     
                     ui.generateBtn.addEventListener('click', () => App.AI.generateNewWorld());
@@ -910,12 +906,41 @@
                     ui.generateModeratorBtn.addEventListener('click', () => App.AI.generateNewModerator());
                     ui.saveModeratorBtn.addEventListener('click', () => App.AI.saveModerator());
                     ui.assetManagerBtn.addEventListener('click', () => App.AssetManager.open());
+                    
+                    ui.forceResetBtn.addEventListener('click', () => {
+                        if (window.confirm('정말로 모든 플레이어 데이터를 초기화하고 게임을 리셋하시겠습니까? (디자인/사회자는 유지됩니다)')) {
+                            this.forceResetGame();
+                        }
+                    });
                 },
                 activate() {
                     App.State.isAdmin = true;
                     App.UI.elements.admin.passwordModal.classList.remove('visible');
                     App.UI.elements.admin.controls.classList.remove('hidden');
                     App.UI.showToast('관리자 모드가 활성화되었습니다.', 'success');
+                },
+                async forceResetGame() {
+                    App.UI.showToast("게임을 강제로 초기화합니다...", "info");
+                    try {
+                        await dbClient.from('messages').delete().neq('id', -1); 
+                        
+                        const { data: currentGame, error } = await dbClient.from('games').select('design_theme, moderator_profile').eq('id', GAME_ID).single();
+                        if (error) throw error;
+
+                        const updatePayload = {
+                            state: 'waiting', players: [],
+                            winner: null, executedPlayer: null, discussion_end_time: null,
+                            design_theme: currentGame.design_theme, 
+                            moderator_profile: currentGame.moderator_profile
+                        };
+                        
+                        await dbClient.from('games').update(updatePayload).eq('id', GAME_ID);
+                        
+                        App.UI.showToast("게임이 성공적으로 초기화되었습니다.", "success");
+                    } catch (error) {
+                        console.error("Failed to force reset game:", error);
+                        App.UI.showToast("게임 초기화에 실패했습니다.", "error");
+                    }
                 }
             },
 
@@ -1168,7 +1193,6 @@
                 currentTimeout: null,
                 apply(profile, isTemp = false) {
                     if (!profile) {
-                        // Apply default moderator appearance if no profile exists
                         App.UI.elements.moderator.name.textContent = "사회자";
                         App.UI.elements.moderator.image.src = `https://placehold.co/64x64/1E1E1E/EAEAEA?text=GM`;
                         return;
@@ -1187,17 +1211,17 @@
 
                     if (!profile || !profile.dialogue) {
                         const defaultDialogues = {
-                            wait_for_two: "2명의 플레이어를 더 기다립니다...",
+                            wait_for_two: "플레이어 2명을 더 기다립니다...",
                             wait_for_one: "마지막 플레이어를 기다립니다. 곧 시작합니다!",
-                            discussion: "토론 시간입니다.",
-                            voting: "투표 시간입니다.",
-                            mafia_win: "마피아가 승리했습니다.",
-                            citizen_win: "시민이 승리했습니다.",
+                            discussion: "토론 시간입니다. 마피아를 찾아내세요.",
+                            voting: "투표 시간입니다. 마피아를 지목해주세요.",
+                            mafia_win: `마피아가 승리했습니다! 마피아는 {mafia}님이었습니다.`,
+                            citizen_win: `시민이 승리했습니다! 마피아 {executed}님을 찾아냈습니다.`,
                             countdown: `${replacements.number || ''}...`,
-                            game_start: "게임 시작!"
+                            game_start: "게임 시작! 밤이 되었습니다."
                         };
                         dialogue = defaultDialogues[dialogueKey] || "";
-                        this.apply(null); // Apply default appearance
+                        this.apply(null);
                     } else {
                         dialogue = profile.dialogue[dialogueKey] || "대사를 찾을 수 없습니다.";
                     }
@@ -1218,7 +1242,7 @@
                     }, 5000);
                 },
                 preview(profile) {
-                    this.apply(profile, true); // Apply with isTemp=true to use base64 image
+                    this.apply(profile, true);
                     const introDialogue = `안녕하세요! 새로운 사회자, ${profile.name}입니다. 게임을 시작해볼까요?`;
                     
                     App.UI.elements.moderator.dialogue.textContent = introDialogue;
@@ -1235,42 +1259,18 @@
             },
             
             AssetManager: {
-                selectedAssets: {
-                    backgroundUrl: null,
-                    logoUrl: null,
-                    moderatorUrl: null,
-                },
+                selectedAssets: { backgroundUrl: null, logoUrl: null, moderatorUrl: null },
                 
                 init() {
                     App.UI.elements.assetManager.closeBtn.addEventListener('click', () => this.close());
                     App.UI.elements.assetManager.applyBtn.addEventListener('click', () => this.applySelection());
                 },
-
-                async open() {
-                    App.UI.elements.assetManager.modal.classList.add('visible');
-                    this.fetchAssets();
-                },
-
-                close() {
-                    App.UI.elements.assetManager.modal.classList.remove('visible');
-                },
-
+                open() { App.UI.elements.assetManager.modal.classList.add('visible'); this.fetchAssets(); },
+                close() { App.UI.elements.assetManager.modal.classList.remove('visible'); },
                 async fetchAssets() {
-                    const { data, error } = await dbClient.storage.from('design_assets').list('public', {
-                        limit: 100, // Adjust as needed
-                        sortBy: { column: 'created_at', order: 'desc' },
-                    });
-
-                    if (error) {
-                        console.error("Error fetching assets:", error);
-                        App.UI.showToast("에셋을 불러오는 데 실패했습니다.", "error");
-                        return;
-                    }
-
-                    const backgrounds = [];
-                    const logos = [];
-                    const moderators = [];
-
+                    const { data, error } = await dbClient.storage.from('design_assets').list('public', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+                    if (error) { console.error("Error fetching assets:", error); return; }
+                    const backgrounds = [], logos = [], moderators = [];
                     for (const file of data) {
                         const { data: urlData } = dbClient.storage.from('design_assets').getPublicUrl(`public/${file.name}`);
                         if (urlData) {
@@ -1279,81 +1279,54 @@
                             if (file.name.startsWith('mod_')) moderators.push({name: file.name, url: urlData.publicUrl});
                         }
                     }
-                    
                     this.renderAssets('background', backgrounds, App.State.game.design_theme?.bgImageUrl);
                     this.renderAssets('logo', logos, App.State.game.design_theme?.logoImageUrl);
                     this.renderAssets('moderator', moderators, App.State.game.moderator_profile?.imageUrl);
                 },
-                
                 renderAssets(type, assets, currentAssetUrl) {
                     const listEl = App.UI.elements.assetManager[`${type}List`];
                     listEl.innerHTML = '';
-                    
                     assets.forEach(asset => {
                         const img = document.createElement('img');
                         img.src = asset.url;
                         img.className = 'asset-item w-full h-24 object-cover rounded-md';
                         img.dataset.url = asset.url;
                         img.dataset.type = type;
-
                         if (asset.url === currentAssetUrl) {
                             img.classList.add('selected');
                             this.selectedAssets[`${type}Url`] = asset.url;
                         }
-
                         img.addEventListener('click', (e) => this.handleAssetClick(e));
                         listEl.appendChild(img);
                     });
                 },
-
                 handleAssetClick(event) {
                     const target = event.currentTarget;
                     const { type, url } = target.dataset;
-                    
                     this.selectedAssets[`${type}Url`] = url;
-
-                    // Update selection visual
                     const listEl = App.UI.elements.assetManager[`${type}List`];
                     listEl.querySelectorAll('.asset-item').forEach(item => item.classList.remove('selected'));
                     target.classList.add('selected');
                 },
-
                 async applySelection() {
                     const { backgroundUrl, logoUrl, moderatorUrl } = this.selectedAssets;
+                    const { data: currentGame, error: fetchError } = await dbClient.from('games').select('design_theme, moderator_profile').eq('id', GAME_ID).single();
+                    if(fetchError) { App.UI.showToast("에셋 적용 전 상태를 불러오지 못했습니다.", "error"); return; }
                     
-                    // We need to fetch the existing profiles to merge with
-                    const currentDesign = App.State.game.design_theme || {};
-                    const currentModerator = App.State.game.moderator_profile || {};
-
+                    const currentDesign = currentGame.design_theme || {};
+                    const currentModerator = currentGame.moderator_profile || {};
                     const updatePayload = {
-                        design_theme: {
-                            ...currentDesign,
-                            bgImageUrl: backgroundUrl || currentDesign.bgImageUrl,
-                            logoImageUrl: logoUrl || currentDesign.logoImageUrl,
-                        },
-                        moderator_profile: {
-                            ...currentModerator,
-                            imageUrl: moderatorUrl || currentModerator.imageUrl,
-                        }
+                        design_theme: { ...currentDesign, bgImageUrl: backgroundUrl || currentDesign.bgImageUrl, logoImageUrl: logoUrl || currentDesign.logoImageUrl },
+                        moderator_profile: { ...currentModerator, imageUrl: moderatorUrl || currentModerator.imageUrl }
                     };
-
                     const { error } = await dbClient.from('games').update(updatePayload).eq('id', GAME_ID);
-
-                    if (error) {
-                        console.error("Error applying assets:", error);
-                        App.UI.showToast("에셋 적용에 실패했습니다.", "error");
-                    } else {
-                        App.UI.showToast("에셋이 성공적으로 적용되었습니다.", "success");
-                        this.close();
-                    }
+                    if (error) App.UI.showToast("에셋 적용에 실패했습니다.", "error");
+                    else { App.UI.showToast("에셋이 성공적으로 적용되었습니다.", "success"); this.close(); }
                 }
             }
         };
 
-        // --- 애플리케이션 시작 ---
-        window.addEventListener('DOMContentLoaded', () => {
-            App.GameLogic.init();
-        });
+        window.addEventListener('DOMContentLoaded', () => { App.GameLogic.init(); });
     </script>
 </body>
 </html>
