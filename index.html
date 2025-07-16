@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>삼진 마피아 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style id="dynamic-styles">
+        :root {
+            --font-main: 'Inter', 'Noto Sans KR', sans-serif;
+            --bg-color: #121212;
+            --container-bg: #1E1E1E;
+            --primary-color: #007BFF;
+            --text-color: #EAEAEA;
+            --text-muted-color: #888888;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        html, body { height: 100%; overflow: hidden; }
+        body { 
+            font-family: var(--font-main); 
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+        }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .hidden { display: none !important; }
+        .game-container { background: var(--container-bg); border: 1px solid var(--border-color); }
+        .primary-btn { background: var(--primary-color); color: white; }
+        .chat-input { background-color: #2a2a2a; border-color: var(--border-color); color: var(--text-color); }
+        .chat-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-color)55; }
+        .chat-bubble { animation: slide-in 0.2s ease-out; }
+        .countdown-number, .role-reveal-content, .game-over-content { animation: zoom-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        @keyframes slide-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoom-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .shake { animation: shake 0.3s ease-in-out; }
+        .ai-loading-spinner {
+            width: 56px; height: 56px;
+            border: 6px solid #444;
+            border-bottom-color: var(--primary-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* 사회자 UI 스타일 */
+        #moderator-view {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        /* 에셋 관리자 스타일 */
+        .asset-item { cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+        .asset-item.selected { border-color: var(--primary-color); }
+    </style>
+</head>
+<body>
+    
+    <!-- 사회자 뷰 -->
+    <div id="moderator-view" class="fixed top-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center space-x-4 opacity-0 -translate-y-full">
+        <img id="moderator-image" src="" alt="사회자" class="w-16 h-16 rounded-full border-2 border-yellow-400 object-cover">
+        <div class="text-left">
+            <h3 id="moderator-name" class="font-bold text-yellow-300"></h3>
+            <p id="moderator-dialogue" class="text-white"></p>
+        </div>
+    </div>
+
+
+    <!-- 게임 컨테이너 -->
+    <div id="game-container" class="game-container w-full max-w-md h-full flex flex-col rounded-2xl shadow-2xl overflow-hidden">
+        <!-- 상단 헤더 -->
+        <header class="p-4 border-b border-[var(--border-color)] shrink-0">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img id="game-logo" src="" alt="Game Logo" class="h-8 w-8 transition-opacity duration-500 opacity-0 object-contain">
+                    <h1 id="game-title" class="text-xl font-bold">삼진 마피아 게임</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="observer-count" class="text-xs text-[var(--text-muted-color)] flex items-center space-x-1"></div>
+                    <div id="timer-display" class="text-xl font-mono text-red-500"></div>
+                </div>
+            </div>
+            <p class="text-xs text-[var(--text-muted-color)] mt-1">내 이름: <span id="user-id-display" class="font-mono">...</span></p>
+        </header>
+
+        <!-- 접속자 현황판 -->
+        <div id="player-status-panel" class="p-4 border-b border-[var(--border-color)] shrink-0">
+            <h2 class="text-sm font-bold mb-2 text-[var(--text-muted-color)]">접속자 현황 <span id="player-count-display" class="font-mono text-sm"></span></h2>
+            <div id="player-list" class="flex items-center space-x-4"></div>
+        </div>
+        
+        <!-- 역할 안내 -->
+        <div id="role-display" class="p-3 text-center font-bold text-lg hidden shrink-0"></div>
+
+        <!-- 중앙 컨텐츠 (채팅) -->
+        <div id="chat-messages" class="flex-1 min-h-0 p-4 space-y-4 overflow-y-auto"></div>
+
+        <!-- 하단 입력 -->
+        <div id="chat-input-container" class="p-3 border-t border-[var(--border-color)] shrink-0">
+            <div class="flex space-x-2">
+                <input type="text" id="message-input" placeholder="메시지 입력..." class="chat-input flex-1 p-3 border rounded-xl focus:outline-none transition-all duration-300">
+                <button id="send-button" class="primary-btn font-semibold px-5 py-3 rounded-xl hover:opacity-90 active:scale-95 transition-all duration-300">전송</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 관리자 모드 UI -->
+    <div id="admin-panel" class="fixed top-4 right-4 z-[100] flex flex-col items-end space-y-2">
+        <div id="admin-controls" class="hidden flex-col space-y-2 p-2 bg-black/50 backdrop-blur-md rounded-lg">
+            <div class="flex space-x-2">
+                <button id="generate-design-btn" class="px-4 py-2 bg-purple-600 rounded-md hover:bg-purple-700 transition">세계 창조</button>
+                <button id="save-design-btn" class="hidden px-4 py-2 bg-green-600 rounded-md hover:bg-green-700 transition">이걸로 할게</button>
+            </div>
+             <div class="flex space-x-2">
+                <button id="generate-moderator-btn" class="px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 transition">사회자 창조</button>
+                <button id="save-moderator-btn" class="hidden px-4 py-2 bg-teal-600 rounded-md hover:bg-teal-700 transition">이 사회자로</button>
+            </div>
+            <div class="flex space-x-2">
+                 <button id="asset-manager-btn" class="px-4 py-2 bg-orange-600 rounded-md hover:bg-orange-700 transition w-full">에셋 관리</button>
+            </div>
+        </div>
+        <button id="admin-toggle-btn" class="w-12 h-12 bg-gray-500/50 rounded-full flex items-center justify-center hover:bg-gray-400/50 transition">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+    </div>
+
+    <!-- 각종 오버레이 및 모달 -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-8 border border-[var(--border-color)] w-11/12 max-w-xs">
+            <h2 class="text-xl font-bold mb-4 text-center text-[var(--primary-color)]">관리자 접속</h2>
+            <p class="text-sm text-center text-[var(--text-muted-color)] mb-6">비밀번호를 입력하세요.</p>
+            <input type="password" id="password-input" class="chat-input w-full mb-4 text-center" placeholder="****">
+            <button id="password-submit-btn" class="primary-btn w-full py-2 font-semibold rounded-lg">접속</button>
+        </div>
+    </div>
+    <div id="ai-loading-overlay" class="modal-overlay">
+        <div class="text-center">
+            <div class="ai-loading-spinner mx-auto"></div>
+            <p id="ai-loading-text" class="mt-4 text-lg font-semibold animate-pulse">AI가 새로운 세계를 창조하는 중...</p>
+        </div>
+    </div>
+    <div id="asset-manager-modal" class="modal-overlay">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-6 border border-[var(--border-color)] w-11/12 max-w-3xl h-5/6 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-[var(--primary-color)]">에셋 관리자</h2>
+                <button id="asset-manager-close-btn" class="p-2 rounded-full hover:bg-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-6 pr-2">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">배경화면</h3>
+                    <div id="asset-list-background" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">로고</h3>
+                    <div id="asset-list-logo" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4"></div>
+                </div>
+                 <div>
+                    <h3 class="text-lg font-semibold mb-2">사회자</h3>
+                    <div id="asset-list-moderator" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4"></div>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-[var(--border-color)]">
+                 <button id="apply-assets-btn" class="primary-btn w-full py-3 font-semibold rounded-lg">선택한 에셋으로 적용</button>
+            </div>
+        </div>
+    </div>
+    <div id="countdown-overlay" class="modal-overlay"><span id="countdown-number" class="text-9xl font-bold text-white"></span></div>
+    <div id="role-reveal-overlay" class="modal-overlay"><div id="role-reveal-content" class="text-center p-8 bg-[var(--container-bg)] rounded-2xl shadow-lg"></div></div>
+    <div id="voting-view" class="modal-overlay"><div id="voting-content" class="text-center p-8 bg-[var(--container-bg)] rounded-2xl shadow-lg w-11/12 max-w-sm"></div></div>
+    <div id="game-over-view" class="modal-overlay"><div id="game-over-content" class="game-over-content text-center p-8 bg-[var(--container-bg)] rounded-2xl shadow-lg w-11/12 max-w-sm"></div></div>
+    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center space-y-2"></div>
+
+
+    <script type="module">
+        // --- 설정 ---
+        // Vercel 배포 시, 아래 값들은 환경 변수로 대체하는 것이 좋습니다.
+        const SUPABASE_URL = 'https://obbmtrxhmhokzvuxdqlc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iYm10cnhobWhva3p2dXhkcWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MjE5MjEsImV4cCI6MjA2NTA5NzkyMX0.xBkkJ41u6mTLu2YaUtuWUxsv5PwyQR6yyMQNM6fAPfQ';
+        const GEMINI_API_KEY = "AIzaSyBcMKVcue0m4OpJ1qLDd2h9T5j1w6lzt6k"; 
+        
+        const dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const GAME_ID = typeof __app_id !== 'undefined' ? __app_id : 'samjin_mafia_genesis_v2';
+        const ADMIN_PASSWORD = '5882';
+        const PLAYER_NAMES = ["마리오", "스파이더맨", "맹구"];
+
+        /**
+         * 애플리케이션의 모든 상태와 로직을 관리하는 메인 객체
+         */
+        const App = {
+            State: {
+                isAdmin: false,
+                myUserId: localStorage.getItem(`mafia-user-id-${GAME_ID}`) || `user_${crypto.randomUUID()}`,
+                myPlayerName: null,
+                isHost: false,
+                isObserver: false,
+                game: {},
+                tempDesign: null,
+                tempModerator: null,
+                selectedAssets: {
+                    backgroundUrl: null,
+                    logoUrl: null,
+                    moderatorUrl: null,
+                },
+                gameChannel: null,
+                chatChannel: null,
+                discussionTimerInterval: null,
+            },
+
+            UI: {
+                init() {
+                    this.elements = {
+                        gameContainer: document.getElementById('game-container'),
+                        gameLogo: document.getElementById('game-logo'),
+                        gameTitle: document.getElementById('game-title'),
+                        observerCount: document.getElementById('observer-count'),
+                        userIdDisplay: document.getElementById('user-id-display'),
+                        playerList: document.getElementById('player-list'),
+                        playerCountDisplay: document.getElementById('player-count-display'),
+                        roleDisplay: document.getElementById('role-display'),
+                        timerDisplay: document.getElementById('timer-display'),
+                        chat: {
+                            messages: document.getElementById('chat-messages'),
+                            input: document.getElementById('message-input'),
+                            sendBtn: document.getElementById('send-button'),
+                        },
+                        admin: {
+                            panel: document.getElementById('admin-panel'),
+                            controls: document.getElementById('admin-controls'),
+                            toggleBtn: document.getElementById('admin-toggle-btn'),
+                            generateBtn: document.getElementById('generate-design-btn'),
+                            saveBtn: document.getElementById('save-design-btn'),
+                            generateModeratorBtn: document.getElementById('generate-moderator-btn'),
+                            saveModeratorBtn: document.getElementById('save-moderator-btn'),
+                            assetManagerBtn: document.getElementById('asset-manager-btn'),
+                            passwordModal: document.getElementById('password-modal'),
+                            passwordInput: document.getElementById('password-input'),
+                            passwordSubmitBtn: document.getElementById('password-submit-btn'),
+                        },
+                        overlays: {
+                            aiLoading: document.getElementById('ai-loading-overlay'),
+                            aiLoadingText: document.getElementById('ai-loading-text'),
+                            countdown: document.getElementById('countdown-overlay'),
+                            roleReveal: document.getElementById('role-reveal-overlay'),
+                            voting: document.getElementById('voting-view'),
+                            gameOver: document.getElementById('game-over-view'),
+                        },
+                        moderator: {
+                            view: document.getElementById('moderator-view'),
+                            image: document.getElementById('moderator-image'),
+                            name: document.getElementById('moderator-name'),
+                            dialogue: document.getElementById('moderator-dialogue'),
+                        },
+                        assetManager: {
+                            modal: document.getElementById('asset-manager-modal'),
+                            closeBtn: document.getElementById('asset-manager-close-btn'),
+                            applyBtn: document.getElementById('apply-assets-btn'),
+                            backgroundList: document.getElementById('asset-list-background'),
+                            logoList: document.getElementById('asset-list-logo'),
+                            moderatorList: document.getElementById('asset-list-moderator'),
+                        },
+                        countdownNumber: document.getElementById('countdown-number'),
+                        roleRevealContent: document.getElementById('role-reveal-content'),
+                        votingContent: document.getElementById('voting-content'),
+                        gameOverContent: document.getElementById('game-over-content'),
+                        toastContainer: document.getElementById('toast-container'),
+                    };
+                },
+                
+                render() {
+                    if (!this.elements.playerList) return;
+                    
+                    this.renderPlayerStatus();
+                    this.renderObserverStatus();
+                    this.updateChatAbility();
+                    this.updateOverlays();
+                    App.Moderator.apply(App.State.game.moderator_profile);
+                },
+
+                updateChatAbility() {
+                    const me = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                    const isAlive = me && me.isAlive;
+                    const isDiscussion = App.State.game.state === 'discussion';
+                    
+                    const canChat = (isDiscussion && isAlive) || App.State.isObserver || App.State.game.state === 'finished' || App.State.game.state === 'waiting';
+                    
+                    this.elements.chat.input.disabled = !canChat;
+                    this.elements.chat.sendBtn.disabled = !canChat;
+                    this.elements.chat.input.placeholder = canChat ? "메시지 입력..." : "지금은 말할 수 없습니다...";
+                },
+                
+                renderPlayerStatus() {
+                    const playerListEl = this.elements.playerList;
+                    if (!playerListEl) return;
+
+                    const playerCount = App.State.game.players?.length || 0;
+                    this.elements.playerCountDisplay.textContent = `(${playerCount}/3)`;
+                    
+                    playerListEl.innerHTML = '';
+                    const connectedPlayers = App.State.game.players || [];
+                    
+                    PLAYER_NAMES.forEach(name => {
+                        const player = connectedPlayers.find(p => p.name === name);
+                        const isConnected = !!player;
+                        const isAlive = player?.isAlive ?? false;
+                        const isMe = player?.userId === App.State.myUserId;
+
+                        const playerDiv = document.createElement('div');
+                        playerDiv.className = 'flex flex-col items-center space-y-1 text-center';
+                        
+                        const avatarDiv = document.createElement('div');
+                        avatarDiv.className = `w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isMe ? 'ring-2 ring-offset-2 ring-offset-[var(--container-bg)] ring-[var(--primary-color)]' : ''}`;
+                        avatarDiv.textContent = name.substring(0, 1);
+                        
+                        if (isConnected) {
+                            avatarDiv.classList.add(isAlive ? 'border-blue-500' : 'border-red-600', 'bg-gray-700');
+                            if (!isAlive) avatarDiv.classList.add('opacity-50');
+                        } else {
+                            avatarDiv.classList.add('border-gray-600', 'bg-gray-800');
+                        }
+                        
+                        const nameP = document.createElement('p');
+                        nameP.className = `text-xs transition-colors ${isConnected ? 'text-white' : 'text-gray-500'}`;
+                        nameP.textContent = name;
+                        if (player && !isAlive) {
+                            nameP.textContent += ' (사망)';
+                        }
+                        
+                        playerDiv.appendChild(avatarDiv);
+                        playerDiv.appendChild(nameP);
+                        playerListEl.appendChild(playerDiv);
+                    });
+                },
+
+                renderObserverStatus() {
+                    const observerCountEl = this.elements.observerCount;
+                    if (!observerCountEl) return;
+                    
+                    const observerCount = App.State.game.observers?.length || 0;
+                    if (observerCount > 0) {
+                        observerCountEl.innerHTML = `
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <span>${observerCount}</span>`;
+                    } else {
+                        observerCountEl.innerHTML = '';
+                    }
+                },
+
+                updateOverlays() {
+                    const state = App.State.game.state;
+                    this.elements.overlays.countdown.classList.toggle('visible', state === 'countdown');
+                    this.elements.overlays.roleReveal.classList.toggle('visible', state === 'role_assignment');
+                    this.elements.overlays.voting.classList.toggle('visible', state === 'voting');
+                    this.elements.overlays.gameOver.classList.toggle('visible', state === 'finished');
+
+                    if (state === 'role_assignment') this.renderRoleReveal();
+                    if (state === 'voting') this.renderVotingView();
+                    if (state === 'finished') this.renderGameOverView();
+                },
+                
+                renderRoleReveal() {
+                    const me = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                    if (!me) return;
+
+                    const contentEl = this.elements.roleRevealContent;
+                    const isMafia = me.role === 'mafia';
+                    contentEl.innerHTML = `
+                        <p class="text-sm text-[var(--text-muted-color)] mb-2">당신의 역할은...</p>
+                        <h2 class="text-4xl font-bold mb-6 ${isMafia ? 'text-red-500' : 'text-cyan-400'}">${isMafia ? '마피아' : '시민'}</h2>
+                        <p class="mb-6">${isMafia ? '당신은 밤에 시민 한 명을 지목할 수 있습니다. 시민들을 속이고 최후까지 살아남으세요.' : '마피아를 찾아내 투표로 처형해야 합니다. 논리적인 토론으로 마피아를 색출하세요.'}</p>
+                        <button id="role-confirm-btn" class="primary-btn w-full py-3 font-semibold rounded-lg">확인했습니다</button>
+                    `;
+                    contentEl.querySelector('#role-confirm-btn').addEventListener('click', App.GameLogic.confirmRole);
+                },
+                
+                renderVotingView() {
+                    const votingContentEl = this.elements.votingContent;
+                    const me = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                    if (!me || !me.isAlive) {
+                        votingContentEl.innerHTML = `<h2 class="text-2xl font-bold mb-4">투표 진행 중</h2><p>다른 플레이어들이 투표하고 있습니다.</p>`;
+                        return;
+                    }
+
+                    if (me.votedFor) {
+                         votingContentEl.innerHTML = `<h2 class="text-2xl font-bold mb-4">투표 완료</h2><p>다른 플레이어들을 기다리고 있습니다.</p>`;
+                         return;
+                    }
+
+                    const alivePlayers = App.State.game.players.filter(p => p.isAlive && p.userId !== App.State.myUserId);
+                    votingContentEl.innerHTML = `
+                        <h2 class="text-2xl font-bold mb-4">마피아 투표</h2>
+                        <p class="text-sm text-[var(--text-muted-color)] mb-6">마피아라고 생각되는 사람을 지목해주세요.</p>
+                        <div id="vote-buttons-container" class="grid grid-cols-1 gap-3">
+                            ${alivePlayers.map(p => `
+                                <button data-vote-for="${p.name}" class="vote-btn w-full p-4 rounded-lg text-lg font-semibold transition bg-gray-700 hover:bg-gray-600 disabled:opacity-50">
+                                    ${p.name}
+                                </button>
+                            `).join('')}
+                        </div>
+                    `;
+                    votingContentEl.querySelectorAll('.vote-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => App.GameLogic.castVote(e.currentTarget.dataset.voteFor));
+                    });
+                },
+
+                renderGameOverView() {
+                    const gameOverContentEl = this.elements.gameOverContent;
+                    const { winner, executedPlayer, players } = App.State.game;
+                    const mafia = players.find(p => p.role === 'mafia');
+                    const me = players.find(p => p.userId === App.State.myUserId);
+
+                    gameOverContentEl.innerHTML = `
+                        <h2 class="text-4xl font-bold mb-4 ${winner === 'mafia' ? 'text-red-500' : 'text-cyan-400'}">${winner === 'mafia' ? '마피아 승리' : '시민 승리'}</h2>
+                        <p class="mb-4">투표 결과 <strong class="font-bold">${executedPlayer || '아무도'}</strong>님이 처형되었습니다.</p>
+                        <p class="mb-6">마피아는 <strong class="font-bold text-red-400">${mafia?.name || '아무도'}</strong>님이었습니다.</p>
+                        <button id="rematch-btn" class="primary-btn w-full py-3 font-semibold rounded-lg mt-4">${me?.wantsRematch ? '재시작 대기 중...' : '재시작 요청'}</button>
+                    `;
+
+                    const rematchBtn = gameOverContentEl.querySelector('#rematch-btn');
+                    if(me && !me.wantsRematch) {
+                        rematchBtn.addEventListener('click', App.GameLogic.requestRematch);
+                    } else {
+                        rematchBtn.disabled = true;
+                    }
+                },
+                
+                showToast(message, type = 'info') {
+                    const bgColor = {
+                        info: 'bg-blue-500',
+                        success: 'bg-green-500',
+                        error: 'bg-red-500'
+                    }[type];
+                    const toast = document.createElement('div');
+                    toast.className = `px-4 py-2 rounded-full text-white text-sm shadow-lg ${bgColor} animate-slide-in`;
+                    toast.textContent = message;
+                    this.elements.toastContainer.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(-20px)';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                }
+            },
+
+            GameLogic: {
+                // Main game logic methods
+                async init() {
+                    App.UI.init();
+                    App.Admin.init();
+                    App.AssetManager.init();
+                    localStorage.setItem(`mafia-user-id-${GAME_ID}`, App.State.myUserId);
+                    
+                    await this.joinGame();
+                    await this.loadInitialMessages();
+                    this.subscribeToChanges();
+                    this.setupEventListeners();
+                },
+                
+                async joinGame() {
+                    // Use .limit(1) to avoid an error when no rows are found.
+                    const { data: games, error } = await dbClient.from('games').select('*').eq('id', GAME_ID).limit(1);
+
+                    if (error) {
+                        console.error("Error fetching game data:", error);
+                        App.UI.showToast("게임 정보를 불러오는 데 실패했습니다.", "error");
+                        return;
+                    }
+
+                    const gameData = games && games.length > 0 ? games[0] : null;
+
+                    if (!gameData) {
+                        console.log("No game found, creating new one.");
+                        App.State.isHost = true;
+                        await this.createNewGame();
+                    } else {
+                        const playerCountBeforeJoin = gameData.players.length;
+                        App.State.game = gameData;
+                        const meAsPlayer = App.State.game.players.find(p => p.userId === App.State.myUserId);
+                        const meAsObserver = App.State.game.observers?.find(o => o.userId === App.State.myUserId);
+
+                        if (meAsPlayer) {
+                            App.State.myPlayerName = meAsPlayer.name;
+                        } else if (meAsObserver) {
+                            App.State.isObserver = true;
+                            App.State.myPlayerName = meAsObserver.name;
+                        } else {
+                            if (App.State.game.players.length < 3 && App.State.game.state === 'waiting') {
+                                const assignedName = PLAYER_NAMES[App.State.game.players.length];
+                                App.State.myPlayerName = assignedName;
+                                const newPlayer = { name: assignedName, userId: App.State.myUserId, wantsRematch: false, isAlive: true };
+                                const updatedPlayers = [...App.State.game.players, newPlayer];
+                                
+                                await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
+                                
+                                // Trigger personalized welcome message after joining
+                                if(playerCountBeforeJoin === 0) App.Moderator.speak('wait_for_two');
+                                if(playerCountBeforeJoin === 1) App.Moderator.speak('wait_for_one');
+
+                            } else {
+                                App.State.isObserver = true;
+                                App.State.myPlayerName = `관전자_${String(Math.random()).substring(2, 6)}`;
+                                const newObserver = { name: App.State.myPlayerName, userId: App.State.myUserId };
+                                const updatedObservers = [...(App.State.game.observers || []), newObserver];
+                                await dbClient.from('games').update({ observers: updatedObservers }).eq('id', GAME_ID);
+                            }
+                        }
+                    }
+                    
+                    App.UI.elements.userIdDisplay.textContent = App.State.myPlayerName;
+                    if(App.State.game.design_theme) App.Design.apply(App.State.game.design_theme); 
+                    if(App.State.game.moderator_profile) App.Moderator.apply(App.State.game.moderator_profile);
+                    App.UI.render();
+                },
+                
+                async createNewGame() {
+                    await dbClient.from('messages').delete().neq('id', 0); // Assuming 'id' is a column that always exists and is not 0
+                    App.State.myPlayerName = PLAYER_NAMES[0];
+                    const newGameState = {
+                        id: GAME_ID, state: 'waiting',
+                        players: [{ name: App.State.myPlayerName, userId: App.State.myUserId, wantsRematch: false, isAlive: true }],
+                        observers: [],
+                        design_theme: null,
+                        moderator_profile: null,
+                    };
+                    await dbClient.from('games').upsert(newGameState);
+                    App.State.game = newGameState;
+                    App.Moderator.speak('wait_for_two');
+                },
+
+                subscribeToChanges() {
+                    if (App.State.gameChannel) App.State.gameChannel.unsubscribe();
+                    App.State.gameChannel = dbClient.channel(`game-${GAME_ID}`)
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'games', filter: `id=eq.${GAME_ID}` }, payload => {
+                            if (payload.eventType === 'DELETE') {
+                                window.location.reload();
+                                return;
+                            }
+                            const oldState = App.State.game.state;
+                            
+                            // Merge the new data with the existing state to prevent overwriting
+                            App.State.game = { ...App.State.game, ...payload.new };
+
+                            const newState = App.State.game.state;
+
+                            if (oldState !== newState) {
+                                console.log(`State changed from ${oldState} to ${newState}`);
+                                this.onStateEnter(newState, oldState);
+                            }
+                            
+                            App.Design.apply(App.State.game.design_theme);
+                            App.Moderator.apply(App.State.game.moderator_profile);
+                            this.handleStateChange();
+                            App.UI.render();
+                        }).subscribe();
+                    
+                    if (App.State.chatChannel) App.State.chatChannel.unsubscribe();
+                    App.State.chatChannel = dbClient.channel(`chat-${GAME_ID}`)
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                            // Only display messages from other users. My own are handled optimistically.
+                            if (payload.new.user_id !== App.State.myUserId) {
+                                this.displayChatMessage(payload.new);
+                            }
+                        }).subscribe();
+                },
+                
+                onStateEnter(newState, oldState) {
+                    // Cleanup for the state we are leaving
+                    if (oldState === 'discussion') {
+                        clearInterval(App.State.discussionTimerInterval);
+                        App.State.discussionTimerInterval = null;
+                        App.UI.elements.timerDisplay.textContent = '';
+                    }
+
+                    // Setup for the new state
+                    if (newState === 'discussion') {
+                        this.startDiscussionTimer();
+                        App.Moderator.speak('discussion');
+                    } else if (newState === 'voting') {
+                         App.Moderator.speak('voting');
+                    } else if (newState === 'finished') {
+                        const winner = App.State.game.winner;
+                        App.Moderator.speak(winner === 'mafia' ? 'mafia_win' : 'citizen_win', {
+                            executed: App.State.game.executedPlayer,
+                            mafia: App.State.game.players.find(p => p.role === 'mafia')?.name || '??'
+                        });
+                    }
+                },
+
+                startDiscussionTimer() {
+                    if (App.State.discussionTimerInterval) clearInterval(App.State.discussionTimerInterval);
+                    
+                    const endTime = new Date(App.State.game.discussion_end_time).getTime();
+                    App.State.discussionTimerInterval = setInterval(() => {
+                        const now = Date.now();
+                        const remaining = Math.max(0, endTime - now);
+                        const minutes = String(Math.floor(remaining / 60000)).padStart(2, '0');
+                        const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+                        App.UI.elements.timerDisplay.textContent = `${minutes}:${seconds}`;
+
+                        if (remaining === 0) {
+                            clearInterval(App.State.discussionTimerInterval);
+                            App.State.discussionTimerInterval = null;
+                        }
+                    }, 1000);
+                },
+
+                setupEventListeners() {
+                    App.UI.elements.chat.sendBtn.addEventListener('click', () => this.sendMessage());
+                    App.UI.elements.chat.input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.sendMessage();
+                        }
+                    });
+                },
+
+                handleStateChange() {
+                    App.State.isHost = App.State.game.players.length > 0 && App.State.game.players[0].userId === App.State.myUserId;
+                    if (!App.State.isHost) return;
+
+                    const { state, players } = App.State.game;
+
+                    switch (state) {
+                        case 'waiting':
+                            if (players.length === 3) {
+                                dbClient.from('games').update({ state: 'countdown' }).eq('id', GAME_ID).then();
+                            }
+                            break;
+                        case 'countdown':
+                            if (!this.countdownRunning) {
+                                this.countdownRunning = true;
+                                this.runCountdown().then(() => { this.countdownRunning = false; });
+                            }
+                            break;
+                        case 'role_assignment':
+                            if (players.every(p => p.confirmed)) {
+                                dbClient.from('games').update({ 
+                                    state: 'discussion',
+                                    discussion_end_time: new Date(Date.now() + 1 * 60 * 1000).toISOString() // 1 minute discussion
+                                }).eq('id', GAME_ID).then();
+                            }
+                            break;
+                        case 'discussion':
+                            const endTime = new Date(App.State.game.discussion_end_time).getTime();
+                            if (Date.now() >= endTime) {
+                                dbClient.from('games').update({ state: 'voting' }).eq('id', GAME_ID).then();
+                            }
+                            break;
+                        case 'voting':
+                            const alivePlayers = players.filter(p => p.isAlive);
+                            if (alivePlayers.every(p => p.votedFor)) {
+                                this.tallyVotes();
+                            }
+                            break;
+                        case 'finished':
+                            if (players.every(p => p.wantsRematch)) {
+                                this.resetGameForRematch();
+                            }
+                            break;
+                    }
+                },
+                
+                async runCountdown() {
+                    for (let i = 3; i > 0; i--) {
+                        App.Moderator.speak('countdown', {number: i});
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                     App.Moderator.speak('game_start');
+                    
+                    if (App.State.isHost) {
+                        const shuffled = [...App.State.game.players].sort(() => 0.5 - Math.random());
+                        const mafiaName = shuffled[0].name;
+                        const updatedPlayers = App.State.game.players.map(p => ({ 
+                            ...p, 
+                            role: p.name === mafiaName ? 'mafia' : 'citizen',
+                            isAlive: true, confirmed: false, votedFor: null, wantsRematch: false
+                        }));
+                        await dbClient.from('games').update({ state: 'role_assignment', players: updatedPlayers }).eq('id', GAME_ID);
+                    }
+                },
+
+                async confirmRole() {
+                    const players = App.State.game.players;
+                    const myIndex = players.findIndex(p => p.userId === App.State.myUserId);
+                    if (myIndex === -1) return;
+                    
+                    const updatedPlayers = [...players];
+                    updatedPlayers[myIndex].confirmed = true;
+                    
+                    await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
+                },
+                
+                async castVote(votedForName) {
+                    const players = App.State.game.players;
+                    const myIndex = players.findIndex(p => p.userId === App.State.myUserId);
+                    if (myIndex === -1 || players[myIndex].votedFor) return;
+
+                    const updatedPlayers = [...players];
+                    updatedPlayers[myIndex].votedFor = votedForName;
+
+                    await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
+                },
+
+                async tallyVotes() {
+                    const votes = {};
+                    App.State.game.players.filter(p=>p.isAlive).forEach(p => {
+                        if(p.votedFor) {
+                            votes[p.votedFor] = (votes[p.votedFor] || 0) + 1;
+                        }
+                    });
+                    
+                    let executedPlayerName = '';
+                    let maxVotes = 0;
+                    for (const playerName in votes) {
+                        if (votes[playerName] > maxVotes) {
+                            maxVotes = votes[playerName];
+                            executedPlayerName = playerName;
+                        }
+                    }
+                    
+                    // In case of a tie, no one is executed.
+                    if (Object.values(votes).filter(v => v === maxVotes).length > 1) {
+                         await dbClient.from('games').update({ state: 'finished', winner: 'mafia', executedPlayer: '투표 동점' }).eq('id', GAME_ID);
+                         return;
+                    }
+
+                    const executedPlayer = App.State.game.players.find(p => p.name === executedPlayerName);
+                    const winner = executedPlayer.role === 'mafia' ? 'citizen' : 'mafia';
+                    
+                    const updatedPlayers = App.State.game.players.map(p => {
+                        if(p.name === executedPlayerName) {
+                            return {...p, isAlive: false};
+                        }
+                        return p;
+                    });
+
+                    await dbClient.from('games').update({ state: 'finished', winner, executedPlayer: executedPlayerName, players: updatedPlayers }).eq('id', GAME_ID);
+                },
+
+                async requestRematch() {
+                    const players = App.State.game.players;
+                    const myIndex = players.findIndex(p => p.userId === App.State.myUserId);
+                    if (myIndex === -1) return;
+
+                    const updatedPlayers = [...players];
+                    updatedPlayers[myIndex].wantsRematch = true;
+                    
+                    await dbClient.from('games').update({ players: updatedPlayers }).eq('id', GAME_ID);
+                },
+
+                async resetGameForRematch() {
+                    await dbClient.from('messages').delete().neq('id', 0); // Assuming 'id' is a column that always exists and is not 0
+                    const resetPlayers = App.State.game.players.map(p => ({
+                        ...p,
+                        role: null,
+                        isAlive: true,
+                        confirmed: false,
+                        votedFor: null,
+                        wantsRematch: false
+                    }));
+                    await dbClient.from('games').update({
+                        state: 'waiting',
+                        players: resetPlayers,
+                        winner: null,
+                        executedPlayer: null,
+                        discussion_end_time: null
+                    }).eq('id', GAME_ID);
+                },
+
+                async loadInitialMessages() {
+                    const { data: messages, error } = await dbClient.from('messages').select('*').order('created_at', { ascending: true });
+                    App.UI.elements.chat.messages.innerHTML = '';
+                    if (messages) messages.forEach(msg => this.displayChatMessage(msg));
+                },
+                
+                renderChatMessage(msg, sender) {
+                    const isMe = sender.userId === App.State.myUserId;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`;
+                    
+                    const bubble = document.createElement('div');
+                    bubble.className = `chat-bubble max-w-xs md:max-w-sm p-3 rounded-2xl ${isMe ? 'bg-blue-600 rounded-br-lg' : 'bg-gray-700 rounded-bl-lg'}`;
+                    
+                    const senderName = document.createElement('p');
+                    senderName.className = `text-xs font-bold mb-1 ${isMe ? 'text-blue-200' : 'text-emerald-300'}`;
+                    
+                    let displayName = sender.name;
+                    if (App.State.game.state === 'finished' && sender.role === 'mafia') {
+                        displayName += ' (마피아)';
+                        senderName.classList.add('text-red-400');
+                    }
+                    senderName.textContent = displayName;
+                    bubble.appendChild(senderName);
+                    
+                    const content = document.createElement('p');
+                    content.className = 'text-white text-sm break-words';
+                    content.textContent = msg.content;
+                    bubble.appendChild(content);
+
+                    const timestamp = document.createElement('span');
+                    timestamp.className = 'text-xs text-gray-400';
+                    timestamp.textContent = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}) : '';
+                    
+                    if (isMe) {
+                        wrapper.appendChild(timestamp);
+                        wrapper.appendChild(bubble);
+                    } else {
+                        wrapper.appendChild(bubble);
+                        wrapper.appendChild(timestamp);
+                    }
+                    
+                    App.UI.elements.chat.messages.appendChild(wrapper);
+                    App.UI.elements.chat.messages.scrollTop = App.UI.elements.chat.messages.scrollHeight;
+                },
+
+                displayChatMessage(msg) {
+                    const allUsers = [...(App.State.game.players || []), ...(App.State.game.observers || [])];
+                    let sender = allUsers.find(p => p.userId === msg.user_id);
+                    
+                    if (!sender) {
+                        sender = { name: App.State.myPlayerName || '나', userId: msg.user_id, role: 'unknown' };
+                    }
+                    
+                    this.renderChatMessage(msg, sender);
+                },
+
+                async sendMessage() {
+                    const content = App.UI.elements.chat.input.value.trim();
+                    if (content && App.State.myUserId) {
+                        App.UI.elements.chat.input.value = '';
+                        
+                        const optimisticMessage = {
+                            user_id: App.State.myUserId,
+                            content: content,
+                            created_at: new Date().toISOString()
+                        };
+                        this.displayChatMessage(optimisticMessage);
+
+                        const { error } = await dbClient.from('messages').insert({ 
+                            user_id: App.State.myUserId, 
+                            content: content,
+                        });
+
+                        if (error) {
+                            console.error("Error sending message:", error);
+                            App.UI.showToast("메시지 전송 실패", "error");
+                        }
+                    }
+                },
+                
+                speak(text) {
+                    try {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'ko-KR';
+                        utterance.rate = 1.8; // Speed increased
+                        utterance.pitch = 1.2;
+                        window.speechSynthesis.speak(utterance);
+                    } catch (e) {
+                        console.error("Speech synthesis failed.", e);
+                    }
+                }
+            },
+
+            Admin: {
+                init() {
+                    const ui = App.UI.elements.admin;
+                    ui.toggleBtn.addEventListener('click', () => {
+                        if (App.State.isAdmin) {
+                            ui.controls.classList.toggle('hidden');
+                        } else {
+                            ui.passwordModal.classList.add('visible');
+                            ui.passwordInput.focus();
+                        }
+                    });
+
+                    const submitPassword = () => {
+                        if (ui.passwordInput.value === ADMIN_PASSWORD) {
+                            this.activate();
+                        } else {
+                            ui.passwordInput.classList.add('shake');
+                            setTimeout(() => ui.passwordInput.classList.remove('shake'), 300);
+                            ui.passwordInput.value = '';
+                        }
+                    };
+
+                    ui.passwordSubmitBtn.addEventListener('click', submitPassword);
+                    ui.passwordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') submitPassword();
+                    });
+                    
+                    ui.generateBtn.addEventListener('click', () => App.AI.generateNewWorld());
+                    ui.saveBtn.addEventListener('click', () => App.AI.saveWorld());
+                    ui.generateModeratorBtn.addEventListener('click', () => App.AI.generateNewModerator());
+                    ui.saveModeratorBtn.addEventListener('click', () => App.AI.saveModerator());
+                    ui.assetManagerBtn.addEventListener('click', () => App.AssetManager.open());
+                },
+                activate() {
+                    App.State.isAdmin = true;
+                    App.UI.elements.admin.passwordModal.classList.remove('visible');
+                    App.UI.elements.admin.controls.classList.remove('hidden');
+                    App.UI.showToast('관리자 모드가 활성화되었습니다.', 'success');
+                }
+            },
+
+            AI: {
+                async generateNewWorld() {
+                    App.UI.elements.overlays.aiLoadingText.textContent = 'AI가 새로운 세계를 창조하는 중...';
+                    App.UI.elements.overlays.aiLoading.classList.add('visible');
+                    try {
+                        const themePrompt = `Create a dramatic and cool theme for a mafia game. The visual style MUST be 2D Japanese anime style, like Naruto or Dragon Ball. DO NOT use realistic or painterly styles. Provide a theme name, a Google Font name, a color palette, a container background color, a border color, a detailed background image prompt, and a simple logo prompt. Respond in JSON format.`;
+                        const themeSchema = {
+                            type: "OBJECT",
+                            properties: {
+                                themeName: { type: "STRING" },
+                                font: { type: "STRING" },
+                                colors: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        primary: { type: "STRING" },
+                                        text: { type: "STRING" },
+                                        background: { type: "STRING" },
+                                        containerBg: { type: "STRING" },
+                                        border: { type: "STRING" },
+                                    }
+                                },
+                                bgPrompt: { type: "STRING" },
+                                logoPrompt: { type: "STRING" }
+                            }
+                        };
+                        const theme = await this.generateWithGemini(themePrompt, themeSchema);
+                        
+                        const [bgImageBase64, logoImageBase64] = await Promise.all([
+                            this.generateWithImagen(theme.bgPrompt, false),
+                            this.generateWithImagen(theme.logoPrompt, true)
+                        ]);
+                        
+                        App.State.tempDesign = { theme, bgImageBase64, logoImageBase64 };
+                        App.Design.apply(App.State.tempDesign, true);
+                        
+                        App.UI.elements.admin.saveBtn.classList.remove('hidden');
+
+                    } catch (error) {
+                        console.error("AI World Creation Failed:", error);
+                        App.UI.showToast("세계 창조에 실패했습니다. API 키나 네트워크를 확인해주세요.", "error");
+                    } finally {
+                        App.UI.elements.overlays.aiLoading.classList.remove('visible');
+                    }
+                },
+
+                async generateNewModerator() {
+                    App.UI.elements.overlays.aiLoadingText.textContent = 'AI가 새로운 사회자를 창조하는 중...';
+                    App.UI.elements.overlays.aiLoading.classList.add('visible');
+                    try {
+                        const moderatorPrompt = `Create a unique and characterful moderator for a mafia game. Provide a name, personality (e.g., 'cold and analytical', 'dramatic and theatrical'), an image prompt for a PNG character portrait (2D anime style), and a set of dialogue lines for different game events. The dialogue should reflect the personality. The events are: 'wait_for_two', 'wait_for_one', 'countdown', 'game_start', 'discussion', 'voting', 'mafia_win', 'citizen_win'. For lines that need variables, use placeholders like {executed}, {mafia}, or {number}. Respond in JSON format.`;
+                        const moderatorSchema = {
+                            type: "OBJECT",
+                            properties: {
+                                name: { type: "STRING" },
+                                personality: { type: "STRING" },
+                                image_prompt: { type: "STRING" },
+                                dialogue: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        wait_for_two: { type: "STRING" },
+                                        wait_for_one: { type: "STRING" },
+                                        countdown: { type: "STRING" },
+                                        game_start: { type: "STRING" },
+                                        discussion: { type: "STRING" },
+                                        voting: { type: "STRING" },
+                                        mafia_win: { type: "STRING" },
+                                        citizen_win: { type: "STRING" },
+                                    }
+                                }
+                            }
+                        };
+                        const profile = await this.generateWithGemini(moderatorPrompt, moderatorSchema);
+                        const imageBase64 = await this.generateWithImagen(profile.image_prompt, true);
+
+                        App.State.tempModerator = { ...profile, imageBase64 };
+                        App.Moderator.preview(App.State.tempModerator);
+                        App.UI.elements.admin.saveModeratorBtn.classList.remove('hidden');
+
+                    } catch (error) {
+                        console.error("AI Moderator Creation Failed:", error);
+                        App.UI.showToast("사회자 창조에 실패했습니다.", "error");
+                    } finally {
+                        App.UI.elements.overlays.aiLoading.classList.remove('visible');
+                    }
+                },
+
+                async generateWithGemini(prompt, schema) {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                    const payload = {
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: schema,
+                        }
+                    };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`Gemini API Error: ${response.status} ${await response.text()}`);
+                    const result = await response.json();
+                    return JSON.parse(result.candidates[0].content.parts[0].text);
+                },
+
+                async generateWithImagen(prompt, isLogo) {
+                    const stylePrompt = isLogo 
+                        ? `, vector logo, simple, bold lines, on a transparent background, 2d anime style`
+                        : `, in the style of 2D Japanese anime like Dragon Ball or Naruto, cel-shaded, dynamic action lines, vibrant colors. No realistic styles, no painterly styles.`;
+                    
+                    const fullPrompt = `${prompt}${stylePrompt}`;
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`;
+                    const payload = {
+                        instances: [{ "prompt": fullPrompt }],
+                        parameters: { "sampleCount": 1 }
+                    };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                     if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error('Imagen API Full Error Response:', errorBody);
+                        throw new Error(`Imagen API Error: ${response.status} ${errorBody}`);
+                     }
+                    const result = await response.json();
+                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    } else {
+                        throw new Error("Imagen API did not return a valid image.");
+                    }
+                },
+
+                async saveWorld() {
+                    App.UI.elements.overlays.aiLoading.classList.add('visible');
+                    try {
+                        const { theme, bgImageBase64, logoImageBase64 } = App.State.tempDesign;
+                        
+                        const bgFile = this.base64ToFile(bgImageBase64, 'background.png');
+                        const logoFile = this.base64ToFile(logoImageBase64, 'logo.png');
+                        const bgPath = `public/bg_${Date.now()}.png`;
+                        const logoPath = `public/logo_${Date.now()}.png`;
+
+                        await Promise.all([
+                            dbClient.storage.from('design_assets').upload(bgPath, bgFile),
+                            dbClient.storage.from('design_assets').upload(logoPath, logoFile)
+                        ]);
+                        
+                        const { data: bgUrlData } = dbClient.storage.from('design_assets').getPublicUrl(bgPath);
+                        const { data: logoUrlData } = dbClient.storage.from('design_assets').getPublicUrl(logoPath);
+                        
+                        const newDesignState = { ...theme, bgImageUrl: bgUrlData.publicUrl, logoImageUrl: logoUrlData.publicUrl };
+                        await dbClient.from('games').update({ design_theme: newDesignState }).eq('id', GAME_ID);
+
+                        App.State.tempDesign = null;
+                        App.UI.elements.admin.saveBtn.classList.add('hidden');
+                        App.UI.showToast("새로운 세계가 적용되었습니다.", "success");
+                    } catch (error) {
+                        console.error("AI World Saving Failed:", error);
+                        App.UI.showToast("세계 저장에 실패했습니다.", "error");
+                    } finally {
+                        App.UI.elements.overlays.aiLoading.classList.remove('visible');
+                    }
+                },
+
+                async saveModerator() {
+                    App.UI.elements.overlays.aiLoading.classList.add('visible');
+                    try {
+                        const { imageBase64, ...profile } = App.State.tempModerator;
+                        
+                        const imageFile = this.base64ToFile(imageBase64, 'moderator.png');
+                        const imagePath = `public/mod_${Date.now()}.png`;
+
+                        await dbClient.storage.from('design_assets').upload(imagePath, imageFile);
+                        const { data: imageUrlData } = dbClient.storage.from('design_assets').getPublicUrl(imagePath);
+                        
+                        const newModeratorProfile = { ...profile, imageUrl: imageUrlData.publicUrl };
+                        await dbClient.from('games').update({ moderator_profile: newModeratorProfile }).eq('id', GAME_ID);
+
+                        App.State.tempModerator = null;
+                        App.UI.elements.admin.saveModeratorBtn.classList.add('hidden');
+                        App.UI.showToast("새로운 사회자가 적용되었습니다.", "success");
+
+                    } catch (error) {
+                        console.error("AI Moderator Saving Failed:", error);
+                        App.UI.showToast("사회자 저장에 실패했습니다.", "error");
+                    } finally {
+                        App.UI.elements.overlays.aiLoading.classList.remove('visible');
+                    }
+                },
+
+                 base64ToFile(base64, filename) {
+                    const arr = base64.split(',');
+                    const mime = arr[0].match(/:(.*?);/)[1];
+                    const bstr = atob(arr[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while (n--) {
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    return new File([u8arr], filename, { type: mime });
+                }
+            },
+            
+            Design: {
+                apply(designConfig, isTemp = false) {
+                    if (!designConfig) return;
+                    
+                    const { theme, bgImageBase64, logoImageBase64 } = designConfig;
+                    if (!theme) return;
+                    
+                    const fontName = theme.font || 'Noto Sans KR';
+                    const bgUrl = isTemp ? bgImageBase64 : (designConfig.bgImageUrl || theme.bgImageUrl);
+                    const logoUrl = isTemp ? logoImageBase64 : (designConfig.logoImageUrl || theme.logoImageUrl);
+
+                    App.UI.elements.gameTitle.textContent = theme.themeName;
+
+                    if (logoUrl) {
+                        App.UI.elements.gameLogo.src = logoUrl;
+                        App.UI.elements.gameLogo.classList.remove('opacity-0');
+                    } else {
+                        App.UI.elements.gameLogo.classList.add('opacity-0');
+                    }
+                    
+                    const fontId = `google-font-${fontName.replace(/\s/g, '-')}`;
+                    if (!document.getElementById(fontId)) {
+                        const fontLink = document.createElement('link');
+                        fontLink.id = fontId;
+                        fontLink.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s/g, '+')}:wght@400;700;800&display=swap`;
+                        fontLink.rel = 'stylesheet';
+                        document.head.appendChild(fontLink);
+                    }
+
+                    document.documentElement.style.setProperty('--font-main', `'${fontName}', 'Noto Sans KR', sans-serif`);
+                    document.documentElement.style.setProperty('--bg-color', theme.colors.background);
+                    document.documentElement.style.setProperty('--container-bg', theme.colors.containerBg);
+                    document.documentElement.style.setProperty('--primary-color', theme.colors.primary);
+                    document.documentElement.style.setProperty('--text-color', theme.colors.text);
+                    document.documentElement.style.setProperty('--border-color', theme.colors.border);
+                    
+                    if(bgUrl) document.body.style.backgroundImage = `url(${bgUrl})`;
+                }
+            },
+
+            Moderator: {
+                currentTimeout: null,
+                apply(profile, isTemp = false) {
+                    if (!profile) {
+                        // Apply default moderator appearance if no profile exists
+                        App.UI.elements.moderator.name.textContent = "사회자";
+                        App.UI.elements.moderator.image.src = `https://placehold.co/64x64/1E1E1E/EAEAEA?text=GM`;
+                        return;
+                    };
+                    const { name, imageBase64, imageUrl } = profile;
+                    const finalImageUrl = isTemp ? imageBase64 : imageUrl;
+
+                    App.UI.elements.moderator.name.textContent = name;
+                    if (finalImageUrl) {
+                        App.UI.elements.moderator.image.src = finalImageUrl;
+                    }
+                },
+                speak(dialogueKey, replacements = {}) {
+                    const profile = App.State.game.moderator_profile;
+                    let dialogue;
+
+                    if (!profile || !profile.dialogue) {
+                        const defaultDialogues = {
+                            wait_for_two: "2명의 플레이어를 더 기다립니다...",
+                            wait_for_one: "마지막 플레이어를 기다립니다. 곧 시작합니다!",
+                            discussion: "토론 시간입니다.",
+                            voting: "투표 시간입니다.",
+                            mafia_win: "마피아가 승리했습니다.",
+                            citizen_win: "시민이 승리했습니다.",
+                            countdown: `${replacements.number || ''}...`,
+                            game_start: "게임 시작!"
+                        };
+                        dialogue = defaultDialogues[dialogueKey] || "";
+                        this.apply(null); // Apply default appearance
+                    } else {
+                        dialogue = profile.dialogue[dialogueKey] || "대사를 찾을 수 없습니다.";
+                    }
+                    
+                    for (const key in replacements) {
+                        dialogue = dialogue.replace(new RegExp(`{${key}}`, 'g'), replacements[key]);
+                    }
+
+                    App.UI.elements.moderator.dialogue.textContent = dialogue;
+                    const view = App.UI.elements.moderator.view;
+                    
+                    view.classList.remove('opacity-0', '-translate-y-full');
+                    App.GameLogic.speak(dialogue);
+
+                    if (this.currentTimeout) clearTimeout(this.currentTimeout);
+                    this.currentTimeout = setTimeout(() => {
+                        view.classList.add('opacity-0', '-translate-y-full');
+                    }, 5000);
+                },
+                preview(profile) {
+                    this.apply(profile, true); // Apply with isTemp=true to use base64 image
+                    const introDialogue = `안녕하세요! 새로운 사회자, ${profile.name}입니다. 게임을 시작해볼까요?`;
+                    
+                    App.UI.elements.moderator.dialogue.textContent = introDialogue;
+                    const view = App.UI.elements.moderator.view;
+                    
+                    view.classList.remove('opacity-0', '-translate-y-full');
+                    App.GameLogic.speak(introDialogue);
+
+                    if (this.currentTimeout) clearTimeout(this.currentTimeout);
+                    this.currentTimeout = setTimeout(() => {
+                        view.classList.add('opacity-0', '-translate-y-full');
+                    }, 5000);
+                }
+            },
+            
+            AssetManager: {
+                selectedAssets: {
+                    backgroundUrl: null,
+                    logoUrl: null,
+                    moderatorUrl: null,
+                },
+                
+                init() {
+                    App.UI.elements.assetManager.closeBtn.addEventListener('click', () => this.close());
+                    App.UI.elements.assetManager.applyBtn.addEventListener('click', () => this.applySelection());
+                },
+
+                async open() {
+                    App.UI.elements.assetManager.modal.classList.add('visible');
+                    this.fetchAssets();
+                },
+
+                close() {
+                    App.UI.elements.assetManager.modal.classList.remove('visible');
+                },
+
+                async fetchAssets() {
+                    const { data, error } = await dbClient.storage.from('design_assets').list('public', {
+                        limit: 100, // Adjust as needed
+                        sortBy: { column: 'created_at', order: 'desc' },
+                    });
+
+                    if (error) {
+                        console.error("Error fetching assets:", error);
+                        App.UI.showToast("에셋을 불러오는 데 실패했습니다.", "error");
+                        return;
+                    }
+
+                    const backgrounds = [];
+                    const logos = [];
+                    const moderators = [];
+
+                    for (const file of data) {
+                        const { data: urlData } = dbClient.storage.from('design_assets').getPublicUrl(`public/${file.name}`);
+                        if (urlData) {
+                            if (file.name.startsWith('bg_')) backgrounds.push({name: file.name, url: urlData.publicUrl});
+                            if (file.name.startsWith('logo_')) logos.push({name: file.name, url: urlData.publicUrl});
+                            if (file.name.startsWith('mod_')) moderators.push({name: file.name, url: urlData.publicUrl});
+                        }
+                    }
+                    
+                    this.renderAssets('background', backgrounds, App.State.game.design_theme?.bgImageUrl);
+                    this.renderAssets('logo', logos, App.State.game.design_theme?.logoImageUrl);
+                    this.renderAssets('moderator', moderators, App.State.game.moderator_profile?.imageUrl);
+                },
+                
+                renderAssets(type, assets, currentAssetUrl) {
+                    const listEl = App.UI.elements.assetManager[`${type}List`];
+                    listEl.innerHTML = '';
+                    
+                    assets.forEach(asset => {
+                        const img = document.createElement('img');
+                        img.src = asset.url;
+                        img.className = 'asset-item w-full h-24 object-cover rounded-md';
+                        img.dataset.url = asset.url;
+                        img.dataset.type = type;
+
+                        if (asset.url === currentAssetUrl) {
+                            img.classList.add('selected');
+                            this.selectedAssets[`${type}Url`] = asset.url;
+                        }
+
+                        img.addEventListener('click', (e) => this.handleAssetClick(e));
+                        listEl.appendChild(img);
+                    });
+                },
+
+                handleAssetClick(event) {
+                    const target = event.currentTarget;
+                    const { type, url } = target.dataset;
+                    
+                    this.selectedAssets[`${type}Url`] = url;
+
+                    // Update selection visual
+                    const listEl = App.UI.elements.assetManager[`${type}List`];
+                    listEl.querySelectorAll('.asset-item').forEach(item => item.classList.remove('selected'));
+                    target.classList.add('selected');
+                },
+
+                async applySelection() {
+                    const { backgroundUrl, logoUrl, moderatorUrl } = this.selectedAssets;
+                    
+                    // We need to fetch the existing profiles to merge with
+                    const currentDesign = App.State.game.design_theme || {};
+                    const currentModerator = App.State.game.moderator_profile || {};
+
+                    const updatePayload = {
+                        design_theme: {
+                            ...currentDesign,
+                            bgImageUrl: backgroundUrl || currentDesign.bgImageUrl,
+                            logoImageUrl: logoUrl || currentDesign.logoImageUrl,
+                        },
+                        moderator_profile: {
+                            ...currentModerator,
+                            imageUrl: moderatorUrl || currentModerator.imageUrl,
+                        }
+                    };
+
+                    const { error } = await dbClient.from('games').update(updatePayload).eq('id', GAME_ID);
+
+                    if (error) {
+                        console.error("Error applying assets:", error);
+                        App.UI.showToast("에셋 적용에 실패했습니다.", "error");
+                    } else {
+                        App.UI.showToast("에셋이 성공적으로 적용되었습니다.", "success");
+                        this.close();
+                    }
+                }
+            }
+        };
+
+        // --- 애플리케이션 시작 ---
+        window.addEventListener('DOMContentLoaded', () => {
+            App.GameLogic.init();
+        });
+    </script>
+</body>
+</html>
