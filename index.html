@@ -490,7 +490,7 @@
                 },
                 
                 async createNewGame() {
-                    await dbClient.from('messages').delete().neq('id', -1);
+                    await dbClient.from('messages').delete().gt('id', 0);
                     App.State.myPlayerName = PLAYER_NAMES[0];
                     App.State.isPlayer = true;
                     const newGameState = {
@@ -500,7 +500,6 @@
                     };
                     await dbClient.from('games').upsert(newGameState);
                     App.State.game = newGameState;
-                    // This line is added to trigger the initial message for the host.
                     App.Moderator.speak('wait_for_two');
                 },
 
@@ -516,7 +515,7 @@
                             const newState = App.State.game.state;
                             const newPlayerLength = App.State.game.players?.length || 0;
 
-                            if (oldPlayerLength < newPlayerLength) {
+                            if (oldPlayerLength < newPlayerLength && newPlayerLength > 1) {
                                 if (newPlayerLength === 2) App.Moderator.speak('wait_for_one');
                             }
 
@@ -766,7 +765,7 @@
                 },
 
                 async resetGameForRematch() {
-                    await dbClient.from('messages').delete().neq('id', -1);
+                    await dbClient.from('messages').delete().gt('id', 0);
                     const resetPlayers = App.State.game.players.map(p => ({
                         ...p, role: null, isAlive: true, confirmed: false,
                         votedFor: null, wantsRematch: false
@@ -922,7 +921,7 @@
                 async forceResetGame() {
                     App.UI.showToast("게임을 강제로 초기화합니다...", "info");
                     try {
-                        await dbClient.from('messages').delete().neq('id', -1); 
+                        await dbClient.from('messages').delete().gt('id', 0); 
                         
                         const { data: currentGame, error } = await dbClient.from('games').select('design_theme, moderator_profile').eq('id', GAME_ID).single();
                         if (error) throw error;
@@ -939,7 +938,7 @@
                         App.UI.showToast("게임이 성공적으로 초기화되었습니다.", "success");
                     } catch (error) {
                         console.error("Failed to force reset game:", error);
-                        App.UI.showToast("게임 초기화에 실패했습니다.", "error");
+                        App.UI.showToast(`초기화 실패: ${error.message}`, "error");
                     }
                 }
             },
