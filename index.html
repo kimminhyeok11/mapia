@@ -512,20 +512,19 @@
                         players: [{ name: hostName, userId: App.State.myUserId, isAlive: true, wantsRematch: false }],
                         observers: {},
                         design_theme: null,
-                        moderator_profile: null, // 컬럼이 있다는 가정 하에 먼저 시도
+                        moderator_profile: null,
                     };
 
                     try {
                         const { data, error } = await dbClient.from('games').upsert(newGameState).select().single();
-                        if (error) throw error; // 에러 발생 시 catch 블록으로 넘김
+                        if (error) throw error; 
                         App.State.game = data;
                     } catch (error) {
-                        // [FIX] 컬럼이 없다는 에러가 발생하면, 해당 키를 제외하고 다시 시도
                         if (error.message && error.message.includes("moderator_profile")) {
                             console.warn("Could not find 'moderator_profile' column. Retrying without it.");
                             App.UI.showToast("알림: 'moderator_profile' 기능이 비활성화되었습니다. DB 컬럼을 확인해주세요.", "info");
                             
-                            delete newGameState.moderator_profile; // 문제가 되는 키 제거
+                            delete newGameState.moderator_profile; 
                             
                             const { data, error: retryError } = await dbClient.from('games').upsert(newGameState).select().single();
                             if (retryError) {
@@ -535,7 +534,6 @@
                             }
                             App.State.game = data;
                         } else {
-                            // 다른 종류의 에러는 그대로 throw
                             console.error("Error creating new game:", error);
                             throw error;
                         }
@@ -543,6 +541,43 @@
                 },
                 
                 subscribeToChannels() {
+                    // Chat Channel
+                    App.State.chatChannel = dbClient.channel(`chat-${GAME_ID}`)
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                            if (payload.new.user_id !== App.State.myUserId) {
+                                this.displayChatMessage(payload.new);
+                            }
+                        }).subscribe();
+
+                    // Presence Channel - [FIX] 접속/퇴장 이벤트를 명시적으로 처리하여 안정성 강화
+                    App.State.presenceChannel = dbClient.channel(`presence-${GAME_ID}`);
+                    App.State.presenceChannel
+                        .on('presence', { event: 'sync' }, () => {
+                            App.State.onlineUsers = App.State.presenceChannel.presenceState();
+                            if (!App.State.isLoading) App.UI.render();
+                        })
+                        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                            console.log('User joined:', newPresences);
+                            App.State.onlineUsers = App.State.presenceChannel.presenceState();
+                            if (!App.State.isLoading) App.UI.render();
+                        })
+                        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                            console.log('User left:', leftPresences);
+                            App.State.onlineUsers = App.State.presenceChannel.presenceState();
+                            if (!App.State.isLoading) App.UI.render();
+                        })
+                        .subscribe(async (status) => {
+                            if (status === 'SUBSCRIBED') {
+                                await App.State.presenceChannel.track({ user_id: App.State.myUserId });
+                                const meAsPlayer = App.State.game.players?.find(p => p.userId === App.State.myUserId);
+                                const meAsObserver = App.State.game.observers?.[App.State.myUserId];
+                                if (!meAsPlayer && !meAsObserver) {
+                                    await this.joinAsObserver();
+                                }
+                            }
+                        });
+                    
+                    // Game State Channel
                     App.State.dbChannel = dbClient.channel(`db-${GAME_ID}`)
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'games', filter: `id=eq.${GAME_ID}` }, payload => {
                             if (App.State.isLoading) return;
@@ -568,30 +603,6 @@
                             App.Moderator.apply(App.State.game.moderator_profile);
                             this.handleStateChange();
                             App.UI.render();
-                        }).subscribe();
-
-                    App.State.presenceChannel = dbClient.channel(`presence-${GAME_ID}`);
-                    App.State.presenceChannel
-                        .on('presence', { event: 'sync' }, () => {
-                            App.State.onlineUsers = App.State.presenceChannel.presenceState();
-                            if (!App.State.isLoading) App.UI.render();
-                        })
-                        .subscribe(async (status) => {
-                            if (status === 'SUBSCRIBED') {
-                                await App.State.presenceChannel.track({ user_id: App.State.myUserId });
-                                const meAsPlayer = App.State.game.players?.find(p => p.userId === App.State.myUserId);
-                                const meAsObserver = App.State.game.observers?.[App.State.myUserId];
-                                if (!meAsPlayer && !meAsObserver) {
-                                    await this.joinAsObserver();
-                                }
-                            }
-                        });
-                    
-                    App.State.chatChannel = dbClient.channel(`chat-${GAME_ID}`)
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                            if (payload.new.user_id !== App.State.myUserId) {
-                                this.displayChatMessage(payload.new);
-                            }
                         }).subscribe();
                 },
 
@@ -633,7 +644,6 @@
                         if (distance < 0) {
                             clearInterval(App.State.discussionTimerInterval);
                             App.UI.elements.timerDisplay.textContent = "00";
-                            // 호스트가 시간 종료 후 투표 상태로 변경
                             if (App.State.isHost) {
                                 dbClient.from('games').update({ state: 'voting' }).eq('id', GAME_ID).then();
                             }
@@ -643,7 +653,6 @@
                     }, 1000);
                 },
                 setupEventListeners() {
-                    // [수정] 게임 참가 요청은 RPC 함수를 호출하도록 변경
                     App.UI.elements.chat.joinBtn.addEventListener('click', () => this.handleJoinRequest());
                     App.UI.elements.chat.sendBtn.addEventListener('click', () => this.sendMessage());
                     App.UI.elements.chat.input.addEventListener('keypress', (e) => {
@@ -660,7 +669,6 @@
                     App.UI.elements.chat.joinBtn.disabled = true;
                     App.UI.elements.chat.joinBtn.textContent = '참가 중...';
 
-                    // [수정] 데이터베이스 함수(RPC)를 호출하여 경쟁 상태(Race Condition)를 방지합니다.
                     const { data, error } = await dbClient.rpc('join_game', {
                         game_id_input: GAME_ID,
                         user_id_input: App.State.myUserId,
@@ -674,7 +682,6 @@
                         App.UI.elements.chat.joinBtn.textContent = '게임 참가하기';
                     } else {
                         App.UI.showToast("게임에 참가했습니다!", "success");
-                        // 성공 시 Realtime이 UI를 자동으로 업데이트하므로 별도 처리가 필요 없습니다.
                     }
                 },
                 handleStateChange() {
@@ -839,14 +846,12 @@
                     };
 
                     input.value = '';
-                    // Optimistic UI update
                     this.displayChatMessage({ ...newMessage, user_id: App.State.myUserId });
 
                     const { error } = await dbClient.from('messages').insert(newMessage);
                     if (error) {
                         console.error("메시지 전송 실패:", error);
                         App.UI.showToast("메시지 전송에 실패했습니다.", "error");
-                        // TODO: 실패 시 UI 롤백
                     }
                 },
                 speak(text) {
@@ -897,7 +902,6 @@
                     ui.assetManagerBtn.addEventListener('click', () => App.AssetManager.open());
                     
                     ui.forceResetBtn.addEventListener('click', () => {
-                        // [수정] window.confirm 대신 커스텀 모달 사용 필요 (현재는 임시로 유지)
                         if (confirm('정말로 모든 플레이어 데이터를 초기화하고 게임을 리셋하시겠습니까? (디자인/사회자는 유지됩니다)')) {
                             this.forceResetGame();
                         }
@@ -924,7 +928,6 @@
                             design_theme: currentGame.design_theme || null, 
                         };
                         
-                        // 이 코드는 속성이 없는 경우를 대비한 훌륭한 방어 코드입니다.
                         if (Object.prototype.hasOwnProperty.call(currentGame, 'moderator_profile')) {
                             updatePayload.moderator_profile = currentGame.moderator_profile || null;
                         }
@@ -940,13 +943,12 @@
             },
 
             AI: {
-                // [수정] AI 관련 로직은 모두 Supabase Edge Function을 호출하도록 변경
                 async generateNewWorld() {
                     App.UI.elements.overlays.aiLoadingText.textContent = 'AI가 새로운 세계를 창조하는 중...';
                     App.UI.elements.overlays.aiLoading.classList.add('visible');
                     try {
                         const themePrompt = `Create a dramatic and cool theme for a mafia game. The visual style MUST be 2D Japanese anime style, like Naruto or Dragon Ball. DO NOT use realistic or painterly styles. Provide a theme name, a Google Font name, a color palette, a container background color, a border color, a detailed background image prompt, and a simple logo prompt. Respond in JSON format.`;
-                        const themeSchema = { /* ... (스키마는 동일) ... */ };
+                        const themeSchema = { type: "OBJECT", properties: { themeName: { type: "STRING" }, font: { type: "STRING" }, colors: { type: "OBJECT", properties: { primary: { type: "STRING" }, text: { type: "STRING" }, background: { type: "STRING" }, containerBg: { type: "STRING" }, border: { type: "STRING" }, } }, bgPrompt: { type: "STRING" }, logoPrompt: { type: "STRING" } } };
                         
                         const theme = await this.generateWithGemini('generate-world-theme', { prompt: themePrompt, schema: themeSchema });
                         
@@ -973,7 +975,7 @@
                     App.UI.elements.overlays.aiLoading.classList.add('visible');
                     try {
                         const moderatorPrompt = `Create a unique and characterful moderator for a mafia game. Provide a name, personality (e.g., 'cold and analytical', 'dramatic and theatrical'), an image prompt for a PNG character portrait (2D anime style), and a set of dialogue lines for different game events. The dialogue should reflect the personality. The events are: 'wait_for_two', 'wait_for_one', 'countdown', 'game_start', 'discussion', 'voting', 'mafia_win', 'citizen_win'. For lines that need variables, use placeholders like {executed}, {mafia}, or {number}. Respond in JSON format.`;
-                        const moderatorSchema = { /* ... (스키마는 동일) ... */ };
+                        const moderatorSchema = { type: "OBJECT", properties: { name: { type: "STRING" }, personality: { type: "STRING" }, image_prompt: { type: "STRING" }, dialogue: { type: "OBJECT", properties: { wait_for_two: { type: "STRING" }, wait_for_one: { type: "STRING" }, countdown: { type: "STRING" }, game_start: { type: "STRING" }, discussion: { type: "STRING" }, voting: { type: "STRING" }, mafia_win: { type: "STRING" }, citizen_win: { type: "STRING" }, } } } };
                         
                         const profile = await this.generateWithGemini('generate-moderator-profile', { prompt: moderatorPrompt, schema: moderatorSchema });
                         const imageBase64 = await this.generateWithImagen(profile.image_prompt, true);
@@ -995,7 +997,6 @@
                         body: bodyPayload,
                     });
                     if (error) throw new Error(`Supabase Function Error (${functionName}): ${error.message}`);
-                    // Edge function이 Gemini 결과를 그대로 반환한다고 가정
                     return JSON.parse(data.candidates[0].content.parts[0].text);
                 },
 
@@ -1004,7 +1005,6 @@
                         body: { prompt, isLogo },
                     });
                     if (error) throw new Error(`Supabase Function Error (generate-image): ${error.message}`);
-                    // Edge function이 Base64 문자열을 직접 반환한다고 가정
                     return data.imageUrl;
                 },
 
@@ -1043,7 +1043,6 @@
                 async saveModerator() {
                     App.UI.elements.overlays.aiLoading.classList.add('visible');
                     try {
-                        // [FIX] 저장하기 전에 DB에 해당 컬럼이 있는지 먼저 확인
                         const { data: currentGame, error: fetchError } = await dbClient.from('games').select('moderator_profile').eq('id', GAME_ID).single();
                         if (fetchError) throw fetchError;
 
@@ -1089,7 +1088,6 @@
             
             Design: {
                 apply(designConfig, isTemp = false) {
-                    // 기본 스타일 적용 (designConfig가 null이거나 undefined일 때)
                     const applyDefaultStyles = () => {
                         document.documentElement.style.setProperty('--font-main', `'Inter', 'Noto Sans KR', sans-serif`);
                         document.documentElement.style.setProperty('--bg-color', '#121212');
@@ -1113,7 +1111,6 @@
                         return;
                     }
 
-                    // [FIX] theme.colors가 없을 경우를 대비하여 방어 코드 추가
                     const colors = theme.colors || {};
                     
                     const fontName = theme.font || 'Noto Sans KR';
@@ -1138,7 +1135,6 @@
                         document.head.appendChild(fontLink);
                     }
                     
-                    // [FIX] Nullish coalescing operator (??)를 사용하여 기본값 설정
                     document.documentElement.style.setProperty('--font-main', `'${fontName}', 'Noto Sans KR', sans-serif`);
                     document.documentElement.style.setProperty('--bg-color', colors.background ?? '#121212');
                     document.documentElement.style.setProperty('--container-bg', colors.containerBg ?? '#1E1E1E');
@@ -1307,7 +1303,6 @@
                 },
 
                 async applySelection() {
-                    // [FIX] 전체 로직을 try...catch로 감싸 안정성 확보
                     try {
                         const { backgroundUrl, logoUrl, moderatorUrl } = this.selectedAssets;
                         
