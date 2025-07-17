@@ -192,9 +192,6 @@
         const SUPABASE_URL = 'https://obbmtrxhmhokzvuxdqlc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iYm10cnhobWhva3p2dXhkcWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MjE5MjEsImV4cCI6MjA2NTA5NzkyMX0.xBkkJ41u6mTLu2YaUtuWUxsv5PwyQR6yyMQNM6fAPfQ';
         
-        // ⚠️ [중요] API 키를 클라이언트 코드에서 제거했습니다.
-        // const GEMINI_API_KEY = "YOUR_API_KEY_HERE"; // 이 줄은 완전히 삭제되었습니다.
-
         const dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         const GAME_ID = typeof __app_id !== 'undefined' ? __app_id : 'samjin_mafia_genesis_v3';
@@ -1092,7 +1089,8 @@
             
             Design: {
                 apply(designConfig, isTemp = false) {
-                    if (!designConfig) {
+                    // 기본 스타일 적용 (designConfig가 null이거나 undefined일 때)
+                    const applyDefaultStyles = () => {
                         document.documentElement.style.setProperty('--font-main', `'Inter', 'Noto Sans KR', sans-serif`);
                         document.documentElement.style.setProperty('--bg-color', '#121212');
                         document.documentElement.style.setProperty('--container-bg', '#1E1E1E');
@@ -1102,17 +1100,27 @@
                         document.body.style.backgroundImage = '';
                         App.UI.elements.gameTitle.textContent = '삼진 마피아 게임';
                         App.UI.elements.gameLogo.classList.add('opacity-0');
-                        return;
                     };
+
+                    if (!designConfig) {
+                        applyDefaultStyles();
+                        return;
+                    }
                     
                     const theme = isTemp ? designConfig.theme : designConfig;
-                    if (!theme) return;
+                    if (!theme) {
+                        applyDefaultStyles();
+                        return;
+                    }
+
+                    // [FIX] theme.colors가 없을 경우를 대비하여 방어 코드 추가
+                    const colors = theme.colors || {};
                     
                     const fontName = theme.font || 'Noto Sans KR';
                     const bgUrl = isTemp ? designConfig.bgImageBase64 : designConfig.bgImageUrl;
                     const logoUrl = isTemp ? designConfig.logoImageBase64 : designConfig.logoImageUrl;
 
-                    App.UI.elements.gameTitle.textContent = theme.themeName;
+                    App.UI.elements.gameTitle.textContent = theme.themeName || '삼진 마피아 게임';
 
                     if (logoUrl) {
                         App.UI.elements.gameLogo.src = logoUrl;
@@ -1129,13 +1137,14 @@
                         fontLink.rel = 'stylesheet';
                         document.head.appendChild(fontLink);
                     }
-
+                    
+                    // [FIX] Nullish coalescing operator (??)를 사용하여 기본값 설정
                     document.documentElement.style.setProperty('--font-main', `'${fontName}', 'Noto Sans KR', sans-serif`);
-                    document.documentElement.style.setProperty('--bg-color', theme.colors.background);
-                    document.documentElement.style.setProperty('--container-bg', theme.colors.containerBg);
-                    document.documentElement.style.setProperty('--primary-color', theme.colors.primary);
-                    document.documentElement.style.setProperty('--text-color', theme.colors.text);
-                    document.documentElement.style.setProperty('--border-color', theme.colors.border);
+                    document.documentElement.style.setProperty('--bg-color', colors.background ?? '#121212');
+                    document.documentElement.style.setProperty('--container-bg', colors.containerBg ?? '#1E1E1E');
+                    document.documentElement.style.setProperty('--primary-color', colors.primary ?? '#007BFF');
+                    document.documentElement.style.setProperty('--text-color', colors.text ?? '#EAEAEA');
+                    document.documentElement.style.setProperty('--border-color', colors.border ?? 'rgba(255, 255, 255, 0.1)');
                     
                     if(bgUrl) document.body.style.backgroundImage = `url(${bgUrl})`;
                     else document.body.style.backgroundImage = '';
