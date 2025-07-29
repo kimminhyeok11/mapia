@@ -3,270 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAFIA: NEON CITY</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>WeaveMind - 우리의 생각들</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #1a1a2e;
-            --surface-color: #16213e;
-            --primary-color: #0f3460;
-            --accent-color: #e94560;
-            --glow-color: #ff7eee;
+            --bg-primary: #111827; /* gray-900 */
+            --bg-secondary: #1f2937; /* gray-800 */
+            --border-color: #374151; /* gray-700 */
+            --text-primary: #f3f4f6; /* gray-100 */
+            --text-secondary: #9ca3af; /* gray-400 */
+            --accent-color: #a78bfa; /* violet-400 */
+            --font-serif: 'Lora', serif;
         }
-        body { 
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
-            background-size: 20px 20px;
-        }
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .neon-text { text-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color), 0 0 15px var(--glow-color); }
-        .card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
-            transition: all 0.3s ease;
-        }
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 12px 24px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px var(--accent-color);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--accent-color); }
-        .chat-bubble { animation: fadeIn 0.5s ease; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        .app-view { display: none; }
+        .app-view.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 카드 뒤집기 애니메이션 */
-        .role-card-container { perspective: 1000px; }
-        .role-card {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
+        /* 읽기 전용 콘텐츠 스타일 */
+        .prose-custom { color: var(--text-secondary); font-family: var(--font-serif); line-height: 1.8; font-size: 1.125rem; }
+        .prose-custom h1, .prose-custom h2, .prose-custom h3 { font-family: 'Noto Sans KR', sans-serif; color: var(--text-primary); font-weight: 700; }
+        .prose-custom hr { border-color: var(--border-color); }
+        .prose-custom a { color: var(--accent-color); text-decoration: none; font-weight: 600; }
+        .prose-custom a:hover { text-decoration: underline; }
+        .prose-custom ul { list-style-type: disc; padding-left: 1.5rem; }
+        .prose-custom li { margin: 0.5em 0; }
+        .prose-custom pre { background-color: #000000; padding: 1rem; border-radius: 0.5rem; font-family: monospace; position: relative; border: 1px solid var(--border-color); }
+        
+        /* 카드 크기 축소 및 애니메이션 */
+        .content-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardFadeIn 0.5s ease-out forwards;
         }
-        .role-card-container.flipped .role-card { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 0.5rem;
+        @keyframes cardFadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* 읽기 진행 상태 바 */
+        #reading-progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; background-color: var(--accent-color); width: 0%; z-index: 99;
+            transition: width 0.1s linear;
         }
-        .card-front { background-color: var(--primary-color); }
-        .card-back { background-color: var(--surface-color); transform: rotateY(180deg); }
-        [v-cloak] { display: none; }
+
+        /* 스티키 목차 */
+        .sticky-toc {
+            position: sticky;
+            top: 80px; /* 헤더 높이 + 여백 */
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
     </style>
 </head>
-<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
-
-    <div id="app" v-cloak class="w-full max-w-md mx-auto flex flex-col h-[95vh] space-y-4">
-        <header class="text-center py-2">
-            <h1 class="text-4xl font-orbitron neon-text text-white">MAFIA</h1>
-            <p class="text-sm text-gray-400">NEON CITY</p>
-        </header>
-
-        <!-- 게임 상태 및 타이머 -->
-        <div class="card p-4 text-center">
-            <p class="font-bold text-lg text-white">{{ statusText }}</p>
-            <p v-if="gameRoom.state === 'discussion'" class="font-orbitron text-3xl text-yellow-300 neon-text tracking-widest">{{ timerText }}</p>
-        </div>
-
-        <!-- 내 역할 -->
-        <div v-if="amIPlayer && gameRoom.state !== 'waiting'" class="role-card-container h-28" :class="{ 'flipped': myRole }">
-             <div class="role-card">
-                <div class="card-face card-front">
-                    <p class="font-bold text-lg">당신의 역할은?</p>
-                    <p class="text-sm text-gray-300">확인 중...</p>
-                </div>
-                <div class="card-face card-back" :class="myRole === 'mafia' ? 'border-2 border-red-500' : 'border-2 border-cyan-400'">
-                    <p class="text-sm">당신의 역할</p>
-                    <p class="font-bold text-2xl" :class="myRole === 'mafia' ? 'text-red-500' : 'text-cyan-400'">{{ myRoleText }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 플레이어 목록 -->
-        <div class="grid grid-cols-3 gap-3">
-            <div v-for="player in playersWithDetails" :key="player.user_id" class="card p-3 text-center" :class="player.borderColor">
-                <p class="font-semibold truncate text-white" :title="player.user_id">...{{ player.user_id.slice(-4) }}</p>
-                <p v-if="player.roleText" class="text-xs" :class="player.roleColor">{{ player.roleText }}</p>
-                <p v-if="player.voteCount > 0" class="text-xs text-yellow-400 mt-1">표: {{ player.voteCount }}</p>
-                <button v-if="canVoteOn(player)" @click="castVote(player.user_id)" class="mt-2 w-full bg-red-600 hover:bg-red-700 text-white text-xs py-1 rounded-md transition-colors">지목</button>
-            </div>
-        </div>
-
-        <!-- 채팅창 -->
-        <div class="card flex-grow p-3 flex flex-col space-y-3 overflow-y-auto" id="chat-container">
-            <div v-for="msg in messages" :key="msg.id" class="chat-bubble">
-                <div v-if="msg.is_system_message" class="text-center text-sm text-yellow-300 italic">{{ msg.content }}</div>
-                <div v-else class="flex items-end gap-2" :class="isMyMessage(msg.user_id) ? 'flex-row-reverse' : ''">
-                    <div class="p-3 rounded-lg max-w-[80%]" :class="isMyMessage(msg.user_id) ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-200'">
-                        <p class="font-bold text-sm" :class="isMyMessage(msg.user_id) ? 'text-right' : 'text-left'">{{ isMyMessage(msg.user_id) ? '나' : `...${msg.user_id.slice(-4)}` }}</p>
-                        <p class="text-sm">{{ msg.content }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 입력 및 버튼 영역 -->
-        <div>
-            <div v-if="amIPlayer && gameRoom.state === 'discussion'" class="flex gap-2">
-                <input type="text" v-model="chatMessage" @keyup.enter="sendMessage" class="flex-grow bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="메시지 입력...">
-                <button @click="sendMessage" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">전송</button>
-            </div>
-            <button v-if="canJoin" @click="joinGame" class="btn-primary w-full">게임 참가</button>
-            <button v-if="canReset" @click="resetGame" class="btn-primary w-full bg-green-500">새 게임 시작</button>
-        </div>
+<body>
+    <div id="reading-progress-bar"></div>
+    <div id="app-container" class="max-w-7xl mx-auto">
+        <!-- Views -->
+        <div id="view-library" class="app-view active"></div>
+        <div id="view-reader" class="app-view"></div>
     </div>
-
+    
     <script type="module">
-        const { createClient } = supabase;
-        const { createApp, reactive, toRefs, computed, onMounted, onUnmounted, nextTick } = Vue;
-
-        const SUPABASE_URL = 'https://obbmtrxhmhokzvuxdqlc.supabase.co'; 
+        const SUPABASE_URL = 'https://obbmtrxhmhokzvuxdqlc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iYm10cnhobWhva3p2dXhkcWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MjE5MjEsImV4cCI6MjA2NTA5NzkyMX0.xBkkJ41u6mTLu2YaUtuWUxsv5PwyQR6yyMQNM6fAPfQ';
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        createApp({
-            setup() {
-                const state = reactive({
-                    user: null, gameRoom: { state: 'waiting' }, players: [], messages: [], votes: [],
-                    chatMessage: '', timerText: '02:00', gameTimer: null,
-                });
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // --- Computed Properties ---
-                const isMyMessage = (userId) => state.user && state.user.id === userId;
-                const amIPlayer = computed(() => state.user && state.players.some(p => p.user_id === state.user.id));
-                const canJoin = computed(() => state.user && !amIPlayer.value && state.gameRoom.state === 'waiting' && state.players.length < 3);
-                const canReset = computed(() => state.user && state.gameRoom.state === 'finished' && state.gameRoom.can_reset_player_id === state.user.id);
-                const myRole = computed(() => amIPlayer.value ? state.players.find(p => p.user_id === state.user.id)?.role : null);
-                const myRoleText = computed(() => myRole.value === 'mafia' ? '마피아' : '시민');
+        const state = { thoughts: [], categories: [], books: [], activeCategory: 'all', searchQuery: '' };
+        const $ = (selector) => document.querySelector(selector);
 
-                const statusText = computed(() => {
-                    switch (state.gameRoom.state) {
-                        case 'waiting': return `플레이어 대기 중... (${state.players.length}/3)`;
-                        case 'discussion': return '마피아를 찾아라';
-                        case 'voting': return '마피아라고 의심되는 사람을 지목하세요';
-                        case 'finished': return `게임 종료: ${state.gameRoom.winner === 'citizens' ? '시민' : '마피아'} 승리!`;
-                        default: return '연결 중...';
-                    }
-                });
+        // --- 안정적인 인라인 SVG 아이콘 ---
+        const ICONS = {
+            'share': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>`,
+            'arrow-left': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
+            'loader': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
+            'search': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+        };
+        function getIcon(name, classes = '') {
+            const svg = ICONS[name] || '';
+            return svg.replace('<svg', `<svg class="${classes}"`);
+        }
 
-                const playersWithDetails = computed(() => state.players.map(player => {
-                    const isFinished = state.gameRoom.state === 'finished';
-                    const isMafia = player.user_id === state.gameRoom.mafia_id;
-                    return {
-                        ...player,
-                        voteCount: state.votes.filter(v => v.voted_for_user_id === player.user_id).length,
-                        roleText: isFinished ? (isMafia ? '마피아' : '시민') : null,
-                        roleColor: isFinished ? (isMafia ? 'text-red-400' : 'text-cyan-400') : '',
-                        borderColor: isFinished ? (isMafia ? 'border-red-500' : 'border-cyan-400') : '',
-                    };
-                }));
+        // --- UI 컴포넌트 & 유틸리티 ---
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-100 text-slate-800 py-2 px-5 rounded-full shadow-lg font-semibold`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.5s';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
+        }
 
-                const canVoteOn = (player) => amIPlayer.value && state.gameRoom.state === 'voting' && player.user_id !== state.user.id && !state.votes.some(v => v.voter_user_id === state.user.id);
+        function renderLoading(container) {
+            container.innerHTML = `<div class="flex justify-center items-center h-96">${getIcon('loader', 'animate-spin h-12 w-12 text-gray-500')}</div>`;
+        }
 
-                // --- Methods ---
-                const fetchAllGameState = async () => {
-                    // 한 번의 요청으로 모든 관련 데이터를 가져옵니다.
-                    const { data, error } = await _supabase.from('mafia_game_rooms').select(`
-                        *,
-                        mafia_players (*),
-                        mafia_messages (*),
-                        mafia_votes (*)
-                    `).limit(1).single();
+        function calculateReadingTime(content) {
+            const text = content.replace(/<[^>]+>/g, '');
+            const words = text.trim().split(/\s+/).length;
+            const time = Math.ceil(words / 200);
+            return time < 1 ? 1 : time;
+        }
 
-                    if (error) return console.error("게임 상태 로드 실패:", error);
-                    
-                    state.gameRoom = data;
-                    state.players = data.mafia_players.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-                    state.messages = data.mafia_messages.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-                    state.votes = data.mafia_votes;
-                    
-                    updateTimer();
-                    scrollToBottom();
-                };
-
-                const joinGame = async () => {
-                    if (!state.user || !state.gameRoom) return;
-                    const { error } = await _supabase.from('mafia_players').insert({ user_id: state.user.id, game_room_id: state.gameRoom.id });
-                    if (error) console.error("참가 실패:", error);
-                };
-
-                const sendMessage = async () => {
-                    if (state.chatMessage.trim() === '') return;
-                    const content = state.chatMessage;
-                    state.chatMessage = '';
-                    const { error } = await _supabase.from('mafia_messages').insert({ user_id: state.user.id, game_room_id: state.gameRoom.id, content: content });
-                    if (error) console.error("전송 실패:", error);
-                };
-                
-                const castVote = async (targetUserId) => {
-                    const { error } = await _supabase.from('mafia_votes').insert({ voter_user_id: state.user.id, voted_for_user_id: targetUserId, game_room_id: state.gameRoom.id });
-                    if (error) console.error("투표 실패:", error);
-                };
-
-                const resetGame = async () => {
-                    const { error } = await _supabase.rpc('reset_game', { room_id: state.gameRoom.id });
-                    if (error) console.error("리셋 실패:", error);
-                };
-
-                const updateTimer = () => {
-                    clearInterval(state.gameTimer);
-                    if (state.gameRoom.state !== 'discussion' || !state.gameRoom.timer_end_time) return;
-                    
-                    state.gameTimer = setInterval(() => {
-                        const remaining = Math.max(0, new Date(state.gameRoom.timer_end_time).getTime() - Date.now());
-                        const minutes = Math.floor(remaining / 60000);
-                        const seconds = Math.floor((remaining % 60000) / 1000);
-                        state.timerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                        if (remaining <= 0) clearInterval(state.gameTimer);
-                    }, 1000);
-                };
-                
-                const scrollToBottom = () => nextTick(() => {
-                    const el = document.getElementById('chat-container');
-                    if (el) el.scrollTop = el.scrollHeight;
-                });
-
-                // --- Lifecycle Hooks ---
-                onMounted(async () => {
-                    const { data: { user } } = await _supabase.auth.getUser();
-                    if (user) {
-                        state.user = user;
-                    } else {
-                        const { data, error } = await _supabase.auth.signInAnonymously();
-                        if (error) console.error("익명 로그인 실패", error);
-                        else state.user = data.user;
-                    }
-
-                    await fetchAllGameState();
-                    
-                    const channel = _supabase.channel('public:mafia-game')
-                        .on('postgres_changes', { event: '*', schema: 'public' }, fetchAllGameState)
-                        .subscribe();
-
-                    onUnmounted(() => _supabase.removeChannel(channel));
-                });
-
-                return { ...toRefs(state), isMyMessage, amIPlayer, canJoin, canReset, myRole, myRoleText, statusText, playersWithDetails, canVoteOn, joinGame, sendMessage, castVote, resetGame };
+        const updateReadingProgress = () => {
+            const readerMain = $('#reader-main');
+            const progressBar = $('#reading-progress-bar');
+            if (!readerMain || !progressBar) return;
+            const scrollableHeight = readerMain.scrollHeight - readerMain.clientHeight;
+            if (scrollableHeight <= 0) {
+                progressBar.style.width = '0%';
+                return;
             }
-        }).mount('#app');
+            const progress = (readerMain.scrollTop / scrollableHeight) * 100;
+            progressBar.style.width = `${progress}%`;
+        };
+
+        // --- 네비게이션 및 라우팅 ---
+        function navigate(viewId) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            const view = $(`#${viewId}`);
+            view.classList.add('active');
+            window.scrollTo(0, 0);
+            
+            const readerMain = $('#reader-main');
+            if (readerMain) {
+                readerMain.addEventListener('scroll', updateReadingProgress);
+            } else {
+                $('#reading-progress-bar').style.width = '0%';
+            }
+        }
+
+        async function handleRouting() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/book/')) {
+                const id = Number(hash.split('/')[2]);
+                const book = state.books.find(b => b.id === id);
+                if (book) renderReaderView({ type: 'book', content: book });
+                else navigate('view-library');
+            } else if (hash.startsWith('#/thought/')) {
+                const id = Number(hash.split('/')[2]);
+                const thought = state.thoughts.find(t => t.id === id);
+                if (thought) renderReaderView({ type: 'thought', content: thought });
+                else navigate('view-library');
+            } else {
+                renderLibraryView();
+                navigate('view-library');
+            }
+        }
+
+        // --- 렌더링 함수 ---
+        function renderLibraryView() {
+            const container = $('#view-library');
+            const publicThoughts = state.thoughts.filter(t => t.is_public);
+            
+            const query = state.searchQuery.toLowerCase();
+            const searchedBooks = state.books.filter(b => b.title.toLowerCase().includes(query) || b.introduction.toLowerCase().includes(query));
+            const searchedThoughts = publicThoughts.filter(t => (t.title || '').toLowerCase().includes(query) || (t.raw_content || '').toLowerCase().includes(query));
+
+            const filteredThoughts = state.activeCategory === 'all'
+                ? searchedThoughts
+                : searchedThoughts.filter(t => t.category_id === state.activeCategory);
+
+            container.innerHTML = `
+                <header class="p-8 md:p-12 text-center border-b border-[var(--border-color)]">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--accent-color)]" style="font-family: var(--font-serif);">WeaveMind</h1>
+                    <p class="mt-4 max-w-2xl mx-auto text-[var(--text-secondary)]">스스로 진화하는 지능을 향한 여정. 생각의 조각들이 모여 하나의 우주를 이룹니다.</p>
+                    <div class="relative mt-8 max-w-md mx-auto">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">${getIcon('search', 'h-5 w-5 text-gray-500')}</div>
+                        <input type="search" id="search-input" value="${state.searchQuery}" placeholder="제목 및 내용 검색..." class="w-full pl-10 pr-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-full focus:ring-2 focus:ring-violet-500 outline-none">
+                    </div>
+                </header>
+                <main class="p-4 md:p-8">
+                    <section id="books-section">
+                        <h2 class="text-3xl font-bold mb-6">엮어낸 책들</h2>
+                        <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            ${searchedBooks.map((book, i) => `
+                                <a href="#/book/${book.id}" class="content-card block p-6 rounded-lg transition-all duration-300 bg-[var(--bg-secondary)] border border-transparent hover:border-violet-500 transform hover:-translate-y-1 hover:shadow-2xl" style="animation-delay: ${i * 50}ms">
+                                    <h3 class="text-xl font-bold text-violet-300" style="font-family: var(--font-serif);">${book.title || '무제'}</h3>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-2">${book.table_of_contents.length}개의 챕터</p>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-4 italic line-clamp-2">"${book.introduction}"</p>
+                                </a>
+                            `).join('') || '<p class="text-gray-500 col-span-full">표시할 책이 없습니다.</p>'}
+                        </div>
+                    </section>
+
+                    <section id="thoughts-section" class="mt-16">
+                        <h2 class="text-3xl font-bold mb-4">낱개의 생각들</h2>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button data-action="filter-category" data-category-id="all" class="${state.activeCategory === 'all' ? 'bg-violet-600 text-white' : 'bg-gray-700 text-gray-300'} px-3 py-1 text-sm font-semibold rounded-full hover:bg-violet-500 hover:text-white transition-colors">전체</button>
+                            ${state.categories.map(cat => `
+                                <button data-action="filter-category" data-category-id="${cat.id}" class="${state.activeCategory === cat.id ? 'bg-violet-600 text-white' : 'bg-gray-700 text-gray-300'} px-3 py-1 text-sm font-semibold rounded-full hover:bg-violet-500 hover:text-white transition-colors">${cat.name}</button>
+                            `).join('')}
+                        </div>
+                        <div id="thoughts-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                             ${filteredThoughts.map((thought, i) => `
+                                <a href="#/thought/${thought.id}" class="content-card block bg-[var(--bg-secondary)] p-4 rounded-lg transition-shadow duration-300 hover:shadow-xl border border-transparent hover:border-violet-500" style="animation-delay: ${i * 50}ms">
+                                    <h3 class="text-lg font-bold">${thought.title || '무제'}</h3>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-2 line-clamp-2">${thought.raw_content || '내용 없음'}</p>
+                                    <p class="text-xs text-right text-gray-500 mt-3">☕️ ${calculateReadingTime(thought.refined_content || thought.raw_content)}분 분량</p>
+                                </a>
+                            `).join('') || '<p class="text-gray-500 col-span-full">표시할 글이 없습니다.</p>'}
+                        </div>
+                    </section>
+                </main>
+            `;
+        }
+
+        function renderReaderView({ type, content }) {
+            let title, body, readingTime, tocHTML = '';
+            
+            if (type === 'book') {
+                const thoughtsMap = new Map(state.thoughts.map(t => [t.id, t]));
+                title = content.title;
+                const fullContent = content.table_of_contents.map(chapter => {
+                    const thought = thoughtsMap.get(chapter.thoughtId);
+                    return thought ? (thought.refined_content || thought.raw_content) : '';
+                }).join(' ');
+                readingTime = calculateReadingTime(fullContent);
+
+                tocHTML = `
+                    <div class="sticky-toc hidden lg:block p-4 border border-[var(--border-color)] rounded-lg">
+                        <h3 class="font-bold mb-2">목차</h3>
+                        <ul class="space-y-2 text-sm">
+                            ${content.table_of_contents.map(c => `<li><a href="#chapter-${c.thoughtId}" class="text-gray-400 hover:text-white hover:underline">${c.title}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                body = `
+                    <h1 class="text-4xl md:text-5xl font-bold text-center" style="font-family: var(--font-serif);">${content.title}</h1>
+                    <p class="text-lg italic text-center text-gray-400 mt-4 mb-8">"${content.introduction}"</p>
+                    <hr>
+                    ${content.table_of_contents.map(chapter => {
+                        const thought = thoughtsMap.get(chapter.thoughtId);
+                        if (!thought) return `<h2 id="chapter-${chapter.thoughtId}" class="mt-12 mb-4 text-3xl font-bold">${chapter.title}</h2><p class="text-red-500">콘텐츠를 찾을 수 없습니다.</p>`;
+                        return `<h2 id="chapter-${chapter.thoughtId}" class="mt-12 mb-4 text-3xl font-bold">${chapter.title}</h2>\n<div>${thought.refined_content || thought.raw_content}</div>`;
+                    }).join('\n<hr class="my-12 border-gray-700">\n')}
+                `;
+            } else { // thought
+                title = content.title;
+                body = `<h1 class="text-4xl md:text-5xl font-bold mb-8" style="font-family: var(--font-serif);">${content.title || '무제'}</h1><div>${content.refined_content || content.raw_content}</div>`;
+                readingTime = calculateReadingTime(content.refined_content || content.raw_content);
+            }
+
+            $('#view-reader').innerHTML = `
+                <header class="flex items-center justify-between p-4 border-b border-[var(--border-color)] sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10">
+                    <a href="#" class="flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-700"> 
+                        ${getIcon('arrow-left', 'h-5 w-5 text-[var(--text-secondary)]')} <span class="text-sm text-[var(--text-secondary)]">뒤로</span> 
+                    </a>
+                    <div class="text-center">
+                        <h2 class="font-bold truncate px-2">${title || '무제'}</h2>
+                        <p class="text-xs text-gray-500">☕️ ${readingTime}분 분량</p>
+                    </div>
+                    <button data-action="share" data-type="${type}" data-id="${content.id}" data-title="${title}" class="p-2 rounded-full hover:bg-gray-700"> 
+                        ${getIcon('share', 'h-5 w-5 text-[var(--text-secondary)]')} 
+                    </button>
+                </header>
+                <main id="reader-main" class="overflow-y-auto flex-grow">
+                    <div class="max-w-7xl mx-auto p-6 md:p-10 grid grid-cols-1 lg:grid-cols-4 gap-12">
+                        <div class="lg:col-span-1">${tocHTML}</div>
+                        <div class="prose-custom lg:col-span-3">${body}</div>
+                    </div>
+                </main>
+            `;
+            
+            $('#view-reader').querySelectorAll('pre').forEach(pre => {
+                const button = document.createElement('button');
+                button.className = 'absolute top-2 right-2 p-1 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 text-xs';
+                button.textContent = '복사';
+                button.dataset.action = 'copy-code';
+                pre.appendChild(button);
+            });
+
+            navigate('view-reader');
+        }
+
+        // --- 데이터 로직 ---
+        async function fetchData() {
+            renderLoading($('#view-library'));
+            try {
+                const [{data: cats}, {data: thts}, {data: books}] = await Promise.all([
+                    supabase.from('categories').select('*'),
+                    supabase.from('thoughts').select('*').eq('is_public', true),
+                    supabase.from('books').select('*')
+                ]);
+                state.categories = cats || [];
+                state.thoughts = thts || [];
+                state.books = books || [];
+                await handleRouting();
+            } catch (error) {
+                $('#view-library').innerHTML = `<p class="text-center text-red-500 p-8">데이터를 불러오는 데 실패했습니다: ${error.message}</p>`;
+            }
+        }
+
+        // --- 이벤트 핸들러 ---
+        async function handleAction(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const { action, type, id, title, categoryId } = target.dataset;
+
+            if (action === 'share') {
+                const url = `${window.location.origin}${window.location.pathname}#/${type}/${id}`;
+                const shareData = { title: title || 'WeaveMind에서 공유된 글', text: `"${title}" 읽어보기`, url: url };
+                try {
+                    if (navigator.share) await navigator.share(shareData);
+                    else throw new Error('Web Share API not supported');
+                } catch (err) {
+                    navigator.clipboard.writeText(url).then(() => showToast('링크가 클립보드에 복사되었습니다.'));
+                }
+            }
+            
+            if (action === 'filter-category') {
+                state.activeCategory = categoryId === 'all' ? 'all' : Number(categoryId);
+                renderLibraryView();
+            }
+
+            if (action === 'copy-code') {
+                const pre = target.closest('pre');
+                const code = pre.querySelector('code')?.innerText || pre.innerText;
+                navigator.clipboard.writeText(code).then(() => showToast('코드가 복사되었습니다.'));
+            }
+        }
+
+        function handleSearch(e) {
+            state.searchQuery = e.target.value;
+            renderLibraryView();
+        }
+
+        // --- 초기화 ---
+        document.addEventListener('DOMContentLoaded', fetchData);
+        window.addEventListener('hashchange', handleRouting);
+        document.body.addEventListener('click', handleAction);
+        document.body.addEventListener('input', e => {
+            if (e.target.id === 'search-input') handleSearch(e);
+        });
     </script>
 </body>
 </html>
