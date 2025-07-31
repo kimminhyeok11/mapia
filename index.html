@@ -22,14 +22,21 @@
         .app-view.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .prose-custom { color: var(--text-secondary); font-family: var(--font-serif); line-height: 1.7; font-size: 1rem; }
-        .prose-custom h1, .prose-custom h2, .prose-custom h3 { font-family: 'Noto Sans KR', sans-serif; color: var(--text-primary); font-weight: 700; }
+        /* 읽기 전용 콘텐츠 스타일 */
+        .prose-custom { color: var(--text-secondary); font-family: var(--font-serif); line-height: 1.8; font-size: 1rem; /* 글자 크기 축소 */ }
+        .prose-custom p { margin-bottom: 1.25em; }
+        .prose-custom h1 { font-family: 'Noto Sans KR', sans-serif; color: var(--text-primary); font-weight: 700; font-size: 2.25rem; /* 제목 크기 축소 */ }
+        .prose-custom h2 { font-family: 'Noto Sans KR', sans-serif; color: var(--text-primary); font-weight: 700; font-size: 1.875rem; /* 챕터 제목 크기 축소 */ }
         .prose-custom hr { border-color: var(--border-color); }
         .prose-custom a { color: var(--accent-color); text-decoration: none; font-weight: 600; }
         .prose-custom a:hover { text-decoration: underline; }
         .prose-custom ul { list-style-type: disc; padding-left: 1.5rem; }
         .prose-custom li { margin: 0.5em 0; }
-        .prose-custom pre { background-color: #000000; padding: 1rem; border-radius: 0.5rem; font-family: monospace; position: relative; border: 1px solid var(--border-color); }
+        .prose-custom pre { 
+            background-color: #000000; padding: 1rem; border-radius: 0.5rem; 
+            font-family: monospace; position: relative; border: 1px solid var(--border-color);
+            white-space: pre-wrap; word-break: break-word; /* 좌우 스크롤 방지 */
+        }
         
         .content-card {
             opacity: 0;
@@ -39,21 +46,19 @@
         @keyframes cardFadeIn { to { opacity: 1; transform: translateY(0); } }
 
         #reading-progress-bar {
-            position: fixed; top: 0; left: 0; height: 4px; background-color: var(--accent-color); width: 0%; z-index: 9999;
+            position: fixed; top: 0; left: 0; height: 4px; background-color: var(--accent-color); width: 0%; z-index: 99;
             transition: width 0.1s linear;
         }
 
         .sticky-toc {
-            position: sticky;
-            top: 80px;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
+            position: sticky; top: 80px; max-height: calc(100vh - 100px); overflow-y: auto;
         }
     </style>
 </head>
 <body>
     <div id="reading-progress-bar"></div>
     <div id="app-container" class="max-w-7xl mx-auto">
+        <!-- Views -->
         <div id="view-library" class="app-view active"></div>
         <div id="view-reader" class="app-view"></div>
     </div>
@@ -68,10 +73,11 @@
         const state = { thoughts: [], categories: [], books: [], activeCategory: 'all', searchQuery: '' };
         const $ = (selector) => document.querySelector(selector);
 
+        // --- 안정적인 인라인 SVG 아이콘 ---
         const ICONS = {
             'share': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>`,
             'arrow-left': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
-            'loader': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
+            'loader': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
             'search': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
         };
         function getIcon(name, classes = '') {
@@ -79,9 +85,10 @@
             return svg.replace('<svg', `<svg class="${classes}"`);
         }
 
+        // --- UI 컴포넌트 & 유틸리티 ---
         function showToast(message) {
             const toast = document.createElement('div');
-            toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-100 text-slate-800 py-2 px-5 rounded-full shadow-lg font-semibold z-[10000]`;
+            toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-100 text-slate-800 py-2 px-5 rounded-full shadow-lg font-semibold`;
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => {
@@ -92,15 +99,22 @@
         }
 
         function renderLoading(container) {
-            container.innerHTML = `<div class="flex justify-center items-center h-96">${getIcon('loader', 'h-12 w-12 text-gray-500')}</div>`;
+            container.innerHTML = `<div class="flex justify-center items-center h-96">${getIcon('loader', 'animate-spin h-12 w-12 text-gray-500')}</div>`;
         }
 
         function calculateReadingTime(content) {
-            if (!content) return 0;
-            const text = content.replace(/<[^>]+>/g, '');
-            const words = text.trim().split(/\s+/).length;
+            const text = (content || '').replace(/<[^>]+>/g, '');
+            const words = text.trim().split(/\s+/).filter(Boolean).length;
             const time = Math.ceil(words / 200);
             return time < 1 ? 1 : time;
+        }
+
+        function formatAIContent(text) {
+            if (!text) return '';
+            return text
+                .split(/\n\s*\n/)
+                .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+                .join('');
         }
 
         const updateReadingProgress = () => {
@@ -116,6 +130,7 @@
             progressBar.style.width = `${progress}%`;
         };
 
+        // --- 네비게이션 및 라우팅 ---
         function navigate(viewId) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             const view = $(`#${viewId}`);
@@ -123,19 +138,14 @@
             window.scrollTo(0, 0);
             
             const readerMain = $('#reader-main');
-            if (viewId === 'view-reader' && readerMain) {
+            if (readerMain) {
                 readerMain.addEventListener('scroll', updateReadingProgress);
             } else {
-                if (readerMain) readerMain.removeEventListener('scroll', updateReadingProgress);
                 $('#reading-progress-bar').style.width = '0%';
             }
         }
 
         async function handleRouting() {
-            if (state.thoughts.length === 0 && state.books.length === 0) {
-                await fetchData();
-            }
-
             const hash = window.location.hash;
             if (hash.startsWith('#/book/')) {
                 const id = Number(hash.split('/')[2]);
@@ -153,6 +163,7 @@
             }
         }
 
+        // --- 렌더링 함수 ---
         function renderLibraryView() {
             const container = $('#view-library');
             const publicThoughts = state.thoughts.filter(t => t.is_public);
@@ -166,97 +177,47 @@
                 : searchedThoughts.filter(t => t.category_id === state.activeCategory);
 
             container.innerHTML = `
-                <header class="p-6 md:p-10 text-center border-b border-[var(--border-color)]">
-                    <h1 class="text-3xl md:text-4xl font-bold text-[var(--accent-color)]" style="font-family: var(--font-serif);">WeaveMind</h1>
-                    <p class="mt-3 max-w-xl mx-auto text-[var(--text-secondary)] text-sm md:text-base">스스로 진화하는 지능을 향한 여정. 생각의 조각들이 모여 하나의 우주를 이룹니다.</p>
-                    <div class="relative mt-6 max-w-md mx-auto">
+                <header class="p-8 md:p-12 text-center border-b border-[var(--border-color)]">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--accent-color)]" style="font-family: var(--font-serif);">WeaveMind</h1>
+                    <p class="mt-4 max-w-2xl mx-auto text-[var(--text-secondary)]">스스로 진화하는 지능을 향한 여정. 생각의 조각들이 모여 하나의 우주를 이룹니다.</p>
+                    <div class="relative mt-8 max-w-md mx-auto">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">${getIcon('search', 'h-5 w-5 text-gray-500')}</div>
                         <input type="search" id="search-input" value="${state.searchQuery}" placeholder="제목 및 내용 검색..." class="w-full pl-10 pr-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-full focus:ring-2 focus:ring-violet-500 outline-none">
                     </div>
                 </header>
                 <main class="p-4 md:p-8">
                     <section id="books-section">
-                        <h2 class="text-2xl font-bold mb-5">엮어낸 책들</h2>
-                        <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <h2 class="text-3xl font-bold mb-6">엮어낸 책들</h2>
+                        <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             ${searchedBooks.map((book, i) => `
-                                <a href="#/book/${book.id}" class="content-card block p-5 rounded-lg transition-all duration-300 bg-[var(--bg-secondary)] border border-transparent hover:border-violet-500 transform hover:-translate-y-1 hover:shadow-2xl" style="animation-delay: ${i * 50}ms">
-                                    <h3 class="text-lg font-bold text-violet-300" style="font-family: var(--font-serif);">${book.title || '무제'}</h3>
-                                    <p class="text-xs text-[var(--text-secondary)] mt-2">${book.table_of_contents.length}개의 챕터</p>
-                                    <p class="text-sm text-[var(--text-secondary)] mt-3 italic line-clamp-2">"${book.introduction}"</p>
+                                <a href="#/book/${book.id}" class="content-card flex flex-col p-6 rounded-lg transition-all duration-300 bg-[var(--bg-secondary)] border border-transparent hover:border-violet-500 transform hover:-translate-y-1 hover:shadow-2xl" style="animation-delay: ${i * 50}ms">
+                                    <h3 class="text-xl font-bold text-violet-300" style="font-family: var(--font-serif);">${book.title || '무제'}</h3>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-2">${book.table_of_contents.length}개의 챕터</p>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-4 italic line-clamp-2 flex-grow">"${book.introduction}"</p>
                                 </a>
                             `).join('') || '<p class="text-gray-500 col-span-full">표시할 책이 없습니다.</p>'}
                         </div>
                     </section>
 
-                    <section id="thoughts-section" class="mt-12">
-                        <h2 class="text-2xl font-bold mb-5">낱개의 생각들</h2>
+                    <section id="thoughts-section" class="mt-16">
+                        <h2 class="text-3xl font-bold mb-4">낱개의 생각들</h2>
                         <div class="flex flex-wrap gap-2 mb-6">
                             <button data-action="filter-category" data-category-id="all" class="${state.activeCategory === 'all' ? 'bg-violet-600 text-white' : 'bg-gray-700 text-gray-300'} px-3 py-1 text-sm font-semibold rounded-full hover:bg-violet-500 hover:text-white transition-colors">전체</button>
                             ${state.categories.map(cat => `
                                 <button data-action="filter-category" data-category-id="${cat.id}" class="${state.activeCategory === cat.id ? 'bg-violet-600 text-white' : 'bg-gray-700 text-gray-300'} px-3 py-1 text-sm font-semibold rounded-full hover:bg-violet-500 hover:text-white transition-colors">${cat.name}</button>
                             `).join('')}
                         </div>
-                        <div id="thoughts-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div id="thoughts-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                              ${filteredThoughts.map((thought, i) => `
-                                <a href="#/thought/${thought.id}" class="content-card block bg-[var(--bg-secondary)] p-4 rounded-lg transition-shadow duration-300 hover:shadow-xl border border-transparent hover:border-violet-500" style="animation-delay: ${i * 50}ms">
-                                    <h3 class="text-base font-bold">${thought.title || '무제'}</h3>
-                                    <p class="text-sm text-[var(--text-secondary)] mt-2 line-clamp-3">${thought.raw_content || '내용 없음'}</p>
+                                <a href="#/thought/${thought.id}" class="content-card flex flex-col bg-[var(--bg-secondary)] p-4 rounded-lg transition-shadow duration-300 hover:shadow-xl border border-transparent hover:border-violet-500" style="animation-delay: ${i * 50}ms">
+                                    <h3 class="text-lg font-bold flex-grow">${thought.title || '무제'}</h3>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-2 line-clamp-2">${thought.raw_content || '내용 없음'}</p>
                                     <p class="text-xs text-right text-gray-500 mt-3">☕️ ${calculateReadingTime(thought.refined_content || thought.raw_content)}분 분량</p>
                                 </a>
                             `).join('') || '<p class="text-gray-500 col-span-full">표시할 글이 없습니다.</p>'}
                         </div>
                     </section>
                 </main>
-            `;
-        }
-        
-        // --- NEW: Recommendation Renderer ---
-        function renderRecommendations({ type, content }) {
-            let recommendations = [];
-            const MAX_RECOMMENDATIONS = 3;
-
-            if (type === 'thought') {
-                // Recommend thoughts from the same category, excluding the current one.
-                const sameCategoryThoughts = state.thoughts.filter(t =>
-                    t.category_id === content.category_id && t.id !== content.id && t.is_public
-                );
-                recommendations = sameCategoryThoughts;
-
-                // If not enough, fill with other random public thoughts.
-                if (recommendations.length < MAX_RECOMMENDATIONS) {
-                    const otherThoughts = state.thoughts.filter(t =>
-                        t.id !== content.id && t.is_public && !recommendations.find(rec => rec.id === t.id)
-                    );
-                    const needed = MAX_RECOMMENDATIONS - recommendations.length;
-                    recommendations.push(...otherThoughts.sort(() => 0.5 - Math.random()).slice(0, needed));
-                }
-            } else { // type === 'book'
-                // Recommend other books, excluding the current one.
-                recommendations = state.books.filter(b => b.id !== content.id);
-            }
-
-            const finalRecommendations = recommendations.sort(() => 0.5 - Math.random()).slice(0, MAX_RECOMMENDATIONS);
-
-            if (finalRecommendations.length === 0) return '';
-
-            return `
-                <div class="mt-16 pt-8 border-t border-[var(--border-color)]">
-                    <h2 class="text-xl font-bold mb-6 text-center text-gray-300">함께 읽으면 좋은 글</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        ${finalRecommendations.map(item => {
-                            const isBook = !!item.table_of_contents;
-                            const url = isBook ? `#/book/${item.id}` : `#/thought/${item.id}`;
-                            const title = item.title || '무제';
-                            const description = isBook ? `"${item.introduction}"` : (item.raw_content || '내용 없음');
-                            return `
-                                <a href="${url}" class="content-card block bg-[var(--bg-secondary)] p-4 rounded-lg transition-all duration-300 hover:shadow-xl border border-transparent hover:border-violet-500 transform hover:-translate-y-1">
-                                    <h3 class="text-base font-bold truncate">${title}</h3>
-                                    <p class="text-sm text-[var(--text-secondary)] mt-2 line-clamp-2">${description}</p>
-                                </a>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
             `;
         }
 
@@ -283,44 +244,39 @@
 
                 body = `
                     <h1 class="text-3xl md:text-4xl font-bold text-center" style="font-family: var(--font-serif);">${content.title}</h1>
-                    <p class="text-base italic text-center text-gray-400 mt-4 mb-8">"${content.introduction}"</p>
+                    <p class="text-base italic text-center text-gray-400 mt-4 mb-8">${formatAIContent(content.introduction)}</p>
                     <hr>
                     ${content.table_of_contents.map(chapter => {
                         const thought = thoughtsMap.get(chapter.thoughtId);
-                        if (!thought) return `<h2 id="chapter-${chapter.thoughtId}" class="mt-10 mb-4 text-2xl font-bold">${chapter.title}</h2><p class="text-red-500">콘텐츠를 찾을 수 없습니다.</p>`;
-                        return `<h2 id="chapter-${chapter.thoughtId}" class="mt-10 mb-4 text-2xl font-bold">${chapter.title}</h2>\n<div>${thought.refined_content || thought.raw_content}</div>`;
-                    }).join('\n<hr class="my-10 border-gray-700">\n')}
+                        if (!thought) return `<h2 id="chapter-${chapter.thoughtId}" class="mt-12 mb-4 text-2xl font-bold">${chapter.title}</h2><p class="text-red-500">[삭제된 글입니다]</p>`;
+                        return `<h2 id="chapter-${chapter.thoughtId}" class="mt-12 mb-4 text-2xl font-bold">${chapter.title}</h2>\n<div>${formatAIContent(thought.refined_content || thought.raw_content)}</div>`;
+                    }).join('\n<hr class="my-12 border-gray-700">\n')}
                 `;
             } else { // thought
                 title = content.title;
-                body = `<h1 class="text-3xl md:text-4xl font-bold mb-6" style="font-family: var(--font-serif);">${content.title || '무제'}</h1><div>${content.refined_content || content.raw_content}</div>`;
+                body = `<h1 class="text-3xl md:text-4xl font-bold mb-8" style="font-family: var(--font-serif);">${content.title || '무제'}</h1><div>${formatAIContent(content.refined_content || content.raw_content)}</div>`;
                 readingTime = calculateReadingTime(content.refined_content || content.raw_content);
             }
 
             $('#view-reader').innerHTML = `
-            <div class="flex flex-col h-screen">
-                <header class="flex items-center justify-between p-2 md:p-4 border-b border-[var(--border-color)] sticky top-0 bg-gray-900/80 backdrop-blur-sm z-20 flex-shrink-0">
-                    <a href="#" class="flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-700"> 
-                        ${getIcon('arrow-left', 'h-5 w-5 text-[var(--text-secondary)]')} <span class="hidden sm:inline text-sm text-[var(--text-secondary)]">뒤로</span> 
+                <header class="flex items-center justify-between p-4 border-b border-[var(--border-color)] sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10">
+                    <a href="#" class="flex-shrink-0 flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-700"> 
+                        ${getIcon('arrow-left', 'h-5 w-5 text-[var(--text-secondary)]')} <span class="text-sm text-[var(--text-secondary)]">뒤로</span> 
                     </a>
-                    <div class="text-center flex-1 min-w-0 px-2">
-                        <h2 class="font-semibold truncate text-sm sm:text-base">${title || '무제'}</h2>
+                    <div class="text-center flex-grow min-w-0 px-2">
+                        <h2 class="font-bold truncate" style="word-break: break-word;">${title || '무제'}</h2>
                         <p class="text-xs text-gray-500">☕️ ${readingTime}분 분량</p>
                     </div>
-                    <button data-action="share" data-type="${type}" data-id="${content.id}" data-title="${title}" class="p-2 rounded-full hover:bg-gray-700"> 
+                    <button data-action="share" data-type="${type}" data-id="${content.id}" data-title="${title}" class="flex-shrink-0 p-2 rounded-full hover:bg-gray-700"> 
                         ${getIcon('share', 'h-5 w-5 text-[var(--text-secondary)]')} 
                     </button>
                 </header>
                 <main id="reader-main" class="overflow-y-auto flex-grow">
-                    <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-12">
+                    <div class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-12">
                         <div class="lg:col-span-1">${tocHTML}</div>
-                        <div class="lg:col-span-3">
-                            <article class="prose-custom">${body}</article>
-                            ${renderRecommendations({ type, content })}
-                        </div>
+                        <div class="prose-custom lg:col-span-3 min-w-0">${body}</div>
                     </div>
                 </main>
-            </div>
             `;
             
             $('#view-reader').querySelectorAll('pre').forEach(pre => {
@@ -334,6 +290,7 @@
             navigate('view-reader');
         }
 
+        // --- 데이터 로직 ---
         async function fetchData() {
             renderLoading($('#view-library'));
             try {
@@ -345,20 +302,16 @@
                 state.categories = cats || [];
                 state.thoughts = thts || [];
                 state.books = books || [];
+                await handleRouting();
             } catch (error) {
-                console.error("Fetch error:", error);
                 $('#view-library').innerHTML = `<p class="text-center text-red-500 p-8">데이터를 불러오는 데 실패했습니다: ${error.message}</p>`;
             }
         }
 
+        // --- 이벤트 핸들러 ---
         async function handleAction(e) {
             const target = e.target.closest('[data-action]');
             if (!target) return;
-
-            // Don't prevent default for links in recommendation section
-            if (!target.closest('.recommendation-card')) {
-                e.preventDefault();
-            }
 
             const { action, type, id, title, categoryId } = target.dataset;
 
@@ -366,10 +319,13 @@
                 const url = `${window.location.origin}${window.location.pathname}#/${type}/${id}`;
                 const shareData = { title: title || 'WeaveMind에서 공유된 글', text: `"${title}" 읽어보기`, url: url };
                 try {
-                    if (navigator.share) await navigator.share(shareData);
-                    else throw new Error('Web Share API not supported');
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                    } else {
+                        navigator.clipboard.writeText(url).then(() => showToast('링크가 클립보드에 복사되었습니다.'));
+                    }
                 } catch (err) {
-                    navigator.clipboard.writeText(url).then(() => showToast('링크가 클립보드에 복사되었습니다.'));
+                    navigator.clipboard.writeText(url).then(() => showToast('공유 API 미지원: 링크가 복사되었습니다.'));
                 }
             }
             
@@ -380,33 +336,23 @@
 
             if (action === 'copy-code') {
                 const pre = target.closest('pre');
-                const codeToCopy = Array.from(pre.childNodes)
-                    .filter(node => node.tagName === 'CODE')
-                    .map(node => node.innerText)
-                    .join('');
-                navigator.clipboard.writeText(codeToCopy).then(() => showToast('코드가 복사되었습니다.'));
+                const code = pre.querySelector('code')?.innerText || pre.innerText;
+                navigator.clipboard.writeText(code).then(() => showToast('코드가 복사되었습니다.'));
             }
         }
 
         function handleSearch(e) {
-            clearTimeout(handleSearch.timeout);
-            handleSearch.timeout = setTimeout(() => {
-                state.searchQuery = e.target.value;
-                renderLibraryView();
-            }, 300);
+            state.searchQuery = e.target.value;
+            renderLibraryView();
         }
 
-        async function init() {
-            await handleRouting();
-            window.addEventListener('hashchange', handleRouting);
-            document.body.addEventListener('click', handleAction);
-            document.body.addEventListener('input', e => {
-                if (e.target.id === 'search-input') handleSearch(e);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
+        // --- 초기화 ---
+        document.addEventListener('DOMContentLoaded', fetchData);
+        window.addEventListener('hashchange', handleRouting);
+        document.body.addEventListener('click', handleAction);
+        document.body.addEventListener('input', e => {
+            if (e.target.id === 'search-input') handleSearch(e);
+        });
     </script>
 </body>
 </html>
-
