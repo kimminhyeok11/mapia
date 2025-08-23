@@ -42,25 +42,31 @@
             padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; border-radius: 6px;
             transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.5rem;
             border: 1px solid var(--border-color); background-color: var(--bg-interface);
+            cursor: pointer;
         }
         .btn:hover { background-color: var(--border-color); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary {
             background: linear-gradient(90deg, var(--accent-glow-start), var(--accent-glow-end));
             border: none; color: white;
         }
         .btn-primary:hover { filter: brightness(1.1); }
+        .btn-danger { background-color: #DA3633; border-color: #DA3633; color: white; }
+        .btn-danger:hover { background-color: #b92c2a; }
 
-        .form-input {
+        .form-input, .form-textarea {
             font-size: 0.9rem; padding: 0.6rem 0.8rem; border: 1px solid var(--border-color);
             border-radius: 6px; width: 100%; background-color: var(--bg-space); color: var(--text-primary);
         }
-        .form-input:focus { outline: none; border-color: var(--accent-glow-start); box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2); }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent-glow-start); box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2); }
+        .form-textarea { min-height: 150px; line-height: 1.6; }
         
         .prose-custom { color: var(--text-secondary); line-height: 1.8; }
         .prose-custom h1, .prose-custom h2, .prose-custom h3 { color: var(--text-primary); font-weight: 600; margin-top: 1.8em; margin-bottom: 1em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
         .prose-custom a { color: var(--accent-glow-start); text-decoration: none; font-weight: 500; }
         .prose-custom a:hover { text-decoration: underline; }
-        .prose-custom pre { background-color: #010409; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.875rem; }
+        .prose-custom pre { background-color: #010409; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.875rem; overflow-x: auto;}
+        .prose-custom code { font-family: 'Courier New', Courier, monospace; }
         .prose-custom img { max-width: 100%; height: auto; border-radius: 6px; margin: 2rem auto; display: block; }
         .prose-custom blockquote { border-left: 3px solid var(--accent-glow-start); padding-left: 1rem; color: var(--text-secondary); font-style: italic; }
 
@@ -71,10 +77,11 @@
 </head>
 <body>
     <div id="app-container" class="max-w-5xl mx-auto px-4">
-        <div id="main-nav-container" class="sticky top-0 z-30"></div>
+        <div id="main-nav-container" class="sticky top-0 z-30 bg-deep-space/80 backdrop-blur-lg"></div>
         <div id="view-library" class="app-view active"></div>
         <div id="view-post" class="app-view"></div>
         <div id="view-admin" class="app-view"></div>
+        <div id="view-writer" class="app-view"></div>
         <div id="modal-container"></div>
         <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
     </div>
@@ -90,9 +97,11 @@
 
         // --- ICONS (Minimalist & consistent) ---
         const ICONS = {
-            'login': `<svg viewBox="0 0 16 16" fill="currentColor" height="1em" width="1em"><path d="M8.22 2.25a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.44 8 8.22 4.81a.75.75 0 0 1 0-1.06Z"></path><path d="M2 8a.75.75 0 0 1 .75-.75h8.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H2.75A.75.75 0 0 1 2 8Z"></path></svg>`,
-            'dashboard': `<svg viewBox="0 0 16 16" fill="currentColor" height="1em" width="1em"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path><path d="M7.5 14.5V8h7v6.5Zm-6-13v6.5h5V1.5Z"></path></svg>`,
-            'search': `<svg viewBox="0 0 16 16" fill="currentColor" height="1em" width="1em"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04ZM9.75 6.5a3.25 3.25 0 0 1-3.25 3.25A3.25 3.25 0 0 1 3.25 6.5 3.25 3.25 0 0 1 6.5 3.25 3.25 3.25 0 0 1 9.75 6.5Z"></path></svg>`,
+            'login': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>`,
+            'dashboard': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>`,
+            'edit': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`,
+            'delete': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`,
+            'ai': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>`,
         };
 
         // --- SEO & Routing ---
@@ -105,13 +114,22 @@
             const hash = window.location.hash || '#/';
             const [path, id] = hash.substring(2).split('/');
             
+            // Check for admin routes and permissions
+            if ((path === 'admin' || path === 'writer') && state.profile?.role !== 'admin') {
+                window.location.hash = '/';
+                showToast('Access denied.', true);
+                return;
+            }
+
             switch (path) {
                 case 'post':
                     renderPostView(id);
                     break;
                 case 'admin':
-                    if (state.profile?.role === 'admin') renderAdminView();
-                    else window.location.hash = '/';
+                    renderAdminView();
+                    break;
+                case 'writer':
+                    renderWriterView(id);
                     break;
                 default:
                     renderLibraryView();
@@ -131,7 +149,7 @@
                 navLinks += `<button data-action="show-auth" class="btn">${ICONS.login} Login / Sign Up</button>`;
             }
             navContainer.innerHTML = `
-                <nav class="flex items-center justify-between py-3 my-2 border-b border-gray-800">
+                <nav class="flex items-center justify-between py-3 my-2 border-b border-border-color">
                     <a href="#/" class="text-xl font-semibold glow-text">WeaveMind</a>
                     <div class="flex items-center space-x-2">${navLinks}</div>
                 </nav>
@@ -161,7 +179,6 @@
             $('#auth-modal-backdrop').classList.add('active');
             $('#auth-modal-content').classList.add('active');
             
-            // Event listeners for the new modal
             $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
             $('#auth-form').addEventListener('submit', handleAuthSubmit);
             $('#auth-toggle-link').addEventListener('click', toggleAuthMode);
@@ -234,7 +251,7 @@
                 </header>
                 <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     ${posts.map(post => `
-                        <a href="#/post/${post.id}" class="block bg-space p-5 rounded-lg border border-transparent transition-all duration-300 glow-border-hover">
+                        <a href="#/post/${post.id}" class="block bg-space p-5 rounded-lg border border-border-color transition-all duration-300 glow-border-hover">
                             <h3 class="font-semibold text-lg text-primary truncate">${post.title}</h3>
                             <p class="text-sm text-secondary mt-2 line-clamp-2">A glimpse into the latest thoughts...</p>
                             <div class="flex items-center space-x-4 text-xs text-secondary mt-4">
@@ -256,13 +273,19 @@
             const { data: post, error } = await supabase.from('thoughts')
                 .select('*, profiles(email)')
                 .eq('id', id)
-                .eq('is_public', true)
                 .single();
-
-            if (error || !post) { window.location.hash = '/'; return; }
             
-            // Increment view count
-            await supabase.rpc('increment_view_count', { thought_id_to_inc: id });
+            // Allow admins to see non-public posts, otherwise check is_public
+            if (error || !post || (!post.is_public && state.profile?.role !== 'admin')) {
+                window.location.hash = '/';
+                showToast('Post not found or you do not have permission to view it.', true);
+                return;
+            }
+            
+            // Increment view count only for public views
+            if (post.is_public) {
+                await supabase.rpc('increment_view_count', { thought_id_to_inc: id });
+            }
             
             updateMetaTags(`${post.title} - WeaveMind`, (post.refined_content || '').replace(/<[^>]+>/g, '').substring(0, 160));
             
@@ -279,20 +302,217 @@
             `;
         }
 
-        // Placeholder for Admin View
-        function renderAdminView() {
+        async function renderAdminView() {
             updateMetaTags('Admin Dashboard - WeaveMind', 'Manage your content.');
             switchView('#view-admin');
-            $('#view-admin').innerHTML = `<div class="py-10"><h1 class="text-2xl font-bold">Admin Dashboard</h1><p class="text-secondary mt-2">Content and AI generation tools will be available here.</p></div>`;
+            const container = $('#view-admin');
+            container.innerHTML = `<div class="py-10"><h1 class="text-2xl font-bold">Loading content...</h1></div>`;
+
+            const { data: posts, error } = await supabase.from('thoughts')
+                .select('id, title, created_at, is_public')
+                .eq('author_id', state.user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<p>Error loading your posts.</p>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="py-10">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+                        <a href="#/writer" class="btn btn-primary">New Thought</a>
+                    </div>
+                    <div class="space-y-3">
+                        ${posts.map(post => `
+                            <div class="bg-space p-4 rounded-lg flex justify-between items-center border border-border-color">
+                                <div>
+                                    <h3 class="font-semibold text-primary">${post.title}</h3>
+                                    <p class="text-xs text-secondary mt-1">
+                                        ${new Date(post.created_at).toLocaleString()} - 
+                                        <span class="${post.is_public ? 'text-green-400' : 'text-yellow-400'}">${post.is_public ? 'Public' : 'Draft'}</span>
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <a href="#/writer/${post.id}" class="btn">${ICONS.edit}</a>
+                                    <button data-action="delete-post" data-id="${post.id}" class="btn btn-danger">${ICONS.delete}</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${posts.length === 0 ? '<p class="text-secondary text-center py-8">You haven\'t written any thoughts yet.</p>' : ''}
+                    </div>
+                </div>
+            `;
         }
+        
+        async function renderWriterView(id) {
+            updateMetaTags(id ? 'Edit Thought' : 'New Thought', 'Weave your ideas with AI.');
+            switchView('#view-writer');
+            const container = $('#view-writer');
+            container.innerHTML = `<div class="text-center py-20">Loading editor...</div>`;
+
+            let post = { id: null, title: '', raw_thought: '', refined_content: '', is_public: false };
+            if (id) {
+                const { data, error } = await supabase.from('thoughts').select('*').eq('id', id).single();
+                if (error || data.author_id !== state.user.id) {
+                    window.location.hash = '/admin';
+                    showToast('Post not found or access denied.', true);
+                    return;
+                }
+                post = data;
+            }
+
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto py-10">
+                    <h1 class="text-2xl font-bold mb-6">${id ? 'Edit Thought' : 'Create a New Thought'}</h1>
+                    <form id="writer-form" data-id="${id || ''}" class="space-y-5">
+                        <div>
+                            <label for="raw-thought" class="block text-sm font-medium text-secondary mb-1">1. Your Raw Thought</label>
+                            <textarea id="raw-thought" name="raw-thought" class="form-textarea" placeholder="Start with a question, a quote, or a fragment of an idea...">${post.raw_thought}</textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" id="generate-ai-btn" class="btn">${ICONS.ai} Weave with AI</button>
+                        </div>
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-secondary mb-1">2. Title</label>
+                            <input type="text" id="title" name="title" class="form-input" placeholder="AI-generated or your own title" value="${post.title}" required>
+                        </div>
+                        <div>
+                            <label for="refined-content" class="block text-sm font-medium text-secondary mb-1">3. Refined Content</label>
+                            <textarea id="refined-content" name="refined-content" class="form-textarea" style="min-height: 300px;" placeholder="AI-generated content will appear here. You can edit it freely. HTML is supported.">${post.refined_content}</textarea>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div class="flex items-center gap-3">
+                                <label for="is-public" class="text-sm font-medium text-secondary">Publish Publicly?</label>
+                                <input type="checkbox" id="is-public" name="is-public" class="w-4 h-4" ${post.is_public ? 'checked' : ''}>
+                            </div>
+                            <button type="submit" id="save-post-btn" class="btn btn-primary">Save Post</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            $('#generate-ai-btn').addEventListener('click', handleAiGenerate);
+            $('#writer-form').addEventListener('submit', handlePostSave);
+        }
+
+        async function handleAiGenerate(e) {
+            const btn = e.target;
+            const rawThought = $('#raw-thought').value;
+            if (!rawThought) {
+                showToast('Please enter a raw thought first.', true);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'Weaving...';
+            showToast('AI is generating content...');
+
+            try {
+                const prompt = `You are an insightful blog writer. Based on the following raw thought, write a thoughtful and well-structured blog post in HTML format. The post should have a clear title. The tone should be reflective and engaging. Your entire response should be a JSON object with two keys: "title" and "content". The content should be the HTML body of the post. Raw thought: "${rawThought}"`;
+                
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Provided by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) {
+                    // Clean the response to be valid JSON
+                    const cleanedText = text.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+                    const aiResponse = JSON.parse(cleanedText);
+                    $('#title').value = aiResponse.title;
+                    $('#refined-content').value = aiResponse.content;
+                    showToast('AI generation complete!', false);
+                } else {
+                    throw new Error('Invalid response from AI.');
+                }
+            } catch (error) {
+                console.error('AI Generation Error:', error);
+                showToast('Failed to generate content. Please try again.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `${ICONS.ai} Weave with AI`;
+            }
+        }
+        
+        async function handlePostSave(e) {
+            e.preventDefault();
+            const form = e.target;
+            const postId = form.dataset.id;
+            const btn = $('#save-post-btn');
+            
+            const postData = {
+                title: form.title.value,
+                raw_thought: form['raw-thought'].value,
+                refined_content: form['refined-content'].value,
+                is_public: form['is-public'].checked,
+                author_id: state.user.id
+            };
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            let error;
+            if (postId) {
+                // Update existing post
+                const { error: updateError } = await supabase.from('thoughts').update(postData).eq('id', postId);
+                error = updateError;
+            } else {
+                // Insert new post
+                const { error: insertError } = await supabase.from('thoughts').insert(postData);
+                error = insertError;
+            }
+
+            if (error) {
+                showToast(`Error saving post: ${error.message}`, true);
+                console.error('Save Post Error:', error);
+            } else {
+                showToast('Post saved successfully!', false);
+                window.location.hash = '/admin';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Save Post';
+        }
+
+        async function handleDeletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+
+            const { error } = await supabase.from('thoughts').delete().eq('id', postId);
+            if (error) {
+                showToast(`Error deleting post: ${error.message}`, true);
+            } else {
+                showToast('Post deleted successfully.');
+                renderAdminView(); // Refresh the view
+            }
+        }
+
 
         // --- Utilities ---
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
-            toast.className = `py-2 px-4 rounded-md shadow-lg text-sm font-medium text-white ${isError ? 'bg-red-500' : 'bg-green-600'}`;
+            toast.className = `py-2 px-4 rounded-md shadow-lg text-sm font-medium text-white ${isError ? 'bg-red-500' : 'bg-green-600'} animate-fadeIn`;
             toast.textContent = message;
             $('#toast-container').appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
         }
 
         // --- Global Event Listeners & Init ---
@@ -307,6 +527,9 @@
                     window.location.hash = '/';
                     showToast('Logged out.');
                     break;
+                case 'delete-post':
+                    handleDeletePost(actionTarget.dataset.id);
+                    break;
             }
         }
 
@@ -319,14 +542,14 @@
                 state.profile = null;
             }
             renderNav();
-            handleRouting();
+            handleRouting(); // Reroute after auth state changes to apply permissions
         });
 
         window.addEventListener('hashchange', handleRouting);
         document.addEventListener('click', handleGlobalClick);
 
         // Initial Load
-        handleRouting();
+        // The onAuthStateChange listener will trigger the initial render and routing
     </script>
 </body>
 </html>
