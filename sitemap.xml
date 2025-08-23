@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <!-- 기본 페이지 -->
+  <url>
+    <loc>https://mapia.vercel.app/</loc>
+    <lastmod>2025-08-23</lastmod>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- 개별 글 페이지 (예시) -->
+  <!-- 
+    실제로는 발행된 모든 글의 URL을 여기에 추가해야 합니다.
+    <loc> 태그에는 #/post/ID 형태의 URL을 포함합니다.
+    <lastmod> 태그는 글의 최종 수정일을 나타냅니다.
+  -->
+  <url>
+    <loc>https://mapia.vercel.app/#/post/1</loc>
+    <lastmod>2025-08-22</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://mapia.vercel.app/#/post/2</loc>
+    <lastmod>2025-08-21</lastmod>
+    <priority>0.80</priority>
+  </url>
+
+</urlset>
