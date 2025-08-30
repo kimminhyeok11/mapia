@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /#/admin
-
-Sitemap: https://mapia.vercel.app/sitemap.xml
+​Sitemap: https://www.google.com/url?sa=E&source=gmail&q=https://mapia.vercel.app/api/sitemap
