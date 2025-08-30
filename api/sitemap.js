@@ -49,6 +49,8 @@ export default async function handler(req, res) {
 
         // 생성된 XML을 sitemap.xml 형식으로 응답합니다.
         res.setHeader('Content-Type', 'application/xml');
+        // Vercel의 CDN 캐시를 설정하여 24시간 동안 유지되도록 합니다.
+        res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
         res.status(200).send(sitemapXml);
 
     } catch (e) {
@@ -56,3 +58,4 @@ export default async function handler(req, res) {
         res.status(500).json({ error: e.message });
     }
 }
+
