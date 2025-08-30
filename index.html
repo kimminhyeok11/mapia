@@ -25,7 +25,6 @@
         html { scroll-behavior: smooth; }
         body { font-family: var(--font-sans); background-color: var(--bg-deep-space); color: var(--text-primary); font-size: 15px; }
         
-        /* 스크롤바 스타일 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-space); }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
@@ -67,7 +66,6 @@
         .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent-glow-start); box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2); }
         .form-textarea { min-height: 150px; line-height: 1.6; }
 
-        /* WYSIWYG Editor 스타일 */
         .wysiwyg-editor {
             min-height: 300px; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.8rem 1rem;
             background-color: var(--bg-space); line-height: 1.7; font-size: 0.9rem;
@@ -92,7 +90,6 @@
 </head>
 <body>
     <div id="app-container" class="max-w-5xl mx-auto px-4">
-        <!-- 동적 렌더링 영역 -->
         <div id="main-nav-container" class="sticky top-0 z-30 bg-deep-space/80 backdrop-blur-lg"></div>
         <main>
             <div id="view-library" class="app-view active"></div>
@@ -111,16 +108,10 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- App State ---
-        const state = { 
-            user: null, 
-            profile: null,
-            isLoading: false,
-        };
+        const state = { user: null, profile: null };
         const $ = (selector) => document.querySelector(selector);
         const $$ = (selector) => document.querySelectorAll(selector);
 
-        // --- ICONS ---
         const ICONS = {
             'login': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>`,
             'dashboard': `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>`,
@@ -130,7 +121,6 @@
             'loading': `<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`
         };
 
-        // --- HTML TEMPLATES ---
         const templates = {
             nav: (isAdmin) => `
                 <nav class="flex items-center justify-between py-3 my-2 border-b border-border-color">
@@ -173,29 +163,19 @@
                 </div>`
         };
 
-
-        // --- CORE LOGIC ---
-
-        /**
-         * Updates page title and meta description for SEO.
-         * @param {string} title - The new title.
-         * @param {string} description - The new meta description.
-         */
         function updateMetaTags(title, description) {
             document.title = title;
             $('meta[name="description"]').setAttribute('content', description);
         }
 
-        /**
-         * Main router function to handle hash changes.
-         */
         function handleRouting() {
             const hash = window.location.hash || '#/';
             const [path, id] = hash.substring(2).split('/');
             
             if ((path === 'admin' || path === 'writer') && state.profile?.role !== 'admin') {
-                window.location.hash = '/';
                 showToast('Access denied.', true);
+                // 지연 후 리디렉션하여 사용자가 토스트 메시지를 볼 시간을 줍니다.
+                setTimeout(() => { window.location.hash = '/'; }, 1000);
                 return;
             }
 
@@ -207,22 +187,12 @@
             }
         }
         
-        /**
-         * Switches the currently active view.
-         * @param {string} viewId - The selector for the view to activate.
-         */
         function switchView(viewId) {
             $$('.app-view').forEach(v => v.classList.remove('active'));
             $(viewId)?.classList.add('active');
             window.scrollTo(0, 0);
         }
         
-        /**
-         * Toggles a loading state on a button.
-         * @param {HTMLElement} btn - The button element.
-         * @param {boolean} isLoading - Whether to show the loading state.
-         * @param {string} originalContent - The original HTML content of the button.
-         */
         function toggleButtonLoading(btn, isLoading, originalContent) {
             if (isLoading) {
                 btn.disabled = true;
@@ -233,7 +203,6 @@
             }
         }
 
-        // --- AUTHENTICATION ---
         function renderNav() {
             $('#main-nav-container').innerHTML = templates.nav(state.profile?.role === 'admin');
         }
@@ -273,11 +242,11 @@
 
             const isLoginMode = !$('#password-confirm-container').classList.contains('hidden');
 
-            if (!isLoginMode) { // Login
+            if (!isLoginMode) {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) errorEl.textContent = 'Invalid login credentials.';
                 else { closeAuthModal(); showToast('Logged in successfully.'); }
-            } else { // Sign Up
+            } else {
                 const passwordConfirm = form['password-confirm'].value;
                 if (password !== passwordConfirm) { errorEl.textContent = 'Passwords do not match.'; }
                 else if (password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; }
@@ -290,7 +259,6 @@
             toggleButtonLoading(btn, false, originalBtnContent);
         }
 
-        // --- VIEWS ---
         async function renderLibraryView() {
             updateMetaTags('WeaveMind', 'AI와 함께 생각을 엮어내는 공간, WeaveMind입니다.');
             switchView('#view-library');
@@ -347,7 +315,7 @@
                     <header class="text-center mb-8">
                         <h1 class="text-3xl md:text-4xl font-bold text-primary">${post.title}</h1>
                         <p class="text-sm text-secondary mt-3">
-                            By ${post.profiles.email} on ${new Date(post.created_at).toLocaleDateString()}
+                            By ${post.profiles?.email || '...'} on ${new Date(post.created_at).toLocaleDateString()}
                         </p>
                     </header>
                     <div class="prose-custom">${post.refined_content}</div>
@@ -359,6 +327,7 @@
             switchView('#view-admin');
             const container = $('#view-admin');
             container.innerHTML = `<div class="py-10"><h1 class="text-2xl font-bold">Loading content...</h1></div>`;
+            if (!state.user) return; // 사용자가 없으면 렌더링 중단
 
             const { data: posts, error } = await supabase.from('thoughts')
                 .select('id, title, created_at, is_public')
@@ -401,6 +370,7 @@
             switchView('#view-writer');
             const container = $('#view-writer');
             container.innerHTML = `<div class="text-center py-20">Loading editor...</div>`;
+            if (!state.user) return;
 
             let post = { id: null, title: '', raw_thought: '', refined_content: '', is_public: false };
             if (id) {
@@ -462,7 +432,7 @@
                 const prompt = `You are an insightful blog writer. Based on the following raw thought, write a thoughtful and well-structured blog post in HTML format. The post should have a clear title. The tone should be reflective and engaging. Your entire response must be a single JSON object with two keys: "title" (string) and "content" (string with HTML for the post body). Do not include markdown backticks or the word "json" in your response. Raw thought: "${rawThought}"`;
                 
                 const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                const apiKey = ""; // Provided by the environment
+                const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -515,7 +485,6 @@
 
             if (error) {
                 showToast(`Error saving post: ${error.message}`, true);
-                console.error('Save Post Error:', error);
             } else {
                 showToast('Post saved successfully!', false);
                 window.location.hash = '/admin';
@@ -537,13 +506,6 @@
             }
         }
 
-
-        // --- UTILITIES ---
-        /**
-         * Shows a toast message.
-         * @param {string} message - The message to display.
-         * @param {boolean} isError - If true, styles the toast as an error.
-         */
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.className = `py-2 px-4 rounded-md shadow-lg text-sm font-medium text-white ${isError ? 'bg-red-600' : 'bg-green-600'}`;
@@ -555,12 +517,6 @@
             }, 3000);
         }
 
-        /**
-         * Shows a confirmation modal and returns a promise that resolves with the user's choice.
-         * @param {string} title - The modal title.
-         * @param {string} message - The modal message.
-         * @returns {Promise<boolean>} - True if confirmed, false otherwise.
-         */
         function showConfirmModal(title, message) {
             return new Promise(resolve => {
                 $('#modal-container').innerHTML = templates.confirmModal(title, message);
@@ -579,12 +535,6 @@
             });
         }
 
-
-        // --- EVENT LISTENERS & INITIALIZATION ---
-        
-        /**
-         * Global click handler using event delegation.
-         */
         async function handleGlobalClick(e) {
             const actionTarget = e.target.closest('[data-action]');
             if (!actionTarget) return;
@@ -606,20 +556,38 @@
          * Initialize the application.
          */
         function init() {
-            supabase.auth.onAuthStateChange(async (event, session) => {
+            // --- KEY CHANGE: Decouple initial render from auth state ---
+            
+            // 1. Render initial UI immediately
+            renderNav();
+            handleRouting();
+
+            // 2. Set up listeners
+            window.addEventListener('hashchange', handleRouting);
+            document.addEventListener('click', handleGlobalClick);
+
+            // 3. Listen for auth changes and update UI accordingly
+            supabase.auth.onAuthStateChange(async (_event, session) => {
+                const wasLoggedIn = !!state.user;
+                const isLoggedIn = !!session?.user;
+
                 state.user = session?.user || null;
+                state.profile = null;
+
                 if (state.user) {
                     const { data } = await supabase.from('profiles').select('role').eq('id', state.user.id).single();
                     state.profile = data;
-                } else {
-                    state.profile = null;
                 }
+                
+                // Always re-render nav to show correct login/logout state
                 renderNav();
-                handleRouting();
-            });
 
-            window.addEventListener('hashchange', handleRouting);
-            document.addEventListener('click', handleGlobalClick);
+                // If auth state changes (login -> logout or vice versa), re-run routing
+                // to handle access permissions (e.g., redirect from admin page on logout).
+                if (wasLoggedIn !== isLoggedIn) {
+                    handleRouting();
+                }
+            });
         }
 
         // --- START APP ---
