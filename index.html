@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112"
-     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <!-- Default Meta Tags -->
     <title>CortexLog</title>
-    <meta name="description" content="AI와 함께 생각을 엮어내는 공간, CortexLog입니다. 기술, 일상, AI에 대한 깊이 있는 인사이트를 탐험하세요.">
-
+    <meta name="description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mapia.vercel.app/">
     <meta property="og:title" content="CortexLog">
-    <meta property="og:description" content="AI와 함께 생각을 엮어내는 공간, CortexLog.">
-    <meta property="og:image" content="https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp">
-
+    <meta property="og:description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
+    
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://mapia.vercel.app/">
     <meta property="twitter:title" content="CortexLog">
-    <meta property="twitter:description" content="AI와 함께 생각을 엮어내는 공간, CortexLog.">
-    <meta property="twitter:image" content="https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp">
-    
+    <meta property="twitter:description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
@@ -36,31 +32,109 @@
 
     <style>
         :root {
-            --bg-main: #0B0B0B; --bg-content: #141414; --border-color: #2A2A2A;
-            --text-primary: #F0F0F0; --text-secondary: #888888; --accent: #FFFFFF;
-            --accent-hover: #1F1F1F; --font-heading: 'Plus Jakarta Sans', sans-serif; --font-body: 'Pretendard', sans-serif;
+            --bg-main: #0B0B0B;
+            --bg-content: #141414;
+            --border-color: #2A2A2A;
+            --text-primary: #F0F0F0;
+            --text-secondary: #888888;
+            --accent: #FFFFFF;
+            --accent-hover: #1F1F1F;
+            --font-heading: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Pretendard', sans-serif;
         }
         html { scroll-behavior: smooth; }
         body {
-            font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-primary);
-            font-size: 15px; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-size: 15px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        #app-background, #app-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        #app-loader { z-index: 100; background-color: var(--bg-main); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
-        .app-view { display: none; } .app-view.active { display: block; }
-        .brand-logo { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; color: var(--text-primary); letter-spacing: 0.5px; }
-        .btn { padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px; transition: all 0.25s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: 1px solid var(--border-color); background-color: transparent; color: var(--text-secondary); cursor: pointer; }
-        .btn:hover { background-color: var(--accent-hover); color: var(--text-primary); transform: translateY(-2px); border-color: #444; }
-        .btn-primary { border-color: var(--text-secondary); color: var(--text-primary); }
-        .btn-primary:hover { background-color: var(--accent); color: var(--bg-main); }
+        
+        #app-background, #app-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+        #app-loader {
+            z-index: 100; background-color: var(--bg-main);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .ai-loader {
+            display: none; /* Initially hidden */
+        }
+
+        .app-view { display: none; }
+        .app-view.active { display: block; }
+
+        .brand-logo {
+            font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem;
+            color: var(--text-primary); letter-spacing: 0.5px;
+        }
+
+        .btn {
+            padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px;
+            transition: all 0.25s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            border: 1px solid var(--border-color); background-color: transparent; color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: var(--accent-hover); color: var(--text-primary); transform: translateY(-2px);
+            border-color: #444;
+        }
+        .btn-primary {
+            border-color: var(--text-secondary); color: var(--text-primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--accent); color: var(--bg-main);
+        }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background-color: transparent !important; }
-        .form-input, .form-textarea { font-size: 0.9rem; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; width: 100%; background-color: var(--bg-main); color: var(--text-primary); transition: all 0.2s ease; }
-        .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1); }
+
+        .form-input, .form-textarea {
+            font-size: 0.9rem; padding: 0.7rem 1rem; border: 1px solid var(--border-color);
+            border-radius: 6px; width: 100%; background-color: var(--bg-main); color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+        
         .prose-custom { color: #b0b0b0; line-height: 1.8; font-size: 1rem; }
         .prose-custom h1, .prose-custom h2, .prose-custom h3 { color: var(--text-primary); font-family: var(--font-heading); font-weight: 700; margin-top: 1.8em; margin-bottom: 0.8em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
-        .prose-custom img { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
-        .prose-custom .post-recommendations { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
-        .prose-custom .post-recommendations h3 { border-bottom: none; }
+        .prose-custom h1 { font-size: 1.8rem; }
+        .prose-custom h2 { font-size: 1.4rem; }
+        .prose-custom h3 { font-size: 1.2rem; }
+        .prose-custom a { color: var(--accent); text-decoration: none; font-weight: 500; border-bottom: 1px solid #555; transition: all 0.2s ease; }
+        .prose-custom a:hover { border-bottom-color: var(--accent); }
+        .prose-custom pre { background-color: #050505; padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); overflow-x: auto;}
+        .prose-custom code { background-color: #222; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; color: #eee; }
+        .prose-custom blockquote { border-left: 2px solid var(--text-secondary); padding-left: 1.2rem; color: var(--text-secondary); font-style: italic; }
+        .prose-custom img { border-radius: 8px; max-width: 100%; height: auto; margin-top: 2em; margin-bottom: 2em; }
+
+        .pagination-controls a, .pagination-controls span {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .pagination-controls a:hover {
+             background-color: var(--accent-hover); color: var(--text-primary);
+        }
+        .pagination-controls .active {
+            background-color: var(--accent);
+            color: var(--bg-main);
+            border-color: var(--accent);
+        }
+        .pagination-controls .disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+
         .ql-toolbar { border: 1px solid var(--border-color) !important; border-top-left-radius: 6px; border-top-right-radius: 6px; }
         .ql-container { border: 1px solid var(--border-color) !important; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; font-family: var(--font-body) !important;}
         .ql-editor { color: var(--text-primary); min-height: 300px; font-size: 0.95rem; }
@@ -69,9 +143,13 @@
     </style>
 </head>
 <body class="antialiased">
-    <div id="app-loader"><div class="brand-logo text-2xl">CortexLog</div></div>
+    <div id="app-loader">
+        <div class="brand-logo text-2xl">CortexLog</div>
+    </div>
     <canvas id="app-background"></canvas>
+
     <header id="main-nav-container" class="sticky top-0 z-40 w-full flex justify-center px-4 py-3"></header>
+    
     <div id="app-container" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <main id="main-content">
             <div id="view-library" class="app-view"></div>
@@ -80,59 +158,118 @@
             <div id="view-writer" class="app-view"></div>
         </main>
     </div>
+    
+    <div id="structured-data-container"></div>
     <div id="modal-container"></div>
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-3"></div>
     
     <script type="module">
         // --- SETUP & STATE ---
+        const SITE_URL = 'https://mapia.vercel.app';
         const SUPABASE_URL = 'https://fzfnjtlzovbpbglvkroh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Zm5qdGx6b3ZicGJnbHZrcm9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4OTcyMjEsImV4cCI6MjA3MTQ3MzIyMX0.yg43GbdVBPAzaghmERNGxRu9dte3bcpWTWjrOa0p55I';
         const IMAGE_BUCKET_NAME = 'thought-images';
-        const SITE_URL = 'https://mapia.vercel.app'; // <--- 주소 변경 최종 확인
+        const POSTS_PER_PAGE = 5;
         
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const state = { user: null, quill: null, isAuthReady: false };
+        const state = { 
+            user: null, 
+            quill: null,
+            isAuthReady: false
+        };
         const $ = (selector) => document.querySelector(selector);
 
-        // --- ANIMATIONS & UI (내용 변경 없음) ---
+        // --- SEO & META TAGS ---
+        const defaultMeta = {
+            title: "CortexLog",
+            description: "AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다."
+        };
+
+        function updateMetaTags(post = null) {
+            const title = post ? post.title : defaultMeta.title;
+            const description = post ? (post.summary || defaultMeta.description) : defaultMeta.description;
+            const url = post ? `${SITE_URL}/#/post/${post.id}` : SITE_URL;
+
+            document.title = title;
+            $('meta[name="description"]').setAttribute('content', description);
+            
+            $('meta[property="og:title"]').setAttribute('content', title);
+            $('meta[property="og:description"]').setAttribute('content', description);
+            $('meta[property="og:url"]').setAttribute('content', url);
+
+            $('meta[property="twitter:title"]').setAttribute('content', title);
+            $('meta[property="twitter:description"]').setAttribute('content', description);
+            $('meta[property="twitter:url"]').setAttribute('content', url);
+
+            const structuredDataContainer = $('#structured-data-container');
+            structuredDataContainer.innerHTML = '';
+            if (post) {
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.text = JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "BlogPosting",
+                    "headline": post.title,
+                    "datePublished": new Date(post.created_at).toISOString(),
+                    "description": post.summary,
+                    "author": { "@type": "Person", "name": "CortexLog Author" }
+                });
+                structuredDataContainer.appendChild(script);
+            }
+        }
+
+        // --- ANIMATIONS & UI ---
         const animations = {
             pageEnter: (el) => anime({ targets: el, translateY: [20, 0], opacity: [0, 1], duration: 500, easing: 'easeOutCubic' }),
             pageExit: (el) => anime({ targets: el, translateY: [0, -20], opacity: [1, 0], duration: 300, easing: 'easeInCubic' }).finished,
-            modalEnter: (b, c) => { anime({ targets: b, opacity: [0, 1], duration: 400 }); anime({ targets: c, translateY: [20, 0], scale: [0.98, 1], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' }); },
-            modalExit: (b, c) => { anime({ targets: b, opacity: [1, 0], duration: 300 }); return anime({ targets: c, translateY: [0, 20], scale: [1, 0.98], opacity: [1, 0], duration: 300 }).finished; },
+            modalEnter: (backdrop, content) => {
+                anime({ targets: backdrop, opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
+                anime({ targets: content, translateY: [20, 0], scale: [0.98, 1], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
+            },
+            modalExit: (backdrop, content) => {
+                anime({ targets: backdrop, opacity: [1, 0], duration: 300, easing: 'easeInCubic' });
+                return anime({ targets: content, translateY: [0, 20], scale: [1, 0.98], opacity: [1, 0], duration: 300, easing: 'easeInCubic' }).finished;
+            },
+            toastEnter: (el) => anime({ targets: el, translateX: [20, 0], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' }),
+            toastExit: (el) => anime({ targets: el, translateX: [0, 20], opacity: [1, 0], duration: 400, easing: 'easeInCubic' }).finished,
         };
+        
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.className = `py-2 px-4 rounded-md shadow-lg text-sm font-medium border ${isError ? 'bg-red-900/50 border-red-700 text-red-200' : 'bg-green-900/50 border-green-700 text-green-200'}`;
             toast.textContent = message;
             $('#toast-container').appendChild(toast);
-            anime({ targets: toast, translateX: [20, 0], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
-            setTimeout(() => {
-                anime({ targets: toast, translateX: [0, 20], opacity: [1, 0], duration: 400, easing: 'easeInCubic' }).finished.then(() => toast.remove());
+            animations.toastEnter(toast);
+            setTimeout(async () => {
+                await animations.toastExit(toast);
+                toast.remove();
             }, 3000);
         }
-        function renderModal({ title, content, confirmText, onConfirm, confirmAction, onRender }) {
+
+        function renderModal({ title, content, confirmText, onConfirm, confirmAction }) {
             const modalId = `modal-${Date.now()}`;
             const modalHtml = `
                 <div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div class="modal-backdrop absolute inset-0 bg-black/80 backdrop-blur-sm" data-action="close-modal"></div>
-                    <div class="modal-content relative bg-content border border-border-color rounded-lg shadow-xl w-full max-w-lg p-6">
+                    <div class="modal-content relative bg-content border border-border-color rounded-lg shadow-xl w-full max-w-sm p-6">
                         <h3 class="text-lg font-bold font-heading mb-4">${title}</h3>
-                        <div class="text-gray-400 mb-6">${content}</div>
+                        <div class="text-gray-400 mb-6 text-sm">${content}</div>
                         <div class="flex justify-end space-x-2">
                             <button type="button" class="btn" data-action="close-modal">취소</button>
-                            ${confirmText ? `<button type="button" class="btn btn-primary" data-action="${confirmAction || 'confirm'}" id="modal-confirm-btn">${confirmText}</button>` : ''}
+                            ${confirmText ? `<button type="button" class="btn btn-primary" data-action="${confirmAction}" id="modal-confirm-btn">${confirmText}</button>` : ''}
                         </div>
                     </div>
                 </div>`;
             $('#modal-container').innerHTML = modalHtml;
             const modalEl = $(`#${modalId}`);
             animations.modalEnter(modalEl.querySelector('.modal-backdrop'), modalEl.querySelector('.modal-content'));
-            if (onConfirm) $('#modal-confirm-btn')?.addEventListener('click', onConfirm);
-            if (onRender) onRender();
+            if (onConfirm) {
+                 $('#modal-confirm-btn').addEventListener('click', onConfirm);
+            }
         }
+        
         async function closeModal() {
             const modal = $('#modal-container').firstElementChild;
             if (!modal) return;
@@ -140,280 +277,733 @@
             $('#modal-container').innerHTML = '';
         }
 
-        // --- SEO & SOCIAL SHARE ---
-        function updateMetaTags(title, description, url, imageUrl) {
-            const defaultImage = `${SITE_URL}/og-image.webp`;
-            document.title = title ? `${title} | CortexLog` : 'CortexLog';
-            $('meta[name="description"]').setAttribute('content', description);
-            $('meta[property="og:title"]').setAttribute('content', title);
-            $('meta[property="og:description"]').setAttribute('content', description);
-            $('meta[property="og:url"]').setAttribute('content', url);
-            $('meta[property="og:image"]').setAttribute('content', imageUrl || defaultImage);
-            $('meta[property="twitter:title"]').setAttribute('content', title);
-            $('meta[property="twitter:description"]').setAttribute('content', description);
-            $('meta[property="twitter:url"]').setAttribute('content', url);
-            $('meta[property="twitter:image"]').setAttribute('content', imageUrl || defaultImage);
-        }
-        function renderShareButtons(post) {
-            const postUrl = `${SITE_URL}/#/post/${post.id}`;
-            const encodedUrl = encodeURIComponent(postUrl);
-            const encodedTitle = encodeURIComponent(post.title);
-            return `
-                <div class="mt-12 pt-6 border-t border-border-color text-center">
-                    <h3 class="text-sm font-bold text-gray-400 mb-4">이 글 공유하기</h3>
-                    <div class="flex justify-center items-center gap-3">
-                        <button data-action="share-twitter" data-url="${encodedUrl}" data-title="${encodedTitle}" class="btn">Twitter</button>
-                        <button data-action="share-facebook" data-url="${encodedUrl}" class="btn">Facebook</button>
-                        <button data-action="copy-link" data-url="${postUrl}" class="btn">링크 복사</button>
-                    </div>
-                </div>`;
-        }
-        
-        // --- AUTHENTICATION (내용 변경 없음) ---
+        // --- AUTHENTICATION ---
         function showAuthModal() {
-            const content = `<form id="auth-form" novalidate class="space-y-4"><div><label for="email" class="block text-xs font-medium text-gray-400 mb-1">이메일</label><input type="email" id="email" class="form-input" required autocomplete="email"></div><div><label for="password" class="block text-xs font-medium text-gray-400 mb-1">비밀번호 (6자 이상)</label><input type="password" id="password" class="form-input" required autocomplete="current-password" minlength="6"></div><div id="auth-error" class="text-red-400 text-xs h-3"></div></form>`;
-            renderModal({ title: '시작하기', content, confirmText: '로그인', confirmAction: 'login' });
+            const content = `
+                <form id="auth-form" novalidate class="space-y-4">
+                    <div>
+                        <label for="email" class="block text-xs font-medium text-gray-400 mb-1">이메일</label>
+                        <input type="email" id="email" class="form-input" required autocomplete="email">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-xs font-medium text-gray-400 mb-1">비밀번호 (6자 이상)</label>
+                        <input type="password" id="password" class="form-input" required autocomplete="current-password" minlength="6">
+                    </div>
+                    <div id="auth-error" class="text-red-400 text-xs h-3"></div>
+                </form>`;
+            renderModal({ 
+                title: '시작하기', 
+                content, 
+                confirmText: '로그인',
+                confirmAction: 'login'
+            });
             const signUpBtn = document.createElement('button');
-            signUpBtn.type = 'button'; signUpBtn.className = 'btn'; signUpBtn.dataset.action = 'signup'; signUpBtn.textContent = '회원가입';
+            signUpBtn.type = 'button';
+            signUpBtn.className = 'btn';
+            signUpBtn.dataset.action = 'signup';
+            signUpBtn.textContent = '회원가입';
             $('#modal-confirm-btn').insertAdjacentElement('beforebegin', signUpBtn);
         }
+        
         function translateAuthError(error) {
-            const msg = error.message;
-            if (msg.includes("Invalid login credentials")) return "이메일 또는 비밀번호가 올바르지 않습니다.";
-            if (msg.includes("User already registered")) return "이미 가입된 이메일입니다.";
-            if (msg.includes("Password should be at least 6 characters")) return "비밀번호는 6자 이상이어야 합니다.";
-            if (msg.includes("Unable to validate email address")) return "유효하지 않은 이메일 형식입니다.";
+            const message = error.message;
+            if (message.includes("Invalid login credentials")) return "이메일 또는 비밀번호가 올바르지 않습니다.";
+            if (message.includes("User already registered")) return "이미 가입된 이메일입니다. 로그인을 시도해주세요.";
+            if (message.includes("Password should be at least 6 characters")) return "비밀번호는 6자 이상이어야 합니다.";
+            if (message.includes("Unable to validate email address")) return "유효하지 않은 이메일 형식입니다.";
             return "오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
         }
+
         async function handleAuth(action) {
-            const email = $('#email').value; const password = $('#password').value;
-            $('#auth-error').textContent = '';
-            const { error } = action === 'login' ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password });
-            if (error) $('#auth-error').textContent = translateAuthError(error);
-            else { showToast(action === 'signup' ? '가입 완료! 이메일을 확인하여 인증해주세요.' : '로그인되었습니다.'); closeModal(); }
+            const email = $('#email').value;
+            const password = $('#password').value;
+            const errorDiv = $('#auth-error');
+            errorDiv.textContent = '';
+            let result;
+            if (action === 'login') {
+                result = await supabase.auth.signInWithPassword({ email, password });
+            } else {
+                result = await supabase.auth.signUp({ email, password });
+            }
+            const { error } = result;
+            if (error) {
+                errorDiv.textContent = translateAuthError(error);
+            } else {
+                showToast(action === 'signup' ? '가입이 완료되었습니다! 이메일을 확인하여 인증해주세요.' : '로그인되었습니다.');
+                closeModal();
+            }
         }
+
         async function handleLogout() {
             const { error } = await supabase.auth.signOut();
-            if (error) showToast('로그아웃 중 오류 발생', true);
-            else { showToast('로그아웃되었습니다.'); window.location.hash = '/'; }
+            if (error) {
+                showToast('로그아웃 중 오류가 발생했습니다.', true);
+            } else {
+                showToast('로그아웃되었습니다.');
+                window.location.hash = '/';
+            }
         }
         
         // --- CORE LOGIC & ROUTING ---
         async function switchView(viewId, callback) {
-            updateMetaTags('CortexLog', 'AI와 함께 생각을 엮어내는 공간, CortexLog.', SITE_URL);
             const currentView = $('.app-view.active');
-            if (currentView) { await animations.pageExit(currentView); currentView.classList.remove('active'); currentView.innerHTML = ''; }
+            if (currentView) {
+                await animations.pageExit(currentView);
+                currentView.classList.remove('active');
+                currentView.innerHTML = '';
+            }
             const nextView = $(`#${viewId}`);
-            if (nextView) { if (callback) await callback(nextView); nextView.classList.add('active'); animations.pageEnter(nextView); }
+            if (nextView) {
+                if (callback) await callback(nextView);
+                nextView.classList.add('active');
+                animations.pageEnter(nextView);
+            }
         }
+        
         function handleRouting() {
             if (!state.isAuthReady) return;
             const hash = window.location.hash || '#/';
-            const [path, id] = hash.substring(2).split('/');
-            if (!state.user && (path === 'dashboard' || path === 'writer')) { showToast('로그인이 필요합니다.', true); window.location.hash = '/'; return; }
+            const parts = hash.substring(2).split('/');
+            const [path, param1, param2] = parts;
+            
+            let id = null;
+            let page = 1;
+
+            if (path === 'post') {
+                id = param1;
+            } else if (path === 'writer' && param1) {
+                id = param1;
+            } else if (path === 'dashboard' && param1 === 'page') {
+                page = parseInt(param2, 10) || 1;
+            } else if (param1 === 'page') {
+                page = parseInt(param2, 10) || 1;
+            }
+
+            if (!state.user && (path === 'dashboard' || path === 'writer')) {
+                showToast('글을 작성하려면 로그인이 필요합니다.', true);
+                window.location.hash = '/';
+                return;
+            }
+
             switch (path) {
                 case 'post': switchView('view-post', (el) => renderPostView(el, id)); break;
-                case 'dashboard': switchView('view-dashboard', renderDashboardView); break;
+                case 'dashboard': switchView('view-dashboard', (el) => renderDashboardView(el, page)); break;
                 case 'writer': switchView('view-writer', (el) => renderWriterView(el, id)); break;
-                default: switchView('view-library', renderLibraryView);
+                default: switchView('view-library', (el) => renderLibraryView(el, page));
             }
         }
 
-        // --- RENDER FUNCTIONS (내용 변경 없음) ---
+        // --- RENDER FUNCTIONS ---
         function renderNav() {
-            $('#main-nav-container').innerHTML = `<nav class="w-full max-w-5xl flex items-center justify-between py-2 px-4 bg-black/30 backdrop-blur-lg border border-border-color rounded-lg"><a href="#/" class="brand-logo" data-action="route">CortexLog</a><div class="flex items-center space-x-2">${state.user ? `<a href="#/dashboard" class="btn" data-action="route">대시보드</a><button data-action="logout" class="btn">로그아웃</button>` : `<button data-action="show-auth" class="btn btn-primary">로그인 / 가입</button>`}</div></nav>`;
+            const navContainer = $('#main-nav-container');
+            navContainer.innerHTML = `
+                <nav class="w-full max-w-5xl flex items-center justify-between py-2 px-4 bg-black/30 backdrop-blur-lg border border-border-color rounded-lg">
+                    <a href="#/" class="brand-logo" data-action="route">CortexLog</a>
+                    <div class="flex items-center space-x-2">
+                        ${state.user 
+                            ? `<a href="#/dashboard" class="btn" data-action="route">대시보드</a><button data-action="logout" class="btn">로그아웃</button>`
+                            : `<button data-action="show-auth" class="btn btn-primary">로그인 / 가입</button>`
+                        }
+                    </div>
+                </nav>`;
         }
-        async function renderLibraryView(container) {
-            const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-            if (error) { container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`; return; }
-            const postsHtml = data.length > 0 ? data.map(post => `<a href="#/post/${post.id}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group"><h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${post.title}</h2><p class="text-gray-400 mb-3 text-sm">${post.summary || ''}</p><p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p></a>`).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
-            container.innerHTML = `<div class="py-16"><h1 class="text-4xl font-extrabold text-center font-heading mb-4">Thoughts & Insights</h1><p class="text-center text-gray-400 mb-12">AI, 기술, 그리고 일상에 대한 기록들</p><div class="space-y-4">${postsHtml}</div></div>`;
+        
+        async function renderLibraryView(container, page = 1) {
+            updateMetaTags();
+            const { from, to } = getPaginationRange(page);
+            const { data, error, count } = await supabase.from('posts')
+                .select('*', { count: 'exact' })
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (error) {
+                showToast('데이터를 불러오는 데 실패했습니다.', true);
+                container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`;
+                return;
+            }
+
+            const postsHtml = data.length > 0 ? data.map(post => `
+                <a href="#/post/${post.id}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group">
+                    <h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${post.title}</h2>
+                    <p class="text-gray-400 mb-3 text-sm">${post.summary || ''}</p>
+                    <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p>
+                </a>`).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
+            
+            const paginationHtml = renderPaginationControls(page, count, '#/page/');
+
+            container.innerHTML = `
+                <div class="py-16">
+                    <h1 class="text-4xl font-extrabold text-center font-heading mb-4">Thoughts & Insights</h1>
+                    <p class="text-center text-gray-400 mb-12">AI, 기술, 그리고 일상에 대한 기록들</p>
+                    <div class="space-y-4">${postsHtml}</div>
+                    ${paginationHtml}
+                </div>`;
         }
+
         async function renderPostView(container, id) {
             if (!id) { window.location.hash = '/'; return; }
-            const { data: post, error } = await supabase.from('posts').select('*').eq('id', id).single();
-            if (error || !post) { showToast('글을 찾을 수 없습니다.', true); window.location.hash = '/'; return; }
-            const postUrl = `${SITE_URL}/#/post/${id}`;
-            const firstImageUrl = post.refined_content.match(/<img src="([^"]+)"/)?.[1];
-            updateMetaTags(post.title, post.summary, postUrl, firstImageUrl);
-            const { data: recs } = await supabase.from('posts').select('id, title').neq('id', id).limit(3);
-            const recsHtml = recs && recs.length > 0 ? `<div class="post-recommendations"><h3 class="text-xl font-bold font-heading mb-6">함께 읽으면 좋은 글</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${recs.map(rec => `<a href="#/post/${rec.id}" data-action="route" class="block p-4 bg-main hover:bg-accent-hover border border-border-color rounded-md transition-colors"><span class="font-bold text-gray-300">${rec.title}</span></a>`).join('')}</div></div>` : '';
-            container.innerHTML = `<article class="prose-custom max-w-none py-12"><h1 class="text-3xl font-extrabold !mt-0">${post.title}</h1><p class="text-sm text-gray-500 mb-8">${new Date(post.created_at).toLocaleString('ko-KR')}</p><div>${post.refined_content || ''}</div>${recsHtml}${renderShareButtons(post)}</article>`;
+            const { data: post, error: postError } = await supabase.from('posts').select('*').eq('id', id).single();
+            if (postError || !post) {
+                showToast('글을 찾을 수 없습니다.', true); window.location.hash = '/'; return;
+            }
+            updateMetaTags(post);
+            const { data: allOtherPosts, error: allPostsError } = await supabase.from('posts').select('id, title, summary').neq('id', id);
+            const relatedPosts = allPostsError ? [] : findRelatedPosts(post, allOtherPosts);
+            const postUrl = `${SITE_URL}/#/post/${post.id}`;
+            const postHtml = `
+                <article class="prose-custom max-w-none pt-8 pb-12">
+                     <div class="mb-8">
+                        <button class="btn" data-action="go-back">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                            목록으로
+                        </button>
+                    </div>
+                    <h1 class="text-3xl font-extrabold !mt-0">${post.title}</h1>
+                    <p class="text-sm text-gray-500 mb-8">${new Date(post.created_at).toLocaleString('ko-KR')}</p>
+                    <div>${post.refined_content || ''}</div>
+                </article>`;
+            const shareHtml = `
+                <div class="mt-12 py-8 mb-12 border-t border-border-color">
+                    <h3 class="text-center text-sm font-bold text-gray-400 mb-4">공유하기</h3>
+                    <div class="flex justify-center items-center gap-4">
+                        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}" target="_blank" class="btn">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+                            <span>X</span>
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}" target="_blank" class="btn">
+                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4z"></path></svg>
+                           <span>Facebook</span>
+                        </a>
+                        <button class="btn" data-action="copy-link" data-url="${postUrl}">
+                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                           <span>링크 복사</span>
+                        </button>
+                    </div>
+                </div>`;
+            const relatedPostsHtml = relatedPosts.length > 0 ? `
+                <div class="mt-8 pt-8 border-t border-border-color">
+                    <h3 class="text-xl font-bold font-heading mb-4">관련 글</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${relatedPosts.map(p => `
+                            <a href="#/post/${p.id}" data-action="route" class="block p-4 bg-content/50 border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group">
+                                <h4 class="font-bold text-gray-200 group-hover:text-white transition-colors">${p.title}</h4>
+                                <p class="text-gray-400 text-sm mt-1">${p.summary}</p>
+                            </a>`).join('')}
+                    </div>
+                </div>` : '';
+            container.innerHTML = postHtml + relatedPostsHtml + shareHtml;
         }
-        async function renderDashboardView(container) {
-            const { data: posts, error } = await supabase.from('posts').select('*').eq('author_id', state.user.id).order('created_at', { ascending: false });
-            if (error) { container.innerHTML = `<p>글을 불러올 수 없습니다.</p>`; return; }
-            container.innerHTML = `<div class="py-12"><div class="flex justify-between items-center mb-8"><h1 class="text-2xl font-bold font-heading">내 글 관리</h1><a href="#/writer" class="btn btn-primary" data-action="route"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>새 글 작성하기</a></div><div class="bg-content border border-border-color rounded-lg"><ul class="divide-y divide-border-color">${posts.length > 0 ? posts.map(p => `<li class="p-4 flex justify-between items-center"><div><a href="#/post/${p.id}" data-action="route" class="font-bold hover:text-white">${p.title}</a><p class="text-xs text-gray-500 mt-1">${new Date(p.created_at).toLocaleString('ko-KR')}</p></div><div class="space-x-2"><a href="#/writer/${p.id}" class="btn text-xs" data-action="route">수정</a><button class="btn text-xs" data-action="delete-post" data-id="${p.id}">삭제</button></div></li>`).join('') : '<li class="p-4 text-center text-gray-500">작성된 글이 없습니다.</li>'}</ul></div></div>`;
+
+        function findRelatedPosts(currentPost, otherPosts, count = 2) {
+            const currentTitleWords = currentPost.title.toLowerCase().split(/\s+/);
+            const scoredPosts = otherPosts.map(post => {
+                let score = 0;
+                const targetTitle = post.title.toLowerCase();
+                currentTitleWords.forEach(word => {
+                    if (word.length > 1 && targetTitle.includes(word)) {
+                        score++;
+                    }
+                });
+                return { ...post, score };
+            });
+            return scoredPosts.filter(post => post.score > 0).sort((a, b) => b.score - a.score).slice(0, count);
         }
+        
+        async function renderDashboardView(container, page = 1) {
+            updateMetaTags();
+            
+            const { from, to } = getPaginationRange(page);
+            const { data, error, count } = await supabase.from('posts')
+                .select('*', { count: 'exact' })
+                .eq('author_id', state.user.id)
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (error) {
+                showToast('내 글 목록 로딩 실패: ' + error.message, true);
+                container.innerHTML = `<p>내가 작성한 글을 불러올 수 없습니다.</p>`; return;
+            }
+
+            const listHtml = data.length > 0 ? data.map(post => `
+                <li class="p-4 flex justify-between items-center">
+                    <div>
+                        <a href="#/post/${post.id}" data-action="route" class="font-bold hover:text-white">${post.title}</a>
+                        <p class="text-xs text-gray-500 mt-1">${new Date(post.created_at).toLocaleString('ko-KR')}</p>
+                    </div>
+                    <div class="space-x-2">
+                        <a href="#/writer/${post.id}" class="btn text-xs" data-action="route">수정</a>
+                        <button class="btn text-xs" data-action="delete-post" data-id="${post.id}">삭제</button>
+                    </div>
+                </li>`).join('') : '<li class="p-4 text-center text-gray-500">작성된 글이 없습니다.</li>';
+            
+            const paginationHtml = renderPaginationControls(page, count, '#/dashboard/page/');
+
+            container.innerHTML = `
+                <div class="py-12 space-y-12">
+                    <div>
+                        <div class="flex justify-between items-center mb-8">
+                            <h1 class="text-2xl font-bold font-heading">AI 글 생성</h1>
+                        </div>
+                        <div class="bg-content border border-border-color rounded-lg p-6">
+                            <form id="ai-writer-form" class="space-y-4">
+                                <div>
+                                    <label for="ai-topic" class="block text-sm font-medium text-gray-300 mb-2">글 주제</label>
+                                    <input type="text" id="ai-topic" class="form-input" required placeholder="예: '자율 AI 프레임워크의 미래'">
+                                </div>
+                                <div class="flex justify-end items-center gap-4">
+                                     <div class="ai-loader w-5 h-5 border-2 border-dashed border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <button type="submit" id="ai-generate-btn" class="btn btn-primary">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.913 2.649a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094-.226l.452-.573a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094.226l.204-.258a.934.934 0 0 1 .82-.395h.01a.934.934 0 0 1 .933.934v.01a.934.934 0 0 1-.395.82l-.258.204a.934.934 0 0 0-.226 1.094l.573.452a.934.934 0 0 1 .226 1.094l-.573.452a.934.934 0 0 0 .226 1.094l.573.452a.934.934 0 0 1-.226 1.094l-.573.452a.934.934 0 0 0-.226 1.094l.573.452a.934.934 0 0 1 .226 1.094l-.573.452a.934.934 0 0 0 .226 1.094l.258.204a.934.934 0 0 1 .395.82v.01a.934.934 0 0 1-.934.933h-.01a.934.934 0 0 1-.82-.395l-.204-.258a.934.934 0 0 0-1.094-.226l-.452.573a.934.934 0 0 1-1.094.226l-.452-.573a.934.934 0 0 0-1.094.226l-.452.573a.934.934 0 0 1-1.094-.226l-.452-.573a.934.934 0 0 0-1.094.226l-.452.573a.934.934 0 0 1-1.094.226l-.452-.573a.934.934 0 0 0-1.094.226l-.204.258a.934.934 0 0 1-.82.395h-.01a.934.934 0 0 1-.933-.934v-.01a.934.934 0 0 1 .395-.82l.258-.204a.934.934 0 0 0 .226-1.094l-.573-.452a.934.934 0 0 1-.226-1.094l.573-.452a.934.934 0 0 0-.226-1.094l-.573-.452a.934.934 0 0 1 .226-1.094l.573-.452a.934.934 0 0 0 .226-1.094l-.573-.452a.934.934 0 0 1-.226-1.094l.573-.452a.934.934 0 0 0-.226-1.094l-.258-.204a.934.934 0 0 1-.395-.82v-.01a.934.934 0 0 1 .934-.933h.01a.934.934 0 0 1 .82.395l.204.258a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226Z"/><path d="M12 8.5A3.5 3.5 0 0 0 8.5 12a3.5 3.5 0 0 0 3.5 3.5A3.5 3.5 0 0 0 15.5 12 3.5 3.5 0 0 0 12 8.5Z"/></svg>
+                                        AI로 글 생성하기
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-8">
+                            <h1 class="text-2xl font-bold font-heading">내 글 관리</h1>
+                            <a href="#/writer" class="btn" data-action="route">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                새 글 수동 작성
+                            </a>
+                        </div>
+                        <div class="bg-content border border-border-color rounded-lg">
+                           <ul class="divide-y divide-border-color">${listHtml}</ul>
+                        </div>
+                        ${paginationHtml}
+                    </div>
+                </div>`;
+            
+            $('#ai-writer-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAiWriterSubmit();
+            });
+        }
+
         async function renderWriterView(container, id) {
+            updateMetaTags();
             let post = { title: '', summary: '', refined_content: '' };
             if (id) {
                 const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
                 if (error) { showToast('글 정보를 가져오지 못했습니다.', true); window.location.hash = '#/dashboard'; return; }
-                if (data.author_id !== state.user.id) { showToast('자신이 작성한 글만 수정할 수 있습니다.', true); window.location.hash = '#/dashboard'; return; }
+                if (data.author_id !== state.user.id) {
+                    showToast('자신이 작성한 글만 수정할 수 있습니다.', true); window.location.hash = '#/dashboard'; return;
+                }
                 post = data;
             }
-            container.innerHTML = `<div class="py-12"><h1 class="text-2xl font-bold font-heading mb-8">${id ? '글 수정하기' : '새 글 작성하기'}</h1><form id="writer-form" class="space-y-6"><input type="hidden" id="post-id" value="${id || ''}"><div><label for="title" class="block text-sm font-medium text-gray-300 mb-2">제목</label><input type="text" id="title" class="form-input" required value="${post.title}"></div><div><label for="summary" class="block text-sm font-medium text-gray-300 mb-2">요약</label><textarea id="summary" class="form-textarea" rows="3" required>${post.summary}</textarea></div><div><label class="block text-sm font-medium text-gray-300 mb-2">본문</label><div id="editor"></div></div><div class="flex justify-end pt-4"><button type="submit" id="submit-btn" class="btn btn-primary">저장하기</button></div></form></div>`;
+            container.innerHTML = `
+                <div class="py-12">
+                     <div class="mb-8">
+                        <button class="btn" data-action="go-back">
+                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                            대시보드로
+                        </button>
+                    </div>
+                    <h1 class="text-2xl font-bold font-heading mb-8">${id ? '글 수정하기' : '새 글 작성하기'}</h1>
+                    <form id="writer-form" class="space-y-6">
+                        <input type="hidden" id="post-id" value="${id || ''}">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-300 mb-2">제목</label>
+                            <input type="text" id="title" class="form-input" required value="${post.title}">
+                        </div>
+                        <div>
+                            <label for="summary" class="block text-sm font-medium text-gray-300 mb-2">요약 (메인 페이지에 표시됩니다)</label>
+                            <textarea id="summary" class="form-textarea" rows="3" required>${post.summary}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">본문</label>
+                            <div id="editor"></div>
+                        </div>
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" id="submit-btn" class="btn btn-primary">저장하기</button>
+                        </div>
+                    </form>
+                </div>`;
             initQuillEditor(post.refined_content || '');
         }
 
-        // --- Quill Editor & Image Handling (내용 변경 없음) ---
+        function getPaginationRange(page) {
+            const from = (page - 1) * POSTS_PER_PAGE;
+            const to = from + POSTS_PER_PAGE - 1;
+            return { from, to };
+        }
+
+        function renderPaginationControls(currentPage, totalPosts, baseLink) {
+            const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+            if (totalPages <= 1) return '';
+
+            let html = '<div class="flex justify-center items-center gap-2 mt-8 pagination-controls">';
+            
+            html += `<a href="${baseLink}${currentPage - 1}" data-action="route" class="${currentPage === 1 ? 'disabled' : ''}">이전</a>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<a href="${baseLink}${i}" data-action="route" class="${i === currentPage ? 'active' : ''}">${i}</a>`;
+            }
+
+            html += `<a href="${baseLink}${currentPage + 1}" data-action="route" class="${currentPage === totalPages ? 'disabled' : ''}">다음</a>`;
+
+            html += '</div>';
+            return html;
+        }
+
+        // --- Quill Editor & Image Handling ---
         function initQuillEditor(initialContent) {
             if (state.quill) state.quill = null;
-            const icons = Quill.import('ui/icons');
-            icons['gallery'] = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
             state.quill = new Quill('#editor', {
                 theme: 'snow',
                 modules: { toolbar: [
-                    [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image', 'gallery'], ['clean']
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'], ['clean']
                 ] }
             });
             state.quill.root.innerHTML = initialContent;
-            const toolbar = state.quill.getModule('toolbar');
-            toolbar.addHandler('image', selectLocalImage);
-            toolbar.addHandler('gallery', showImageGallery);
-        }
-        function showImageGallery() {
-            if (!state.user) { showToast('이미지 갤러리는 로그인이 필요합니다.', true); return; }
-            renderModal({
-                title: '내 이미지 갤러리',
-                content: '<div id="gallery-content" class="h-96 overflow-y-auto p-1 bg-main rounded-md grid grid-cols-4 sm:grid-cols-6 gap-2"><p class="col-span-full">이미지를 불러오는 중...</p></div>',
-                onRender: async () => {
-                    const galleryContent = $('#gallery-content');
-                    const { data: files, error } = await supabase.storage.from(IMAGE_BUCKET_NAME).list(state.user.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-                    if (error) { galleryContent.innerHTML = `<p class="col-span-full text-red-400">이미지를 불러오는데 실패했습니다.</p>`; return; }
-                    if (files.length === 0) { galleryContent.innerHTML = `<p class="col-span-full">업로드된 이미지가 없습니다.</p>`; return; }
-                    galleryContent.innerHTML = files.map(file => {
-                        const publicUrl = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(`${state.user.id}/${file.name}`).data.publicUrl;
-                        return `<div class="aspect-square bg-cover bg-center rounded-md cursor-pointer hover:ring-2 ring-accent transition-all" style="background-image: url('${publicUrl}?width=200&height=200')" data-full-url="${publicUrl}" data-alt="${file.name}"></div>`;
-                    }).join('');
-                }
-            });
-        }
-        async function insertImageFromGallery(target) {
-            const fullUrl = target.dataset.fullUrl; const altText = target.dataset.alt;
-            const range = state.quill.getSelection(true);
-            state.quill.insertEmbed(range.index, 'image', fullUrl);
-            state.quill.formatText(range.index, 1, 'alt', altText);
-            closeModal();
-            showToast('이미지를 본문에 삽입했습니다.');
-        }
-        function selectLocalImage() {
-            const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
-            input.onchange = () => {
-                const file = input.files[0]; if (!file) return;
-                renderModal({
-                    title: '이미지 Alt 태그 입력',
-                    content: `<p class="text-sm text-gray-400 mb-4">SEO와 접근성을 위해 이미지 설명을 입력해주세요.</p><input type="text" id="alt-text-input" class="form-input" placeholder="예: 밤하늘의 은하수" value="${file.name.split('.')[0]}">`,
-                    confirmText: '업로드',
-                    onConfirm: async () => {
-                        const altText = $('#alt-text-input').value || 'image';
-                        await uploadImageAndInsert(file, altText);
-                        closeModal();
-                    }
-                });
-            };
-            input.click();
-        }
-        async function uploadImageAndInsert(file, altText) {
-            if (!state.user) { showToast('이미지 업로드는 로그인이 필요합니다.', true); return; }
-            showToast('이미지를 최적화하고 있습니다...');
-            try {
-                const compressedFile = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' });
-                const fileName = `${state.user.id}/${Date.now()}.webp`;
-                showToast('이미지를 업로드하는 중입니다...');
-                const { error } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, compressedFile);
-                if (error) throw new Error(error.message);
-                const { data } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName);
-                if (data) {
-                    const range = state.quill.getSelection(true);
-                    state.quill.insertEmbed(range.index, 'image', data.publicUrl);
-                    state.quill.formatText(range.index, 1, 'alt', altText);
-                    showToast('이미지가 성공적으로 업로드되었습니다.');
-                }
-            } catch (error) { showToast(`업로드 실패: ${error.message}`, true); }
+            state.quill.getModule('toolbar').addHandler('image', selectLocalImage);
         }
 
-        // --- Event Handlers (내용 변경 없음) ---
+        function selectLocalImage() {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (file) await uploadImageAndInsert(file);
+            };
+        }
+
+        async function uploadImageAndInsert(file) {
+            if (!state.user) { showToast('이미지 업로드는 로그인이 필요합니다.', true); return; }
+            if (file.size > 2 * 1024 * 1024) { showToast('이미지 파일은 2MB를 초과할 수 없습니다.', true); return; }
+            
+            const webpFile = await convertBlobToWebP(file);
+            const fileName = `${state.user.id}/${Date.now()}.webp`;
+
+            showToast('이미지를 업로드하는 중입니다...');
+            const { error } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, webpFile);
+            if (error) { showToast(`업로드 실패: ${error.message}`, true); return; }
+
+            const { data } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName);
+            if (data) {
+                const range = state.quill.getSelection(true);
+                state.quill.insertEmbed(range.index, 'image', data.publicUrl);
+                showToast('이미지가 성공적으로 업로드되었습니다.');
+            }
+        }
+        
+        // --- Gemini API Functions ---
+        async function generateText(topic) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const systemPrompt = `당신은 'CortexLog'의 수석 개발자이자 기술 문제 해결 전문가입니다. 당신의 목표는 독자가 복잡한 기술적 과제를 단순히 해결하는 것을 넘어, 그 원리를 깊이 이해하고 스스로 문제를 해결할 수 있도록 돕는 것입니다. '자율 AI 프레임워크'와 같은 고급 주제에 대한 높은 이해도를 바탕으로, 다음과 같은 스타일로 글을 작성해주세요.
+1.  **페르소나:** 친절하고 인내심 있는 전문가. 독자를 동료 개발자로 대하며, 전문 용어를 사용하되 항상 쉽게 풀어서 설명합니다.
+2.  **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다.
+3.  **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 단순히 'A를 하세요'가 아니라 'A를 해야 합니다. 왜냐하면 B라는 원리 때문이며, 이렇게 하면 C라는 장점이 있기 때문입니다.' 와 같이 상세하게 설명합니다.
+4.  **형식:** 생성할 내용은 제목, 짧은 요약(2-3문장), 그리고 HTML 형식의 본문입니다. 본문은 h2, h3, p, blockquote, pre, code 태그를 적극적으로 사용하여 가독성을 극대화해야 합니다.`;
+            const userQuery = `주제: "${topic}"`;
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "title": { "type": "STRING" },
+                            "summary": { "type": "STRING" },
+                            "body": { "type": "STRING" }
+                        },
+                        required: ["title", "summary", "body"]
+                    }
+                }
+            };
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error(`Gemini 텍스트 생성 API 오류: ${response.statusText}`);
+            const result = await response.json();
+            const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textContent) throw new Error("Gemini API로부터 유효한 텍스트 콘텐츠를 받지 못했습니다.");
+            return JSON.parse(textContent);
+        }
+
+        async function generateImage(title) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            const prompt = `A minimalist line art illustration on a pure black background, drawn only with thin white or gray outlines. No text, no labels, no letters, no words. The style is simple, futuristic, and monochrome. Depict "${title}" in a clean and abstract way.`;
+            const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error(`Imagen 이미지 생성 API 오류: ${response.statusText}`);
+            const result = await response.json();
+            const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
+            if (!base64Data) throw new Error("Imagen API로부터 유효한 이미지 데이터를 받지 못했습니다.");
+            return base64Data;
+        }
+
+        function base64ToBlob(base64, contentType = 'image/png') {
+            const byteCharacters = atob(base64);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                const slice = byteCharacters.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            return new Blob(byteArrays, { type: contentType });
+        }
+
+        function convertBlobToWebP(blob, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.src = URL.createObjectURL(blob);
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(webpBlob => {
+                        if (webpBlob) {
+                            resolve(webpBlob);
+                        } else {
+                            reject(new Error('Canvas to WebP conversion failed.'));
+                        }
+                    }, 'image/webp', quality);
+                    URL.revokeObjectURL(img.src);
+                };
+                img.onerror = () => {
+                    reject(new Error('Image loading for WebP conversion failed.'));
+                    URL.revokeObjectURL(img.src);
+                };
+            });
+        }
+
+        async function deletePostAndAssociatedImages(postId) {
+            const { data: post, error: fetchError } = await supabase
+                .from('posts')
+                .select('refined_content')
+                .eq('id', postId)
+                .single();
+
+            if (fetchError) throw new Error(`삭제할 글을 찾지 못했습니다: ${fetchError.message}`);
+
+            const content = post.refined_content || '';
+            const imageUrls = content.match(/https:\/\/[^"]+\/storage\/v1\/object\/public\/thought-images\/[^"]+/g) || [];
+            const imagePaths = imageUrls.map(url => {
+                const parts = url.split('/thought-images/');
+                return parts[1] || '';
+            }).filter(path => path);
+
+            if (imagePaths.length > 0) {
+                showToast(`${imagePaths.length}개의 이미지 삭제를 시작합니다...`);
+                const { error: storageError } = await supabase.storage
+                    .from(IMAGE_BUCKET_NAME)
+                    .remove(imagePaths);
+                
+                if (storageError) throw new Error(`스토리지 이미지 삭제 실패: ${storageError.message}`);
+                showToast('연관된 이미지를 모두 삭제했습니다.');
+            }
+
+            const { error: dbError } = await supabase
+                .from('posts')
+                .delete()
+                .eq('id', postId);
+            
+            if (dbError) throw new Error(`데이터베이스 글 삭제 실패: ${dbError.message}`);
+        }
+
+
+        // --- EVENT HANDLERS ---
         async function handleGlobalClick(target) {
             const action = target.dataset.action;
             const id = target.dataset.id;
+            const url = target.dataset.url;
             switch (action) {
                 case 'route': window.location.hash = target.hash; break;
+                case 'go-back': history.back(); break;
                 case 'show-auth': showAuthModal(); break;
                 case 'close-modal': closeModal(); break;
                 case 'login': handleAuth('login'); break;
                 case 'signup': handleAuth('signup'); break;
                 case 'logout': handleLogout(); break;
+                case 'copy-link':
+                    const textArea = document.createElement("textarea");
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.focus(); textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast('링크가 복사되었습니다!');
+                    } catch (err) {
+                        showToast('링크 복사에 실패했습니다.', true);
+                    }
+                    document.body.removeChild(textArea);
+                    break;
                 case 'delete-post':
                     renderModal({
-                        title: '정말 삭제하시겠습니까?', content: '이 작업은 되돌릴 수 없습니다.', confirmText: '삭제',
+                        title: '정말 삭제하시겠습니까?',
+                        content: '연관된 모든 이미지도 함께 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.',
+                        confirmText: '삭제',
+                        confirmAction: 'confirm-delete',
                         onConfirm: async () => {
-                            const { error } = await supabase.from('posts').delete().eq('id', id);
-                            if (error) showToast('삭제 실패: ' + error.message, true);
-                            else { showToast('글이 삭제되었습니다.'); handleRouting(); }
-                            closeModal();
+                            try {
+                                showToast('글과 이미지 삭제를 시작합니다...');
+                                await deletePostAndAssociatedImages(id);
+                                showToast('글이 완전히 삭제되었습니다.');
+                                handleRouting(); // Refresh the entire view to handle pagination correctly
+                            } catch (error) {
+                                console.error('Deletion Error:', error);
+                                showToast(`삭제 중 오류 발생: ${error.message}`, true);
+                            } finally {
+                                closeModal();
+                            }
                         }
                     });
                     break;
-                case 'share-twitter': window.open(`https://twitter.com/intent/tweet?url=${target.dataset.url}&text=${target.dataset.title}`, '_blank'); break;
-                case 'share-facebook': window.open(`https://www.facebook.com/sharer/sharer.php?u=${target.dataset.url}`, '_blank'); break;
-                case 'copy-link': navigator.clipboard.writeText(target.dataset.url).then(() => showToast('링크가 복사되었습니다!'), () => showToast('링크 복사에 실패했습니다.', true)); break;
             }
         }
+        
         async function handleWriterSubmit() {
-            const id = $('#post-id').value; const title = $('#title').value; const summary = $('#summary').value;
+            const id = $('#post-id').value;
+            const title = $('#title').value;
+            const summary = $('#summary').value;
             const refined_content = state.quill.root.innerHTML;
-            if (!title.trim() || !summary.trim()) { showToast('제목과 요약은 필수 항목입니다.', true); return; }
+            if (!title.trim() || !summary.trim()) {
+                showToast('제목과 요약은 필수 항목입니다.', true); return;
+            }
             $('#submit-btn').disabled = true;
             const postData = { title, summary, refined_content, author_id: state.user.id };
-            const { error } = id ? await supabase.from('posts').update({ title, summary, refined_content }).eq('id', id) : await supabase.from('posts').insert(postData);
+            const result = id 
+                ? await supabase.from('posts').update({ title, summary, refined_content }).eq('id', id)
+                : await supabase.from('posts').insert(postData);
             $('#submit-btn').disabled = false;
-            if (error) showToast(`저장 실패: ${error.message}`, true);
-            else { showToast(id ? '글이 수정되었습니다!' : '글이 생성되었습니다!'); window.location.hash = '#/dashboard'; }
+            if (result.error) {
+                showToast(`저장 실패: ${result.error.message}`, true);
+            } else {
+                showToast(id ? '글이 수정되었습니다!' : '글이 생성되었습니다!');
+                window.location.hash = '#/dashboard';
+            }
+        }
+
+        async function handleAiWriterSubmit() {
+            const topic = $('#ai-topic').value;
+            if (!topic.trim()) {
+                showToast('글 주제를 입력해주세요.', true); return;
+            }
+            const loader = $('.ai-loader');
+            const button = $('#ai-generate-btn');
+            loader.style.display = 'block';
+            button.disabled = true;
+
+            try {
+                showToast('AI가 글을 작성하고 있습니다...');
+                const article = await generateText(topic);
+                
+                showToast('AI가 이미지를 생성하고 있습니다...');
+                const imageBase64 = await generateImage(article.title);
+                const imageBlob = base64ToBlob(imageBase64);
+                
+                showToast('이미지를 WebP로 변환 중입니다...');
+                const webpImageBlob = await convertBlobToWebP(imageBlob);
+
+                showToast('이미지를 업로드하고 있습니다...');
+                const fileName = `${state.user.id}/${Date.now()}.webp`;
+                const { error: uploadError } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, webpImageBlob);
+                if (uploadError) throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+
+                const { data: publicUrlData } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName);
+                const imageUrl = publicUrlData.publicUrl;
+
+                const bodyWithImage = article.body.replace(/<\/p>/, `</p><img src="${imageUrl}" alt="${article.title}">`);
+
+                const postData = {
+                    title: article.title,
+                    summary: article.summary,
+                    refined_content: bodyWithImage,
+                    author_id: state.user.id
+                };
+
+                const { error: insertError } = await supabase.from('posts').insert(postData);
+                if (insertError) throw new Error(`글 저장 실패: ${insertError.message}`);
+
+                showToast('AI가 글 작성을 완료했습니다!');
+                $('#ai-topic').value = '';
+                handleRouting();
+
+            } catch (error) {
+                console.error('AI Writer Error:', error);
+                showToast(`오류 발생: ${error.message}`, true);
+            } finally {
+                loader.style.display = 'none';
+                button.disabled = false;
+            }
         }
 
         // --- INITIALIZATION ---
         function initializeApp() {
             window.addEventListener('hashchange', handleRouting);
             document.addEventListener('click', (e) => {
-                let target = e.target.closest('[data-action]');
+                const target = e.target.closest('[data-action]');
                 if (target) { e.preventDefault(); handleGlobalClick(target); }
-                target = e.target.closest('#gallery-content > div');
-                if (target) { insertImageFromGallery(target); }
             });
             document.addEventListener('submit', (e) => {
-                if (e.target.id === 'writer-form' || e.target.id === 'auth-form') e.preventDefault();
-                if (e.target.id === 'writer-form') handleWriterSubmit();
+                if (e.target.id === 'writer-form') { e.preventDefault(); handleWriterSubmit(); }
+                if (e.target.id === 'ai-writer-form') { e.preventDefault(); }
+                if (e.target.id === 'auth-form') e.preventDefault();
             });
             supabase.auth.onAuthStateChange(async (_event, session) => {
-                state.user = session?.user || null; renderNav();
+                state.user = session?.user || null;
+                renderNav();
                 if (!state.isAuthReady) {
                     state.isAuthReady = true;
                     const loader = $('#app-loader');
                     anime({ targets: loader, opacity: 0, duration: 500, easing: 'easeOutCubic', complete: () => loader.style.display = 'none' });
                     handleRouting(); 
-                } else { handleRouting(); }
+                } else {
+                    handleRouting();
+                }
             });
         }
+        
         (function setupDynamicBackground() {
-            const canvas = $('#app-background'); if (!canvas) return;
+            const canvas = $('#app-background');
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             let particles = [];
             const particleCount = Math.min(40, window.innerWidth / 30);
             const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-            window.addEventListener('resize', resize, { passive: true }); resize();
+            window.addEventListener('resize', resize, { passive: true });
+            resize();
             class Particle {
                 constructor() { this.reset(); this.radius = Math.random() * 1.2 + 0.3; }
-                reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15; }
-                update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
-                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fill(); }
+                reset() {
+                    this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.fill();
+                }
             }
             for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-            function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animate);
+            }
             animate();
         })();
+
         initializeApp();
     </script>
 </body>
