@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- AdSense Script: 이 스크립트는 head에 한 번만 포함되면 됩니다. -->
+    <!-- AdSense Script: This script should be included only once in the head. -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112" crossorigin="anonymous"></script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Default Meta Tags -->
+    <!-- Meta Tags -->
     <title>CortexLog</title>
     <meta name="description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
     
@@ -25,177 +25,104 @@
     <meta property="twitter:description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
     <meta property="twitter:image" content="https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp">
 
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- Main Styles -->
     <style>
         :root {
-            --bg-main: #0B0B0B;
-            --bg-content: #141414;
-            --border-color: #2A2A2A;
-            --text-primary: #F0F0F0;
-            --text-secondary: #888888;
-            --accent: #FFFFFF;
-            --accent-hover: #1F1F1F;
-            --font-heading: 'Plus Jakarta Sans', sans-serif;
+            --bg-main: #0B0B0B; --bg-content: #141414; --border-color: #2A2A2A;
+            --text-primary: #F0F0F0; --text-secondary: #888888; --accent: #FFFFFF;
+            --accent-hover: #1F1F1F; --font-heading: 'Plus Jakarta Sans', sans-serif;
             --font-body: 'Pretendard', sans-serif;
         }
         html { scroll-behavior: smooth; }
-        body {
-            font-family: var(--font-body);
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            font-size: 15px;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        #app-background, #app-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-        }
-        #app-loader {
-            z-index: 100; background-color: var(--bg-main);
-            display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease;
-        }
-        .ai-loader {
-            display: none; /* Initially hidden */
-        }
-
-        .app-view { display: none; }
-        .app-view.active { display: block; }
-
-        .brand-logo {
-            font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem;
-            color: var(--text-primary); letter-spacing: 0.5px;
-        }
-
-        .btn {
-            padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px;
-            transition: all 0.25s ease;
-            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-            border: 1px solid var(--border-color); background-color: transparent; color: var(--text-secondary);
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: var(--accent-hover); color: var(--text-primary); transform: translateY(-2px);
-            border-color: #444;
-        }
-        .btn-primary {
-            border-color: var(--text-secondary); color: var(--text-primary);
-        }
-        .btn-primary:hover {
-            background-color: var(--accent); color: var(--bg-main);
-        }
+        body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-primary); font-size: 15px; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        #app-background, #app-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        #app-loader { z-index: 100; background-color: var(--bg-main); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        .ai-loader, .image-loader { display: none; width: 1.25rem; height: 1.25rem; border: 2px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .app-view { display: none; } .app-view.active { display: block; }
+        .brand-logo { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; color: var(--text-primary); letter-spacing: 0.5px; }
+        .btn { padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px; transition: all 0.25s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: 1px solid var(--border-color); background-color: transparent; color: var(--text-secondary); cursor: pointer; }
+        .btn:hover { background-color: var(--accent-hover); color: var(--text-primary); transform: translateY(-2px); border-color: #444; }
+        .btn-primary { border-color: var(--text-secondary); color: var(--text-primary); }
+        .btn-primary:hover { background-color: var(--accent); color: var(--bg-main); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background-color: transparent !important; }
-
-        .form-input, .form-textarea {
-            font-size: 0.9rem; padding: 0.7rem 1rem; border: 1px solid var(--border-color);
-            border-radius: 6px; width: 100%; background-color: var(--bg-main); color: var(--text-primary);
-            transition: all 0.2s ease;
-        }
-        .form-input:focus, .form-textarea:focus {
-            outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-        }
-        
+        .form-input, .form-textarea { font-size: 0.9rem; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; width: 100%; background-color: var(--bg-main); color: var(--text-primary); transition: all 0.2s ease; }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1); }
         .prose-custom { color: #b0b0b0; line-height: 1.8; font-size: 1rem; }
-        .prose-custom h1, .prose-custom h2, .prose-custom h3 { color: var(--text-primary); font-family: var(--font-heading); font-weight: 700; margin-top: 1.8em; margin-bottom: 0.8em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
-        .prose-custom h1 { font-size: 1.8rem; }
-        .prose-custom h2 { font-size: 1.4rem; }
-        .prose-custom h3 { font-size: 1.2rem; }
+        .prose-custom > *:not(:first-child) { margin-top: 1.25em; } 
+        .prose-custom p { margin-bottom: 1.25em; } 
+        .prose-custom h1, .prose-custom h2, .prose-custom h3 { color: var(--text-primary); font-family: var(--font-heading); font-weight: 700; margin-top: 2em; margin-bottom: 1em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+        .prose-custom h1 { font-size: 1.8rem; } .prose-custom h2 { font-size: 1.4rem; } .prose-custom h3 { font-size: 1.2rem; }
         .prose-custom a { color: var(--accent); text-decoration: none; font-weight: 500; border-bottom: 1px solid #555; transition: all 0.2s ease; }
         .prose-custom a:hover { border-bottom-color: var(--accent); }
+        .prose-custom pre, .prose-custom blockquote { margin-top: 2em; margin-bottom: 2em; }
         .prose-custom pre { background-color: #050505; padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); overflow-x: auto;}
         .prose-custom code { background-color: #222; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; color: #eee; }
         .prose-custom blockquote { border-left: 2px solid var(--text-secondary); padding-left: 1.2rem; color: var(--text-secondary); font-style: italic; }
-        .prose-custom img { border-radius: 8px; max-width: 100%; height: auto; margin-top: 2em; margin-bottom: 2em; }
-
-        .pagination-controls a, .pagination-controls span {
-            padding: 0.4rem 0.8rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-        }
-        .pagination-controls a:hover {
-             background-color: var(--accent-hover); color: var(--text-primary);
-        }
-        .pagination-controls .active {
-            background-color: var(--accent);
-            color: var(--bg-main);
-            border-color: var(--accent);
-        }
-        .pagination-controls .disabled {
-            opacity: 0.4;
-            pointer-events: none;
-        }
-
+        .prose-custom img { border-radius: 8px; max-width: 100%; height: auto; margin-top: 2.5em; margin-bottom: 2.5em; }
+        .pagination-controls a, .pagination-controls span { padding: 0.4rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.8rem; transition: all 0.2s ease; }
+        .pagination-controls a:hover { background-color: var(--accent-hover); color: var(--text-primary); }
+        .pagination-controls .active { background-color: var(--accent); color: var(--bg-main); border-color: var(--accent); }
+        .pagination-controls .disabled { opacity: 0.4; pointer-events: none; }
         .ql-toolbar { border: 1px solid var(--border-color) !important; border-top-left-radius: 6px; border-top-right-radius: 6px; }
         .ql-container { border: 1px solid var(--border-color) !important; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; font-family: var(--font-body) !important;}
         .ql-editor { color: var(--text-primary); min-height: 300px; font-size: 0.95rem; }
-        .ql-snow .ql-stroke { stroke: var(--text-secondary); }
-        .ql-snow .ql-picker-label { color: var(--text-secondary) !important; }
-
-        /* YouTube Embed Styles */
-        .youtube-embed-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            height: 0;
-            overflow: hidden;
-            max-width: 100%;
-            background: #000;
-            margin: 1.5em 0;
-            border-radius: 8px;
-        }
-        .youtube-embed-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        .ql-video-embed-wrapper {
-            margin: 1em 0;
+        .ql-snow .ql-stroke { stroke: var(--text-secondary); } .ql-snow .ql-picker-label { color: var(--text-secondary) !important; }
+        .youtube-embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 1.5em 0; border-radius: 8px; }
+        .youtube-embed-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .ql-video-embed-wrapper { margin: 1em 0; }
+        #view-refiner .refiner-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; height: calc(100vh - 150px); }
+        #refiner-preview-container { height: 100%; overflow-y: auto; padding-right: 1rem; border-right: 1px solid var(--border-color); }
+        #refiner-chat-container { display: flex; flex-direction: column; height: 100%; }
+        #chat-history { flex-grow: 1; overflow-y: auto; padding: 1rem; space-y: 1rem; display: flex; flex-direction: column;}
+        .chat-message { max-width: 90%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.6; }
+        .chat-message.user { background-color: var(--accent); color: var(--bg-main); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-message.ai { background-color: var(--bg-content); border: 1px solid var(--border-color); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-message.system { font-size: 0.8rem; text-align: center; color: var(--text-secondary); align-self: center; }
+        #refiner-chat-form { border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; gap: 0.5rem; }
+        @media (max-width: 768px) {
+            #view-refiner .refiner-grid { grid-template-columns: 1fr; height: auto; gap: 1.5rem; }
+            #refiner-preview-container { height: 60vh; border-right: none; border-bottom: 1px solid var(--border-color); padding-right: 0; padding-bottom: 1.5rem; }
+            #refiner-chat-container { height: 70vh; }
         }
     </style>
 </head>
 <body class="antialiased">
-    <div id="app-loader">
-        <div class="brand-logo text-2xl">CortexLog</div>
-    </div>
+    <div id="app-loader"><div class="brand-logo text-2xl">CortexLog</div></div>
     <canvas id="app-background"></canvas>
-
     <header id="main-nav-container" class="sticky top-0 z-40 w-full flex justify-center px-4 py-3"></header>
-    
-    <div id="app-container" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="app-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <main id="main-content">
             <div id="view-library" class="app-view"></div>
             <div id="view-post" class="app-view"></div>
             <div id="view-dashboard" class="app-view"></div>
             <div id="view-writer" class="app-view"></div>
+            <div id="view-refiner" class="app-view"></div>
         </main>
     </div>
-    
     <div id="structured-data-container"></div>
     <div id="modal-container"></div>
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-3"></div>
     
     <script type="module">
-        // --- SETUP & STATE ---
+        // =================================================================================
+        // --- SETUP & STATE MANAGEMENT ---
+        // =================================================================================
         const SITE_URL = 'https://mapia.vercel.app';
         const SUPABASE_URL = 'https://fzfnjtlzovbpbglvkroh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Zm5qdGx6b3ZicGJnbHZrcm9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4OTcyMjEsImV4cCI6MjA3MTQ3MzIyMX0.yg43GbdVBPAzaghmERNGxRu9dte3bcpWTWjrOa0p55I';
         const IMAGE_BUCKET_NAME = 'thought-images';
         const POSTS_PER_PAGE = 5;
+        const DRAFT_STORAGE_KEY = 'cortexlog_ai_draft';
         
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -203,75 +130,42 @@
         const state = { 
             user: null, 
             quill: null,
-            isAuthReady: false
+            isAuthReady: false,
+            draftArticle: null,
         };
         const $ = (selector) => document.querySelector(selector);
 
+        // =================================================================================
         // --- SEO & META TAGS ---
-        const defaultMeta = {
-            title: "CortexLog",
-            description: "AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다. 웹 개발시 보안과 코드, 바이브 코딩을 다루고 있습니다."
-        };
-
+        // =================================================================================
         function updateMetaTags(post = null) {
+            const defaultMeta = {
+                title: "CortexLog",
+                description: "AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.",
+                image: 'https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp'
+            };
             const title = post ? post.title : defaultMeta.title;
             const description = post ? (post.summary || defaultMeta.description) : defaultMeta.description;
             const url = post ? `${SITE_URL}/#/post/${post.id}` : SITE_URL;
-            const defaultImage = 'https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp';
-            let imageUrl = defaultImage;
-
+            let imageUrl = defaultMeta.image;
             if (post && post.refined_content) {
                 const match = post.refined_content.match(/<img[^>]+src="([^">]+)"/);
-                if (match && match[1]) {
-                    imageUrl = match[1];
-                }
+                if (match && match[1]) imageUrl = match[1];
             }
-
             document.title = title;
             $('meta[name="description"]').setAttribute('content', description);
-            
-            $('meta[property="og:title"]').setAttribute('content', title);
-            $('meta[property="og:description"]').setAttribute('content', description);
-            $('meta[property="og:url"]').setAttribute('content', url);
-            $('meta[property="og:image"]').setAttribute('content', imageUrl);
-
-            $('meta[property="twitter:title"]').setAttribute('content', title);
-            $('meta[property="twitter:description"]').setAttribute('content', description);
-            $('meta[property="twitter:url"]').setAttribute('content', url);
-            $('meta[property="twitter:image"]').setAttribute('content', imageUrl);
-
-            const structuredDataContainer = $('#structured-data-container');
-            structuredDataContainer.innerHTML = '';
-            if (post) {
-                const script = document.createElement('script');
-                script.type = 'application/ld+json';
-                script.text = JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "BlogPosting",
-                    "headline": post.title,
-                    "image": imageUrl,
-                    "datePublished": new Date(post.created_at).toISOString(),
-                    "description": post.summary,
-                    "author": { "@type": "Person", "name": "CortexLog Author" }
-                });
-                structuredDataContainer.appendChild(script);
-            }
+            ['og:title', 'twitter:title'].forEach(p => $(`meta[property="${p}"]`).setAttribute('content', title));
+            ['og:description', 'twitter:description'].forEach(p => $(`meta[property="${p}"]`).setAttribute('content', description));
+            ['og:url', 'twitter:url'].forEach(p => $(`meta[property="${p}"]`).setAttribute('content', url));
+            ['og:image', 'twitter:image'].forEach(p => $(`meta[property="${p}"]`).setAttribute('content', imageUrl));
         }
 
-        // --- ANIMATIONS & UI ---
+        // =================================================================================
+        // --- UI & ANIMATIONS ---
+        // =================================================================================
         const animations = {
             pageEnter: (el) => anime({ targets: el, translateY: [20, 0], opacity: [0, 1], duration: 500, easing: 'easeOutCubic' }),
             pageExit: (el) => anime({ targets: el, translateY: [0, -20], opacity: [1, 0], duration: 300, easing: 'easeInCubic' }).finished,
-            modalEnter: (backdrop, content) => {
-                anime({ targets: backdrop, opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
-                anime({ targets: content, translateY: [20, 0], scale: [0.98, 1], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
-            },
-            modalExit: (backdrop, content) => {
-                anime({ targets: backdrop, opacity: [1, 0], duration: 300, easing: 'easeInCubic' });
-                return anime({ targets: content, translateY: [0, 20], scale: [1, 0.98], opacity: [1, 0], duration: 300, easing: 'easeInCubic' }).finished;
-            },
-            toastEnter: (el) => anime({ targets: el, translateX: [20, 0], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' }),
-            toastExit: (el) => anime({ targets: el, translateX: [0, 20], opacity: [1, 0], duration: 400, easing: 'easeInCubic' }).finished,
         };
         
         function showToast(message, isError = false) {
@@ -279,110 +173,64 @@
             toast.className = `py-2 px-4 rounded-md shadow-lg text-sm font-medium border ${isError ? 'bg-red-900/50 border-red-700 text-red-200' : 'bg-green-900/50 border-green-700 text-green-200'}`;
             toast.textContent = message;
             $('#toast-container').appendChild(toast);
-            animations.toastEnter(toast);
+            anime({ targets: toast, translateX: [20, 0], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
             setTimeout(async () => {
-                await animations.toastExit(toast);
+                await anime({ targets: toast, translateX: [0, 20], opacity: [1, 0], duration: 400, easing: 'easeInCubic' }).finished;
                 toast.remove();
             }, 3000);
         }
 
-        function renderModal({ title, content, confirmText, onConfirm, confirmAction }) {
+        function renderModal({ title, content, confirmText, onConfirm, cancelText = '취소', onCancel = closeModal }) {
             const modalId = `modal-${Date.now()}`;
-            const modalHtml = `
-                <div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div class="modal-backdrop absolute inset-0 bg-black/80 backdrop-blur-sm" data-action="close-modal"></div>
-                    <div class="modal-content relative bg-content border border-border-color rounded-lg shadow-xl w-full max-w-sm p-6">
-                        <h3 class="text-lg font-bold font-heading mb-4">${title}</h3>
-                        <div class="text-gray-400 mb-6 text-sm">${content}</div>
-                        <div class="flex justify-end space-x-2">
-                            <button type="button" class="btn" data-action="close-modal">취소</button>
-                            ${confirmText ? `<button type="button" class="btn btn-primary" data-action="${confirmAction}" id="modal-confirm-btn">${confirmText}</button>` : ''}
-                        </div>
-                    </div>
-                </div>`;
+            const modalHtml = `<div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center p-4"><div class="modal-backdrop absolute inset-0 bg-black/80 backdrop-blur-sm"></div><div class="modal-content relative bg-content border border-border-color rounded-lg shadow-xl w-full max-w-sm p-6"><h3 class="text-lg font-bold font-heading mb-4">${title}</h3><div class="text-gray-400 mb-6 text-sm">${content}</div><div class="flex justify-end space-x-2"><button type="button" class="btn" id="modal-cancel-btn">${cancelText}</button>${confirmText ? `<button type="button" class="btn btn-primary" id="modal-confirm-btn">${confirmText}</button>` : ''}</div></div></div>`;
             $('#modal-container').innerHTML = modalHtml;
             const modalEl = $(`#${modalId}`);
-            animations.modalEnter(modalEl.querySelector('.modal-backdrop'), modalEl.querySelector('.modal-content'));
-            if (onConfirm) {
-                 $('#modal-confirm-btn').addEventListener('click', onConfirm);
-            }
+            if (onConfirm) $('#modal-confirm-btn').addEventListener('click', onConfirm);
+            $('#modal-cancel-btn').addEventListener('click', onCancel);
+            modalEl.querySelector('.modal-backdrop').addEventListener('click', onCancel);
+            anime({ targets: modalEl.querySelector('.modal-backdrop'), opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
+            anime({ targets: modalEl.querySelector('.modal-content'), translateY: [20, 0], scale: [0.98, 1], opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
         }
         
         async function closeModal() {
             const modal = $('#modal-container').firstElementChild;
             if (!modal) return;
-            await animations.modalExit(modal.querySelector('.modal-backdrop'), modal.querySelector('.modal-content'));
+            await Promise.all([
+                anime({ targets: modal.querySelector('.modal-backdrop'), opacity: 0, duration: 300, easing: 'easeInCubic' }).finished,
+                anime({ targets: modal.querySelector('.modal-content'), translateY: 20, scale: 0.98, opacity: 0, duration: 300, easing: 'easeInCubic' }).finished
+            ]);
             $('#modal-container').innerHTML = '';
         }
 
+        // =================================================================================
         // --- AUTHENTICATION ---
+        // =================================================================================
         function showAuthModal() {
-            const content = `
-                <form id="auth-form" novalidate class="space-y-4">
-                    <div>
-                        <label for="email" class="block text-xs font-medium text-gray-400 mb-1">이메일</label>
-                        <input type="email" id="email" class="form-input" required autocomplete="email">
-                    </div>
-                    <div>
-                        <label for="password" class="block text-xs font-medium text-gray-400 mb-1">비밀번호 (6자 이상)</label>
-                        <input type="password" id="password" class="form-input" required autocomplete="current-password" minlength="6">
-                    </div>
-                    <div id="auth-error" class="text-red-400 text-xs h-3"></div>
-                </form>`;
-            renderModal({ 
-                title: '시작하기', 
-                content, 
-                confirmText: '로그인',
-                confirmAction: 'login'
-            });
+            const content = `<form id="auth-form" novalidate class="space-y-4"><div><label for="email" class="block text-xs font-medium text-gray-400 mb-1">이메일</label><input type="email" id="email" class="form-input" required autocomplete="email"></div><div><label for="password" class="block text-xs font-medium text-gray-400 mb-1">비밀번호 (6자 이상)</label><input type="password" id="password" class="form-input" required autocomplete="current-password" minlength="6"></div><div id="auth-error" class="text-red-400 text-xs h-3"></div></form>`;
+            renderModal({ title: '시작하기', content, confirmText: '로그인', onConfirm: () => handleAuth('login') });
             const signUpBtn = document.createElement('button');
-            signUpBtn.type = 'button';
-            signUpBtn.className = 'btn';
-            signUpBtn.dataset.action = 'signup';
-            signUpBtn.textContent = '회원가입';
+            signUpBtn.type = 'button'; signUpBtn.className = 'btn'; signUpBtn.textContent = '회원가입';
             $('#modal-confirm-btn').insertAdjacentElement('beforebegin', signUpBtn);
+            signUpBtn.addEventListener('click', () => handleAuth('signup'));
         }
         
-        function translateAuthError(error) {
-            const message = error.message;
-            if (message.includes("Invalid login credentials")) return "이메일 또는 비밀번호가 올바르지 않습니다.";
-            if (message.includes("User already registered")) return "이미 가입된 이메일입니다. 로그인을 시도해주세요.";
-            if (message.includes("Password should be at least 6 characters")) return "비밀번호는 6자 이상이어야 합니다.";
-            if (message.includes("Unable to validate email address")) return "유효하지 않은 이메일 형식입니다.";
-            return "오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-        }
-
         async function handleAuth(action) {
-            const email = $('#email').value;
-            const password = $('#password').value;
-            const errorDiv = $('#auth-error');
-            errorDiv.textContent = '';
-            let result;
-            if (action === 'login') {
-                result = await supabase.auth.signInWithPassword({ email, password });
-            } else {
-                result = await supabase.auth.signUp({ email, password });
-            }
-            const { error } = result;
-            if (error) {
-                errorDiv.textContent = translateAuthError(error);
-            } else {
-                showToast(action === 'signup' ? '가입이 완료되었습니다! 이메일을 확인하여 인증해주세요.' : '로그인되었습니다.');
-                closeModal();
-            }
+            const email = $('#email').value; const password = $('#password').value;
+            const errorDiv = $('#auth-error'); errorDiv.textContent = '';
+            const { error } = action === 'login' ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password });
+            if (error) { errorDiv.textContent = "인증 오류: " + error.message; } 
+            else { showToast(action === 'signup' ? '가입 완료! 이메일을 확인하여 인증해주세요.' : '로그인되었습니다.'); closeModal(); }
         }
 
         async function handleLogout() {
             const { error } = await supabase.auth.signOut();
-            if (error) {
-                showToast('로그아웃 중 오류가 발생했습니다.', true);
-            } else {
-                showToast('로그아웃되었습니다.');
-                window.location.hash = '/';
-            }
+            if (error) showToast('로그아웃 중 오류가 발생했습니다.', true);
+            else { showToast('로그아웃되었습니다.'); window.location.hash = '/'; }
         }
         
-        // --- CORE LOGIC & ROUTING ---
+        // =================================================================================
+        // --- ROUTING & VIEW MANAGEMENT ---
+        // =================================================================================
         async function switchView(viewId, callback) {
             const currentView = $('.app-view.active');
             if (currentView) {
@@ -395,13 +243,8 @@
                 if (callback) await callback(nextView);
                 nextView.classList.add('active');
                 animations.pageEnter(nextView);
-                
-                // AdSense SPA Logic: 페이지 뷰가 변경될 때마다 광고를 요청합니다.
-                try {
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (e) {
-                    console.error("AdSense push error:", e);
-                }
+                try { (adsbygoogle = window.adsbygoogle || []).push({}); } 
+                catch (e) { console.error("AdSense push error:", e); }
             }
         }
         
@@ -409,27 +252,15 @@
             if (!state.isAuthReady) return;
             const hash = window.location.hash || '#/';
             const parts = hash.substring(2).split('/');
-            
             let path = parts[0] || '';
-            let id = null;
-            let page = 1;
+            let id = null; let page = 1;
+            if (path === 'page') { page = parseInt(parts[1], 10) || 1; path = ''; } 
+            else if (path === 'dashboard' && parts[1] === 'page') { page = parseInt(parts[2], 10) || 1; } 
+            else if (path === 'post') { id = parts[1]; }
+            else if (path === 'writer') { id = parts[1]; }
 
-            if (path === 'page') {
-                page = parseInt(parts[1], 10) || 1;
-                path = ''; 
-            } 
-            else if (path === 'dashboard' && parts[1] === 'page') {
-                page = parseInt(parts[2], 10) || 1;
-            } 
-            else if (path === 'post') {
-                id = parts[1];
-            }
-            else if (path === 'writer') {
-                id = parts[1];
-            }
-
-            if (!state.user && (path === 'dashboard' || path === 'writer')) {
-                showToast('글을 작성하려면 로그인이 필요합니다.', true);
+            if (!state.user && ['dashboard', 'writer', 'refiner'].includes(path)) {
+                showToast('이 기능을 사용하려면 로그인이 필요합니다.', true);
                 window.location.hash = '/';
                 return;
             }
@@ -438,621 +269,136 @@
                 case 'post': switchView('view-post', (el) => renderPostView(el, id)); break;
                 case 'dashboard': switchView('view-dashboard', (el) => renderDashboardView(el, page)); break;
                 case 'writer': switchView('view-writer', (el) => renderWriterView(el, id)); break;
+                case 'refiner': switchView('view-refiner', (el) => renderRefinerView(el)); break;
                 default: switchView('view-library', (el) => renderLibraryView(el, page));
             }
         }
-
-        // --- RENDER FUNCTIONS ---
+        
+        // =================================================================================
+        // --- CORE RENDER FUNCTIONS ---
+        // =================================================================================
         function renderNav() {
-            const navContainer = $('#main-nav-container');
-            navContainer.innerHTML = `
-                <nav class="w-full max-w-5xl flex items-center justify-between py-2 px-4 bg-black/30 backdrop-blur-lg border border-border-color rounded-lg">
-                    <a href="#/" class="brand-logo" data-action="route">CortexLog</a>
-                    <div class="flex items-center space-x-2">
-                        ${state.user 
-                            ? `<a href="#/dashboard" class="btn" data-action="route">대시보드</a><button data-action="logout" class="btn">로그아웃</button>`
-                            : `<button data-action="show-auth" class="btn btn-primary">로그인 / 가입</button>`
-                        }
-                    </div>
-                </nav>`;
+            $('#main-nav-container').innerHTML = `<nav class="w-full max-w-7xl flex items-center justify-between py-2 px-4 bg-black/30 backdrop-blur-lg border border-border-color rounded-lg"><a href="#/" class="brand-logo" data-action="route">CortexLog</a><div class="flex items-center space-x-2">${state.user ? `<a href="#/dashboard" class="btn" data-action="route">대시보드</a><button data-action="logout" class="btn">로그아웃</button>` : `<button data-action="show-auth" class="btn btn-primary">로그인 / 가입</button>`}</div></nav>`;
         }
         
         async function renderLibraryView(container, page = 1) {
             updateMetaTags();
+            $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
             const { from, to } = getPaginationRange(page);
-            const { data, error, count } = await supabase.from('posts')
-                .select('*', { count: 'exact' })
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            if (error) {
-                showToast('데이터를 불러오는 데 실패했습니다.', true);
-                container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`;
-                return;
-            }
-
-            const postsHtml = data.length > 0 ? data.map(post => `
-                <a href="#/post/${post.id}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group">
-                    <h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${post.title}</h2>
-                    <p class="text-gray-400 mb-3 text-sm">${post.summary || ''}</p>
-                    <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p>
-                </a>`).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
-            
-            const paginationHtml = renderPaginationControls(page, count, '#/page/');
-
-            container.innerHTML = `
-                <div class="py-16">
-                    <h1 class="text-4xl font-extrabold text-center font-heading mb-4">Thoughts & Insights</h1>
-                    <p class="text-center text-gray-400 mb-12">AI, 기술, 그리고 일상에 대한 기록들</p>
-                    <div class="space-y-4">${postsHtml}</div>
-                    ${paginationHtml}
-                </div>`;
+            const { data, error, count } = await supabase.from('posts').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
+            if (error) { showToast('데이터를 불러오는 데 실패했습니다.', true); container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`; return; }
+            const postsHtml = data.length > 0 ? data.map(post => `<a href="#/post/${post.id}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group"><h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${post.title}</h2><p class="text-gray-400 mb-3 text-sm">${post.summary || ''}</p><p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p></a>`).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
+            container.innerHTML = `<div class="py-16"><h1 class="text-4xl font-extrabold text-center font-heading mb-4">Thoughts & Insights</h1><p class="text-center text-gray-400 mb-12">AI, 기술, 그리고 일상에 대한 기록들</p><div class="space-y-4">${postsHtml}</div>${renderPaginationControls(page, count, '#/page/')}</div>`;
         }
 
         async function renderPostView(container, id) {
+            $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
             if (!id) { window.location.hash = '/'; return; }
-            const { data: post, error: postError } = await supabase.from('posts').select('*').eq('id', id).single();
-            if (postError || !post) {
-                showToast('글을 찾을 수 없습니다.', true); window.location.hash = '/'; return;
-            }
+            const { data: post, error } = await supabase.from('posts').select('*').eq('id', id).single();
+            if (error || !post) { showToast('글을 찾을 수 없습니다.', true); window.location.hash = '/'; return; }
             updateMetaTags(post);
             const { data: allOtherPosts, error: allPostsError } = await supabase.from('posts').select('id, title, summary').neq('id', id);
-            const relatedPosts = allPostsError ? [] : findRelatedPosts(post, allOtherPosts);
-            const postUrl = `${SITE_URL}/#/post/${post.id}`;
-            const postHtml = `
-                <article class="prose-custom max-w-none pt-8 pb-12">
-                     <div class="mb-8">
-                        <button class="btn" data-action="go-back">
-                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-                            목록으로
-                        </button>
-                    </div>
-                    <h1 class="text-3xl font-extrabold !mt-0">${post.title}</h1>
-                    <p class="text-sm text-gray-500 mb-8">${new Date(post.created_at).toLocaleString('ko-KR')}</p>
-                    <div>${post.refined_content || ''}</div>
-                </article>`;
-            
-            const adHtml = `
-                <div class="my-12">
-                    <ins class="adsbygoogle"
-                         style="display:block"
-                         data-ad-client="ca-pub-5239497835591112"
-                         data-ad-slot="2069100221"
-                         data-ad-format="auto"
-                         data-full-width-responsive="true"></ins>
-                </div>`;
-
-            const shareHtml = `
-                <div class="mt-12 py-8 mb-12 border-t border-border-color">
-                    <h3 class="text-center text-sm font-bold text-gray-400 mb-4">공유하기</h3>
-                    <div class="flex justify-center items-center gap-4">
-                        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}" target="_blank" class="btn">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-                            <span>X</span>
-                        </a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}" target="_blank" class="btn">
-                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4z"></path></svg>
-                           <span>Facebook</span>
-                        </a>
-                        <button class="btn" data-action="copy-link" data-url="${postUrl}">
-                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                           <span>링크 복사</span>
-                        </button>
-                    </div>
-                </div>`;
-            const relatedPostsHtml = relatedPosts.length > 0 ? `
-                <div class="mt-8 pt-8 border-t border-border-color">
-                    <h3 class="text-xl font-bold font-heading mb-4">관련 글</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${relatedPosts.map(p => `
-                            <a href="#/post/${p.id}" data-action="route" class="block p-4 bg-content/50 border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group">
-                                <h4 class="font-bold text-gray-200 group-hover:text-white transition-colors">${p.title}</h4>
-                                <p class="text-gray-400 text-sm mt-1">${p.summary}</p>
-                            </a>`).join('')}
-                    </div>
-                </div>` : '';
+            const postHtml = `<article class="prose-custom max-w-none pt-8 pb-12"><div class="mb-8"><button class="btn" data-action="go-back"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>목록으로</button></div><h1 class="text-3xl font-extrabold !mt-0">${post.title}</h1><p class="text-sm text-gray-500 mb-8">${new Date(post.created_at).toLocaleString('ko-KR')}</p><div>${post.refined_content || ''}</div></article>`;
+            const adHtml = `<div class="my-12"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5239497835591112" data-ad-slot="2069100221" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
+            const shareHtml = createShareButtonsHtml(`${SITE_URL}/#/post/${post.id}`, post.title);
+            const relatedPostsHtml = allPostsError ? '' : createRelatedPostsHtml(findRelatedPosts(post, allOtherPosts));
             container.innerHTML = postHtml + adHtml + relatedPostsHtml + shareHtml;
         }
 
-        function findRelatedPosts(currentPost, otherPosts, count = 2) {
-            const currentTitleWords = currentPost.title.toLowerCase().split(/\s+/);
-            const scoredPosts = otherPosts.map(post => {
-                let score = 0;
-                const targetTitle = post.title.toLowerCase();
-                currentTitleWords.forEach(word => {
-                    if (word.length > 1 && targetTitle.includes(word)) {
-                        score++;
-                    }
-                });
-                return { ...post, score };
-            });
-            return scoredPosts.filter(post => post.score > 0).sort((a, b) => b.score - a.score).slice(0, count);
-        }
-        
         async function renderDashboardView(container, page = 1) {
             updateMetaTags();
-            
+            $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
             const { from, to } = getPaginationRange(page);
-            const { data, error, count } = await supabase.from('posts')
-                .select('*', { count: 'exact' })
-                .eq('author_id', state.user.id)
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            if (error) {
-                showToast('내 글 목록 로딩 실패: ' + error.message, true);
-                container.innerHTML = `<p>내가 작성한 글을 불러올 수 없습니다.</p>`; return;
-            }
-
-            const listHtml = data.length > 0 ? data.map(post => `
-                <li class="p-4 flex justify-between items-center">
-                    <div>
-                        <a href="#/post/${post.id}" data-action="route" class="font-bold hover:text-white">${post.title}</a>
-                        <p class="text-xs text-gray-500 mt-1">${new Date(post.created_at).toLocaleString('ko-KR')}</p>
-                    </div>
-                    <div class="space-x-2">
-                        <a href="#/writer/${post.id}" class="btn text-xs" data-action="route">수정</a>
-                        <button class="btn text-xs" data-action="delete-post" data-id="${post.id}">삭제</button>
-                    </div>
-                </li>`).join('') : '<li class="p-4 text-center text-gray-500">작성된 글이 없습니다.</li>';
-            
-            const paginationHtml = renderPaginationControls(page, count, '#/dashboard/page/');
-
-            container.innerHTML = `
-                <div class="py-12 space-y-12">
-                    <div>
-                        <div class="flex justify-between items-center mb-8">
-                            <h1 class="text-2xl font-bold font-heading">AI 글 생성</h1>
-                        </div>
-                        <div class="bg-content border border-border-color rounded-lg p-6">
-                            <form id="ai-writer-form" class="space-y-4">
-                                <div>
-                                    <label for="ai-topic" class="block text-sm font-medium text-gray-300 mb-2">글 주제</label>
-                                    <input type="text" id="ai-topic" class="form-input" required placeholder="예: '자율 AI 프레임워크의 미래'">
-                                </div>
-                                <div class="flex justify-end items-center gap-4">
-                                     <div class="ai-loader w-5 h-5 border-2 border-dashed border-gray-500 border-t-transparent rounded-full animate-spin"></div>
-                                    <button type="submit" id="ai-generate-btn" class="btn btn-primary">
-                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.913 2.649a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094-.226l.452-.573a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094.226l.204-.258a.934.934 0 0 1 .82-.395h.01a.934.934 0 0 1 .933.934v.01a.934.934 0 0 1-.395.82l-.258.204a.934.934 0 0 0-.226 1.094l.573.452a.934.934 0 0 1 .226 1.094l-.573.452a.934.934 0 0 0 .226 1.094l.573.452a.934.934 0 0 1-.226 1.094l-.573.452a.934.934 0 0 0-.226 1.094l.573.452a.934.934 0 0 1 .226 1.094l-.573.452a.934.934 0 0 0 .226 1.094l.258.204a.934.934 0 0 1 .395.82v.01a.934.934 0 0 1-.934.933h-.01a.934.934 0 0 1-.82-.395l-.204-.258a.934.934 0 0 0-1.094-.226l-.452.573a.934.934 0 0 1-1.094.226l-.452-.573a.934.934 0 0 0-1.094.226l-.452.573a.934.934 0 0 1-1.094-.226l-.452-.573a.934.934 0 0 0-1.094.226l-.452.573a.934.934 0 0 1-1.094.226l-.452-.573a.934.934 0 0 0-1.094.226l-.204.258a.934.934 0 0 1-.82.395h-.01a.934.934 0 0 1-.933-.934v-.01a.934.934 0 0 1 .395-.82l.258-.204a.934.934 0 0 0 .226-1.094l-.573-.452a.934.934 0 0 1-.226-1.094l.573-.452a.934.934 0 0 0-.226-1.094l-.573-.452a.934.934 0 0 1 .226-1.094l.573-.452a.934.934 0 0 0 .226-1.094l-.573-.452a.934.934 0 0 1-.226-1.094l.573-.452a.934.934 0 0 0-.226-1.094l-.258-.204a.934.934 0 0 1-.395-.82v-.01a.934.934 0 0 1 .934-.933h.01a.934.934 0 0 1 .82.395l.204.258a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226l.452.573a.934.934 0 0 0 1.094.226l.452-.573a.934.934 0 0 1 1.094-.226Z"/><path d="M12 8.5A3.5 3.5 0 0 0 8.5 12a3.5 3.5 0 0 0 3.5 3.5A3.5 3.5 0 0 0 15.5 12 3.5 3.5 0 0 0 12 8.5Z"/></svg>
-                                        AI로 글 생성하기
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-8">
-                            <h1 class="text-2xl font-bold font-heading">내 글 관리</h1>
-                            <a href="#/writer" class="btn" data-action="route">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                새 글 수동 작성
-                            </a>
-                        </div>
-                        <div class="bg-content border border-border-color rounded-lg">
-                           <ul class="divide-y divide-border-color">${listHtml}</ul>
-                        </div>
-                        ${paginationHtml}
-                    </div>
-                </div>`;
-            
-            $('#ai-writer-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                handleAiWriterSubmit();
-            });
+            const { data, error, count } = await supabase.from('posts').select('*', { count: 'exact' }).eq('author_id', state.user.id).order('created_at', { ascending: false }).range(from, to);
+            if (error) { showToast('내 글 목록 로딩 실패: ' + error.message, true); container.innerHTML = `<p>내가 작성한 글을 불러올 수 없습니다.</p>`; return; }
+            const listHtml = data.length > 0 ? data.map(post => `<li class="p-4 flex justify-between items-center"><div><a href="#/post/${post.id}" data-action="route" class="font-bold hover:text-white">${post.title}</a><p class="text-xs text-gray-500 mt-1">${new Date(post.created_at).toLocaleString('ko-KR')}</p></div><div class="space-x-2"><a href="#/writer/${post.id}" class="btn text-xs" data-action="route">수정</a><button class="btn text-xs" data-action="delete-post" data-id="${post.id}">삭제</button></div></li>`).join('') : '<li class="p-4 text-center text-gray-500">작성된 글이 없습니다.</li>';
+            container.innerHTML = `<div class="py-12 space-y-12"><div><div class="flex justify-between items-center mb-8"><h1 class="text-2xl font-bold font-heading">AI 글 생성</h1></div><div class="bg-content border border-border-color rounded-lg p-6"><form id="ai-writer-form" class="space-y-4"><div><label for="ai-topic" class="block text-sm font-medium text-gray-300 mb-2">글 주제</label><input type="text" id="ai-topic" class="form-input" required placeholder="예: '자율 AI 프레임워크의 미래'"></div><div class="flex justify-end items-center gap-4"><div class="ai-loader"></div><button type="submit" id="ai-generate-btn" class="btn btn-primary">AI로 초안 생성하기</button></div></form></div></div><div><div class="flex justify-between items-center mb-8"><h1 class="text-2xl font-bold font-heading">내 글 관리</h1><a href="#/writer" class="btn" data-action="route"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>새 글 수동 작성</a></div><div class="bg-content border border-border-color rounded-lg"><ul class="divide-y divide-border-color">${listHtml}</ul></div>${renderPaginationControls(page, count, '#/dashboard/page/')}</div></div>`;
+            $('#ai-writer-form').addEventListener('submit', (e) => { e.preventDefault(); handleAiWriterSubmit(); });
         }
 
-        async function renderWriterView(container, id) {
+        async function renderWriterView(container, id, draft = null) {
+            $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
             updateMetaTags();
             let post = { title: '', summary: '', refined_content: '' };
-            if (id) {
+            if (draft) {
+                post.title = draft.title;
+                post.summary = draft.summary;
+                post.refined_content = `${draft.imageHtml}${draft.body}`;
+            } else if (id) {
                 const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
-                if (error) { showToast('글 정보를 가져오지 못했습니다.', true); window.location.hash = '#/dashboard'; return; }
-                if (data.author_id !== state.user.id) {
-                    showToast('자신이 작성한 글만 수정할 수 있습니다.', true); window.location.hash = '#/dashboard'; return;
-                }
+                if (error || !data) { showToast('글 정보를 가져오지 못했습니다.', true); window.location.hash = '#/dashboard'; return; }
+                if (data.author_id !== state.user.id) { showToast('자신이 작성한 글만 수정할 수 있습니다.', true); window.location.hash = '#/dashboard'; return; }
                 post = data;
             }
-            container.innerHTML = `
-                <div class="py-12">
-                     <div class="mb-8">
-                        <button class="btn" data-action="go-back">
-                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-                            대시보드로
-                        </button>
-                    </div>
-                    <h1 class="text-2xl font-bold font-heading mb-8">${id ? '글 수정하기' : '새 글 작성하기'}</h1>
-                    <form id="writer-form" class="space-y-6">
-                        <input type="hidden" id="post-id" value="${id || ''}">
-                        <div>
-                            <label for="title" class="block text-sm font-medium text-gray-300 mb-2">제목</label>
-                            <input type="text" id="title" class="form-input" required value="${post.title}">
-                        </div>
-                        <div>
-                            <label for="summary" class="block text-sm font-medium text-gray-300 mb-2">요약 (메인 페이지에 표시됩니다)</label>
-                            <textarea id="summary" class="form-textarea" rows="3" required>${post.summary}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">본문</label>
-                            <div id="editor"></div>
-                        </div>
-                        <div class="flex justify-end pt-4">
-                            <button type="submit" id="submit-btn" class="btn btn-primary">저장하기</button>
-                        </div>
-                    </form>
-                </div>`;
+            container.innerHTML = `<div class="py-12"><div class="mb-8"><button class="btn" data-action="go-back"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>대시보드로</button></div><h1 class="text-2xl font-bold font-heading mb-8">${id ? '글 수정하기' : '새 글 작성하기'}</h1><form id="writer-form" class="space-y-6"><input type="hidden" id="post-id" value="${id || ''}"><input type="hidden" id="is-draft-publish" value="${draft ? 'true' : 'false'}"><div><label for="title" class="block text-sm font-medium text-gray-300 mb-2">제목</label><input type="text" id="title" class="form-input" required value="${post.title}"></div><div><label for="summary" class="block text-sm font-medium text-gray-300 mb-2">요약</label><textarea id="summary" class="form-textarea" rows="3" required>${post.summary}</textarea></div><div><label class="block text-sm font-medium text-gray-300 mb-2">본문</label><div id="editor"></div></div><div class="flex justify-end pt-4"><button type="submit" id="submit-btn" class="btn btn-primary">저장하기</button></div></form></div>`;
             initQuillEditor(post.refined_content || '');
         }
-
-        function getPaginationRange(page) {
-            const from = (page - 1) * POSTS_PER_PAGE;
-            const to = from + POSTS_PER_PAGE - 1;
-            return { from, to };
-        }
-
-        function renderPaginationControls(currentPage, totalPosts, baseLink) {
-            const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-            if (totalPages <= 1) return '';
-
-            let html = '<div class="flex justify-center items-center gap-2 mt-8 pagination-controls">';
-            
-            html += `<a href="${baseLink}${currentPage - 1}" data-action="route" class="${currentPage === 1 ? 'disabled' : ''}">이전</a>`;
-
-            for (let i = 1; i <= totalPages; i++) {
-                html += `<a href="${baseLink}${i}" data-action="route" class="${i === currentPage ? 'active' : ''}">${i}</a>`;
-            }
-
-            html += `<a href="${baseLink}${currentPage + 1}" data-action="route" class="${currentPage === totalPages ? 'disabled' : ''}">다음</a>`;
-
-            html += '</div>';
-            return html;
-        }
-
-        // --- Quill Editor & Image Handling ---
-        function initQuillEditor(initialContent) {
-            if (state.quill) state.quill = null;
         
-            const BlockEmbed = Quill.import('blots/block/embed');
-            class VideoEmbedBlot extends BlockEmbed {
-                static create(value) {
-                    let node = super.create();
-                    node.innerHTML = value;
-                    node.setAttribute('contenteditable', 'false');
-                    return node;
-                }
-                static value(node) {
-                    return node.innerHTML;
-                }
-            }
-            VideoEmbedBlot.blotName = 'video-embed';
-            VideoEmbedBlot.tagName = 'div';
-            VideoEmbedBlot.className = 'ql-video-embed-wrapper';
-            Quill.register(VideoEmbedBlot);
-
-            state.quill = new Quill('#editor', {
-                theme: 'snow',
-                modules: { 
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link', 'image'], ['clean']
-                    ] 
-                }
-            });
-            
-            const Delta = Quill.import('delta');
-            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:(?:m|www)\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-
-            state.quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
-                const text = node.data;
-                const match = text.match(youtubeRegex);
-                if (match && match[1]) {
-                    const videoId = match[1];
-                    const embedHtml = `
-                        <div class="youtube-embed-container">
-                            <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                        </div>`;
-                    return new Delta().insert({ 'video-embed': embedHtml }).insert('\n');
-                }
-                return delta;
-            });
-
-            state.quill.root.innerHTML = initialContent;
-            state.quill.getModule('toolbar').addHandler('image', selectLocalImage);
-        }
-
-        function selectLocalImage() {
-            const input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', 'image/*');
-            input.click();
-            input.onchange = async () => {
-                const file = input.files[0];
-                if (file) await uploadImageAndInsert(file);
-            };
-        }
-
-        async function uploadImageAndInsert(file) {
-            if (!state.user) { showToast('이미지 업로드는 로그인이 필요합니다.', true); return; }
-            if (file.size > 2 * 1024 * 1024) { showToast('이미지 파일은 2MB를 초과할 수 없습니다.', true); return; }
-            
-            const webpFile = await convertBlobToWebP(file);
-            const fileName = `${state.user.id}/${Date.now()}.webp`;
-
-            showToast('이미지를 업로드하는 중입니다...');
-            const { error } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, webpFile);
-            if (error) { showToast(`업로드 실패: ${error.message}`, true); return; }
-
-            const { data } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName);
-            if (data) {
-                const range = state.quill.getSelection(true);
-                state.quill.insertEmbed(range.index, 'image', data.publicUrl);
-                showToast('이미지가 성공적으로 업로드되었습니다.');
-            }
-        }
+        // =================================================================================
+        // --- HELPER & UTILITY FUNCTIONS ---
+        // =================================================================================
+        function getPaginationRange(page) { const from = (page - 1) * POSTS_PER_PAGE; return { from, to: from + POSTS_PER_PAGE - 1 }; }
+        function renderPaginationControls(currentPage, totalPosts, baseLink) { const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE); if (totalPages <= 1) return ''; let html = '<div class="flex justify-center items-center gap-2 mt-8 pagination-controls">'; html += `<a href="${baseLink}${currentPage - 1}" data-action="route" class="${currentPage === 1 ? 'disabled' : ''}">이전</a>`; for (let i = 1; i <= totalPages; i++) { html += `<a href="${baseLink}${i}" data-action="route" class="${i === currentPage ? 'active' : ''}">${i}</a>`; } html += `<a href="${baseLink}${currentPage + 1}" data-action="route" class="${currentPage === totalPages ? 'disabled' : ''}">다음</a>`; return html + '</div>'; }
+        function findRelatedPosts(currentPost, otherPosts, count = 2) { const currentTitleWords = currentPost.title.toLowerCase().split(/\s+/); const scoredPosts = otherPosts.map(post => { let score = 0; const targetTitle = post.title.toLowerCase(); currentTitleWords.forEach(word => { if (word.length > 1 && targetTitle.includes(word)) score++; }); return { ...post, score }; }); return scoredPosts.filter(post => post.score > 0).sort((a, b) => b.score - a.score).slice(0, count); }
+        function createShareButtonsHtml(url, title) { return `<div class="mt-12 py-8 mb-12 border-t border-border-color"><h3 class="text-center text-sm font-bold text-gray-400 mb-4">공유하기</h3><div class="flex justify-center items-center gap-4"><a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}" target="_blank" class="btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg><span>X</span></a><a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4z"></path></svg><span>Facebook</span></a><button class="btn" data-action="copy-link" data-url="${url}"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>링크 복사</span></button></div></div>`; }
+        function createRelatedPostsHtml(relatedPosts) { if (relatedPosts.length === 0) return ''; return `<div class="mt-8 pt-8 border-t border-border-color"><h3 class="text-xl font-bold font-heading mb-4">관련 글</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${relatedPosts.map(p => `<a href="#/post/${p.id}" data-action="route" class="block p-4 bg-content/50 border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group"><h4 class="font-bold text-gray-200 group-hover:text-white transition-colors">${p.title}</h4><p class="text-gray-400 text-sm mt-1">${p.summary}</p></a>`).join('')}</div></div>`; }
+        function initQuillEditor(initialContent) { if (state.quill) state.quill = null; const BlockEmbed = Quill.import('blots/block/embed'); class VideoEmbedBlot extends BlockEmbed { static create(value) { let node = super.create(); node.innerHTML = value; node.setAttribute('contenteditable', 'false'); return node; } static value(node) { return node.innerHTML; } } VideoEmbedBlot.blotName = 'video-embed'; VideoEmbedBlot.tagName = 'div'; VideoEmbedBlot.className = 'ql-video-embed-wrapper'; Quill.register(VideoEmbedBlot); state.quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean']] } }); const Delta = Quill.import('delta'); const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:(?:m|www)\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/; state.quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => { const text = node.data; const match = text.match(youtubeRegex); if (match && match[1]) { const embedHtml = `<div class="youtube-embed-container"><iframe src="https://www.youtube.com/embed/${match[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`; return new Delta().insert({ 'video-embed': embedHtml }).insert('\n'); } return delta; }); state.quill.root.innerHTML = initialContent; }
+        function base64ToBlob(base64, contentType = 'image/webp') { const byteCharacters = atob(base64); const byteArrays = []; for (let offset = 0; offset < byteCharacters.length; offset += 512) { const slice = byteCharacters.slice(offset, offset + 512); const byteNumbers = new Array(slice.length); for (let i = 0; i < slice.length; i++) byteNumbers[i] = slice.charCodeAt(i); byteArrays.push(new Uint8Array(byteNumbers)); } return new Blob(byteArrays, { type: contentType }); }
         
-        // --- Gemini API Functions ---
-        async function generateText(topic) {
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const systemPrompt = `당신은 'CortexLog'의 수석 개발자이자 기술 문제 해결 전문가입니다. 당신의 목표는 독자가 복잡한 기술적 과제를 단순히 해결하는 것을 넘어, 그 원리를 깊이 이해하고 스스로 문제를 해결할 수 있도록 돕는 것입니다. '자율 AI 프레임워크'와 같은 고급 주제에 대한 높은 이해도를 바탕으로, 다음과 같은 스타일로 글을 작성해주세요.
-1.  **페르소나:** 친절하고 인내심 있는 전문가. 독자를 동료 개발자로 대하며, 전문 용어를 사용하되 항상 쉽게 풀어서 설명합니다.
-2.  **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다.
-3.  **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 단순히 'A를 하세요'가 아니라 'A를 해야 합니다. 왜냐하면 B라는 원리 때문이며, 이렇게 하면 C라는 장점이 있기 때문입니다.' 와 같이 상세하게 설명합니다.
-4.  **형식:** 생성할 내용은 제목(title), 짧은 요약(summary), 그리고 HTML 형식의 본문(body)입니다.
-5.  **본문 HTML 규칙:** 본문(body) 내용은 반드시 유효한 HTML이어야 합니다. **모든 소제목은 반드시 '<h2>' 또는 '<h3>' 태그로 감싸야 합니다.** 일반 텍스트나 마크다운(#) 형식을 사용해서는 안 됩니다. 가독성을 위해 p, blockquote, pre, code 태그도 적극적으로 사용해주세요.`;
-            const userQuery = `주제: "${topic}"`;
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "title": { "type": "STRING" },
-                            "summary": { "type": "STRING" },
-                            "body": { "type": "STRING" }
-                        },
-                        required: ["title", "summary", "body"]
-                    }
-                }
-            };
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`Gemini 텍스트 생성 API 오류: ${response.statusText}`);
-            const result = await response.json();
-            const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!textContent) throw new Error("Gemini API로부터 유효한 텍스트 콘텐츠를 받지 못했습니다.");
-            return JSON.parse(textContent);
-        }
+        // =================================================================================
+        // --- GEMINI API & IMAGE HANDLING ---
+        // =================================================================================
+        async function generateText(topic, isInitial = true, draft = null, instruction = null) { const apiKey = ""; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`; const initialSystemPrompt = `당신은 'CortexLog'의 수석 개발자이자 기술 문제 해결 전문가입니다. 당신의 목표는 독자가 복잡한 기술적 과제를 단순히 해결하는 것을 넘어, 그 원리를 깊이 이해하고 스스로 문제를 해결할 수 있도록 돕는 것입니다. 다음과 같은 스타일로 글을 작성해주세요. 1. **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다. 2. **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 3. **형식:** 생성할 내용은 제목(title), 짧은 요약(summary), 그리고 HTML 형식의 본문(body)입니다. 4. **본문 HTML 규칙:** 본문(body) 내용은 반드시 유효한 HTML이어야 합니다. **모든 소제목은 반드시 '<h2>' 또는 '<h3>' 태그로 감싸야 합니다.** 가독성을 위해 p, blockquote, pre, code 태그도 적극적으로 사용해주세요.`; const editorSystemPrompt = `당신은 'CortexLog'의 유능한 편집자입니다. 사용자가 제공한 초안(draft)과 수정 요청(instruction)을 바탕으로, 글 전체를 수정하고 완성된 결과물을 JSON 형식으로 반환하는 임무를 맡았습니다. 반드시 전체 글의 맥락을 유지하면서 요청사항을 반영해야 합니다. 응답은 반드시 제목(title), 요약(summary), 본문(body) 필드를 포함한 단일 JSON 객체여야 합니다. 원본의 HTML 구조를 최대한 유지해주세요.`; let systemPrompt, userQuery; if (isInitial) { systemPrompt = initialSystemPrompt; userQuery = `주제: "${topic}"`; } else { systemPrompt = editorSystemPrompt; userQuery = `{"draft": ${JSON.stringify(draft)}, "instruction": "${instruction}"}`; } const payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { "title": { "type": "STRING" }, "summary": { "type": "STRING" }, "body": { "type": "STRING" } }, required: ["title", "summary", "body"] } } }; const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error(`Gemini API 오류: ${response.statusText}`); const result = await response.json(); const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text; if (!textContent) throw new Error("Gemini API로부터 유효한 콘텐츠를 받지 못했습니다."); return JSON.parse(textContent); }
+        async function generateImage(title) { const apiKey = ""; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`; const prompt = `A minimalist illustration on a pure black background, drawn only with thin white outlines. The style is simple, futuristic, and monochrome. Depict "${title}" in a clean and abstract way.`; const payload = { instances: [{ prompt }], parameters: { "sampleCount": 1 } }; const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error(`Imagen API 오류: ${response.statusText}`); const result = await response.json(); const base64Data = result.predictions?.[0]?.bytesBase64Encoded; if (!base64Data) throw new Error("Imagen API로부터 유효한 이미지 데이터를 받지 못했습니다."); return base64Data; }
+        async function uploadBase64Image(base64Data) { if (!base64Data) throw new Error("이미지 데이터가 없습니다."); const imageBlob = base64ToBlob(base64Data); const fileName = `${state.user.id}/${Date.now()}.webp`; const { error } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, imageBlob); if (error) throw new Error(`이미지 업로드 실패: ${error.message}`); const { data } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName); return data.publicUrl; }
 
-        async function generateImage(title) {
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            const prompt = `A minimalist line art illustration on a pure black background, drawn only with thin white or gray outlines. No text, no labels, no letters, no words. The style is simple, futuristic, and monochrome. Depict "${title}" in a clean and abstract way.`;
-            const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`Imagen 이미지 생성 API 오류: ${response.statusText}`);
-            const result = await response.json();
-            const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
-            if (!base64Data) throw new Error("Imagen API로부터 유효한 이미지 데이터를 받지 못했습니다.");
-            return base64Data;
-        }
-
-        function base64ToBlob(base64, contentType = 'image/png') {
-            const byteCharacters = atob(base64);
-            const byteArrays = [];
-            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-                const slice = byteCharacters.slice(offset, offset + 512);
-                const byteNumbers = new Array(slice.length);
-                for (let i = 0; i < slice.length; i++) {
-                    byteNumbers[i] = slice.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                byteArrays.push(byteArray);
-            }
-            return new Blob(byteArrays, { type: contentType });
-        }
-
-        function convertBlobToWebP(blob, quality = 0.8) {
-            return new Promise((resolve, reject) => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.src = URL.createObjectURL(blob);
-                img.onload = () => {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    canvas.toBlob(webpBlob => {
-                        if (webpBlob) {
-                            resolve(webpBlob);
-                        } else {
-                            reject(new Error('Canvas to WebP conversion failed.'));
-                        }
-                    }, 'image/webp', quality);
-                    URL.revokeObjectURL(img.src);
-                };
-                img.onerror = () => {
-                    reject(new Error('Image loading for WebP conversion failed.'));
-                    URL.revokeObjectURL(img.src);
-                };
-            });
-        }
-
-        async function deletePostAndAssociatedImages(postId) {
-            const { data: post, error: fetchError } = await supabase
-                .from('posts')
-                .select('refined_content')
-                .eq('id', postId)
-                .single();
-
-            if (fetchError) throw new Error(`삭제할 글을 찾지 못했습니다: ${fetchError.message}`);
-
-            const content = post.refined_content || '';
-            const imageUrls = content.match(/https:\/\/[^"]+\/storage\/v1\/object\/public\/thought-images\/[^"]+/g) || [];
-            const imagePaths = imageUrls.map(url => {
-                const parts = url.split('/thought-images/');
-                return parts[1] || '';
-            }).filter(path => path);
-
-            if (imagePaths.length > 0) {
-                showToast(`${imagePaths.length}개의 이미지 삭제를 시작합니다...`);
-                const { error: storageError } = await supabase.storage
-                    .from(IMAGE_BUCKET_NAME)
-                    .remove(imagePaths);
-                
-                if (storageError) throw new Error(`스토리지 이미지 삭제 실패: ${storageError.message}`);
-                showToast('연관된 이미지를 모두 삭제했습니다.');
-            }
-
-            const { error: dbError } = await supabase
-                .from('posts')
-                .delete()
-                .eq('id', postId);
-            
-            if (dbError) throw new Error(`데이터베이스 글 삭제 실패: ${dbError.message}`);
-        }
-
-
-        // --- EVENT HANDLERS ---
-        async function handleGlobalClick(target) {
-            const action = target.dataset.action;
-            const id = target.dataset.id;
-            const url = target.dataset.url;
-            switch (action) {
-                case 'route': window.location.hash = target.hash; break;
-                case 'go-back': history.back(); break;
-                case 'show-auth': showAuthModal(); break;
-                case 'close-modal': closeModal(); break;
-                case 'login': handleAuth('login'); break;
-                case 'signup': handleAuth('signup'); break;
-                case 'logout': handleLogout(); break;
-                case 'copy-link':
-                    const textArea = document.createElement("textarea");
-                    textArea.value = url;
-                    document.body.appendChild(textArea);
-                    textArea.focus(); textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showToast('링크가 복사되었습니다!');
-                    } catch (err) {
-                        showToast('링크 복사에 실패했습니다.', true);
-                    }
-                    document.body.removeChild(textArea);
-                    break;
-                case 'delete-post':
-                    renderModal({
-                        title: '정말 삭제하시겠습니까?',
-                        content: '연관된 모든 이미지도 함께 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.',
-                        confirmText: '삭제',
-                        confirmAction: 'confirm-delete',
-                        onConfirm: async () => {
-                            try {
-                                showToast('글과 이미지 삭제를 시작합니다...');
-                                await deletePostAndAssociatedImages(id);
-                                showToast('글이 완전히 삭제되었습니다.');
-                                handleRouting(); 
-                            } catch (error) {
-                                console.error('Deletion Error:', error);
-                                showToast(`삭제 중 오류 발생: ${error.message}`, true);
-                            } finally {
-                                closeModal();
-                            }
-                        }
-                    });
-                    break;
-            }
-        }
+        // =================================================================================
+        // --- WORKFLOW & EVENT HANDLERS ---
+        // =================================================================================
+        async function handleGlobalClick(target) { const action = target.dataset.action; switch (action) { case 'route': window.location.hash = target.hash; break; case 'go-back': history.back(); break; case 'show-auth': showAuthModal(); break; case 'close-modal-backdrop': closeModal(); break; case 'logout': handleLogout(); break; case 'finalize-draft': handleMoveToEditor(); break; case 'publish-draft': handleDirectPublish(); break; case 'copy-link': const textArea = document.createElement("textarea"); textArea.value = target.dataset.url; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); showToast('링크가 복사되었습니다!'); } catch (err) { showToast('링크 복사에 실패했습니다.', true); } document.body.removeChild(textArea); break; case 'delete-post': renderModal({ title: '정말 삭제하시겠습니까?', content: '연관된 모든 이미지도 함께 영구적으로 삭제됩니다.', confirmText: '삭제', onConfirm: async () => { try { showToast('글과 이미지 삭제를 시작합니다...'); await deletePostAndAssociatedImages(target.dataset.id); showToast('글이 완전히 삭제되었습니다.'); handleRouting(); } catch (error) { console.error('Deletion Error:', error); showToast(`삭제 중 오류 발생: ${error.message}`, true); } finally { closeModal(); } } }); break; } }
+        async function handleWriterSubmit() { const id = $('#post-id').value; const isDraft = $('#is-draft-publish').value === 'true'; const title = $('#title').value; const summary = $('#summary').value; let refined_content = state.quill.root.innerHTML; if (!title.trim() || !summary.trim()) { showToast('제목과 요약은 필수 항목입니다.', true); return; } $('#submit-btn').disabled = true; try { if (isDraft) { const imgTag = refined_content.match(/<img[^>]+src="data:image\/webp;base64,([^">]+)"/); if (imgTag && imgTag[1]) { showToast('최종 이미지를 업로드합니다...'); const imageUrl = await uploadBase64Image(imgTag[1]); refined_content = refined_content.replace(imgTag[0], `<img src="${imageUrl}" alt="${title}">`); } } const postData = { title, summary, refined_content, author_id: state.user.id }; const { error } = id ? await supabase.from('posts').update(postData).eq('id', id) : await supabase.from('posts').insert(postData); if (error) throw error; clearDraft(); showToast(id ? '글이 수정되었습니다!' : '글이 생성되었습니다!'); window.location.hash = '#/dashboard'; } catch (error) { console.error("Publish Error:", error); showToast(`발행 실패: ${error.message}`, true); } finally { $('#submit-btn').disabled = false; } }
+        async function handleAiWriterSubmit() { const topic = $('#ai-topic').value; if (!topic.trim()) { showToast('글 주제를 입력해주세요.', true); return; } const loader = $('.ai-loader'); const button = $('#ai-generate-btn'); loader.style.display = 'block'; button.disabled = true; try { showToast('AI가 글 초안을 작성하고 있습니다...'); const article = await generateText(topic); showToast('AI가 이미지를 생성하고 있습니다...'); const imageBase64 = await generateImage(article.title); state.draftArticle = { title: article.title, summary: article.summary, body: article.body, imageBase64 }; saveDraft(state.draftArticle); showToast('초안 생성 완료! 글 다듬기 화면으로 이동합니다.'); window.location.hash = '#/refiner'; } catch (error) { console.error('AI Writer Error:', error); showToast(`오류 발생: ${error.message}`, true); } finally { loader.style.display = 'none'; button.disabled = false; } }
+        async function handleRefinerChatSubmit(e) { e.preventDefault(); const input = $('#refiner-input'); const instruction = input.value.trim(); if (!instruction) return; const chatHistory = $('#chat-history'); chatHistory.innerHTML += `<div class="chat-message user">${instruction}</div>`; chatHistory.innerHTML += `<div class="chat-message system">AI가 응답을 생성 중입니다...</div>`; chatHistory.scrollTop = chatHistory.scrollHeight; input.value = ''; input.disabled = true; try { const currentDraft = { title: state.draftArticle.title, summary: state.draftArticle.summary, body: state.draftArticle.body }; const updatedArticle = await generateText(null, false, currentDraft, instruction); state.draftArticle.title = updatedArticle.title; state.draftArticle.summary = updatedArticle.summary; state.draftArticle.body = updatedArticle.body; saveDraft(state.draftArticle); chatHistory.querySelector('.system').remove(); renderRefinerPreview(); } catch(error) { console.error("Refiner Error:", error); showToast(`수정 중 오류 발생: ${error.message}`, true); chatHistory.querySelector('.system').textContent = '오류가 발생했습니다.'; } finally { input.disabled = false; } }
+        async function handleRegenerateImage() { const btn = $('#regenerate-image-btn'); btn.disabled = true; btn.innerHTML = '<div class="image-loader" style="display: block;"></div>'; try { showToast('새 이미지를 생성하고 있습니다...'); const newImageBase64 = await generateImage(state.draftArticle.title); state.draftArticle.imageBase64 = newImageBase64; saveDraft(state.draftArticle); renderRefinerPreview(); showToast('이미지가 교체되었습니다.'); } catch (error) { console.error("Image Regeneration Error:", error); showToast(`이미지 재생성 실패: ${error.message}`, true); } finally { btn.disabled = false; btn.textContent = '이미지 재생성'; } }
+        async function handleDirectPublish() { if (!state.draftArticle) return showToast("발행할 초안이 없습니다.", true); showToast("이미지를 업로드하고 글을 발행합니다..."); try { const imageUrl = await uploadBase64Image(state.draftArticle.imageBase64); const imageHtml = `<img src="${imageUrl}" alt="${state.draftArticle.title}">`; const postData = { title: state.draftArticle.title, summary: state.draftArticle.summary, refined_content: imageHtml + state.draftArticle.body, author_id: state.user.id, }; const { error } = await supabase.from('posts').insert(postData); if (error) throw error; clearDraft(); showToast("글이 성공적으로 발행되었습니다!"); window.location.hash = '#/dashboard'; } catch (error) { console.error("Direct publish error:", error); showToast(`발행 실패: ${error.message}`, true); } }
+        async function handleMoveToEditor() { if (!state.draftArticle) return showToast("편집할 초안이 없습니다.", true); const finalDraftForEditor = { ...state.draftArticle, imageHtml: `<img src="data:image/webp;base64,${state.draftArticle.imageBase64}" alt="${state.draftArticle.title}">`, }; switchView('view-writer', (el) => renderWriterView(el, null, finalDraftForEditor)); }
+        async function deletePostAndAssociatedImages(postId) { const { data: post, error: fetchError } = await supabase.from('posts').select('refined_content').eq('id', postId).single(); if (fetchError) throw new Error(`삭제할 글을 찾지 못했습니다: ${fetchError.message}`); const content = post.refined_content || ''; const imageUrls = content.match(/https:\/\/[^"]+\/storage\/v1\/object\/public\/thought-images\/[^"]+/g) || []; const imagePaths = imageUrls.map(url => url.split('/thought-images/')[1] || '').filter(Boolean); if (imagePaths.length > 0) { const { error: storageError } = await supabase.storage.from(IMAGE_BUCKET_NAME).remove(imagePaths); if (storageError) throw new Error(`스토리지 이미지 삭제 실패: ${storageError.message}`); } const { error: dbError } = await supabase.from('posts').delete().eq('id', postId); if (dbError) throw new Error(`데이터베이스 글 삭제 실패: ${dbError.message}`); }
         
-        async function handleWriterSubmit() {
-            const id = $('#post-id').value;
-            const title = $('#title').value;
-            const summary = $('#summary').value;
-            const refined_content = state.quill.root.innerHTML;
-            if (!title.trim() || !summary.trim()) {
-                showToast('제목과 요약은 필수 항목입니다.', true); return;
-            }
-            $('#submit-btn').disabled = true;
-            const postData = { title, summary, refined_content, author_id: state.user.id };
-            const result = id 
-                ? await supabase.from('posts').update({ title, summary, refined_content }).eq('id', id)
-                : await supabase.from('posts').insert(postData);
-            $('#submit-btn').disabled = false;
-            if (result.error) {
-                showToast(`저장 실패: ${result.error.message}`, true);
-            } else {
-                showToast(id ? '글이 수정되었습니다!' : '글이 생성되었습니다!');
+        // =================================================================================
+        // --- AI REFINER WORKFLOW & DRAFT MANAGEMENT ---
+        // =================================================================================
+        function renderRefinerView(container) {
+            $('#app-container').className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
+            if (!state.draftArticle) {
+                showToast("초안 정보가 없습니다. 대시보드에서 다시 시작해주세요.", true);
                 window.location.hash = '#/dashboard';
+                return;
             }
+            container.innerHTML = `<div class="py-8"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"><div><h1 class="text-2xl font-bold font-heading">AI 글 다듬기</h1><p class="text-gray-400 text-sm mt-1">AI 초안을 확인하고, 채팅으로 수정을 요청하여 글을 완성하세요.</p></div><div class="flex gap-2 w-full sm:w-auto"><button class="btn w-full" data-action="finalize-draft">수동 편집</button><button class="btn btn-primary w-full" data-action="publish-draft">바로 발행하기</button></div></div><div class="refiner-grid"><div id="refiner-preview-wrapper"><div class="flex justify-between items-center mb-4"><h2 class="font-bold">미리보기</h2><button id="regenerate-image-btn" class="btn text-xs">이미지 재생성</button></div><div id="refiner-preview-container"></div></div><div id="refiner-chat-container"><div id="chat-history"><div class="chat-message ai">초안이 완성되었습니다. 어떤 부분을 수정할까요?</div></div><form id="refiner-chat-form"><input type="text" id="refiner-input" class="form-input" placeholder="수정 요청사항을 입력하세요..."><button type="submit" class="btn btn-primary">전송</button></form></div></div></div>`;
+            renderRefinerPreview();
+            $('#refiner-chat-form').addEventListener('submit', handleRefinerChatSubmit);
+            $('#regenerate-image-btn').addEventListener('click', handleRegenerateImage);
         }
 
-        async function handleAiWriterSubmit() {
-            const topic = $('#ai-topic').value;
-            if (!topic.trim()) {
-                showToast('글 주제를 입력해주세요.', true); return;
-            }
-            const loader = $('.ai-loader');
-            const button = $('#ai-generate-btn');
-            loader.style.display = 'block';
-            button.disabled = true;
-
-            try {
-                showToast('AI가 글을 작성하고 있습니다...');
-                const article = await generateText(topic);
-                
-                showToast('AI가 이미지를 생성하고 있습니다...');
-                const imageBase64 = await generateImage(article.title);
-                const imageBlob = base64ToBlob(imageBase64);
-                
-                showToast('이미지를 WebP로 변환 중입니다...');
-                const webpImageBlob = await convertBlobToWebP(imageBlob);
-
-                showToast('이미지를 업로드하고 있습니다...');
-                const fileName = `${state.user.id}/${Date.now()}.webp`;
-                const { error: uploadError } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, webpImageBlob);
-                if (uploadError) throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
-
-                const { data: publicUrlData } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName);
-                const imageUrl = publicUrlData.publicUrl;
-
-                const bodyWithImage = article.body.replace(/<\/p>/, `</p><img src="${imageUrl}" alt="${article.title}">`);
-
-                const postData = {
-                    title: article.title,
-                    summary: article.summary,
-                    refined_content: bodyWithImage,
-                    author_id: state.user.id
-                };
-
-                const { error: insertError } = await supabase.from('posts').insert(postData);
-                if (insertError) throw new Error(`글 저장 실패: ${insertError.message}`);
-
-                showToast('AI가 글 작성을 완료했습니다!');
-                $('#ai-topic').value = '';
-                handleRouting();
-
-            } catch (error) {
-                console.error('AI Writer Error:', error);
-                showToast(`오류 발생: ${error.message}`, true);
-            } finally {
-                loader.style.display = 'none';
-                button.disabled = false;
-            }
+        function renderRefinerPreview() {
+            const previewContainer = $('#refiner-preview-container');
+            if (!previewContainer || !state.draftArticle) return;
+            const { title, summary, body, imageBase64 } = state.draftArticle;
+            const imageHtml = imageBase64 ? `<img src="data:image/webp;base64,${imageBase64}" alt="${title}">` : '';
+            previewContainer.innerHTML = `<div class="prose-custom max-w-none"><h1>${title}</h1><p class="text-gray-400 italic">${summary}</p>${imageHtml}${body}</div>`;
         }
+        function saveDraft(draft) { localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)); }
+        function loadDraft() { const draftJson = localStorage.getItem(DRAFT_STORAGE_KEY); return draftJson ? JSON.parse(draftJson) : null; }
+        function clearDraft() { localStorage.removeItem(DRAFT_STORAGE_KEY); state.draftArticle = null; }
+        function checkForUnsavedDraft() { const savedDraft = loadDraft(); if (savedDraft) { renderModal({ title: '미완성 초안 발견', content: '작업을 중단했던 AI 글 초안이 있습니다. 이어서 작성하시겠습니까?', confirmText: '이어쓰기', onConfirm: () => { state.draftArticle = savedDraft; window.location.hash = '#/refiner'; closeModal(); }, cancelText: '삭제', onCancel: () => { clearDraft(); closeModal(); } }); } }
 
+        // =================================================================================
         // --- INITIALIZATION ---
+        // =================================================================================
         function initializeApp() {
             window.addEventListener('hashchange', handleRouting);
-            document.addEventListener('click', (e) => {
-                const target = e.target.closest('[data-action]');
-                if (target) { e.preventDefault(); handleGlobalClick(target); }
-            });
-            document.addEventListener('submit', (e) => {
-                if (e.target.id === 'writer-form') { e.preventDefault(); handleWriterSubmit(); }
-                if (e.target.id === 'ai-writer-form') { e.preventDefault(); }
-                if (e.target.id === 'auth-form') e.preventDefault();
-            });
+            document.addEventListener('click', (e) => { const target = e.target.closest('[data-action]'); if (target) { e.preventDefault(); handleGlobalClick(target); } });
+            document.addEventListener('submit', (e) => { const formId = e.target.id; if (formId === 'writer-form') { e.preventDefault(); handleWriterSubmit(); } else if (['ai-writer-form', 'auth-form', 'refiner-chat-form'].includes(formId)) { e.preventDefault(); } });
             supabase.auth.onAuthStateChange(async (_event, session) => {
                 state.user = session?.user || null;
                 renderNav();
@@ -1061,47 +407,14 @@
                     const loader = $('#app-loader');
                     anime({ targets: loader, opacity: 0, duration: 500, easing: 'easeOutCubic', complete: () => loader.style.display = 'none' });
                     handleRouting(); 
+                    if (state.user) checkForUnsavedDraft();
                 } else {
                     handleRouting();
                 }
             });
         }
         
-        (function setupDynamicBackground() {
-            const canvas = $('#app-background');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let particles = [];
-            const particleCount = Math.min(40, window.innerWidth / 30);
-            const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-            window.addEventListener('resize', resize, { passive: true });
-            resize();
-            class Particle {
-                constructor() { this.reset(); this.radius = Math.random() * 1.2 + 0.3; }
-                reset() {
-                    this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                    this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15;
-                }
-                update() {
-                    this.x += this.vx; this.y += this.vy;
-                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-                }
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                    ctx.fill();
-                }
-            }
-            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => { p.update(); p.draw(); });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        })();
+        (function setupDynamicBackground() { const canvas = $('#app-background'); if (!canvas) return; const ctx = canvas.getContext('2d'); let particles = []; const particleCount = Math.min(40, window.innerWidth / 30); const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.addEventListener('resize', resize, { passive: true }); resize(); class Particle { constructor() { this.reset(); this.radius = Math.random() * 1.2 + 0.3; } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fill(); } } for (let i = 0; i < particleCount; i++) particles.push(new Particle()); function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate(); })();
 
         initializeApp();
     </script>
