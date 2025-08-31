@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112"
-     crossorigin="anonymous"></script>
+    <!-- AdSense Script: 이 스크립트는 head에 한 번만 포함되면 됩니다. -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112" crossorigin="anonymous"></script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -15,12 +16,14 @@
     <meta property="og:url" content="https://mapia.vercel.app/">
     <meta property="og:title" content="CortexLog">
     <meta property="og:description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
+    <meta property="og:image" content="https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://mapia.vercel.app/">
     <meta property="twitter:title" content="CortexLog">
     <meta property="twitter:description" content="AI, 기술, 그리고 일상에 대한 깊이 있는 인사이트를 탐험하는 공간, CortexLog입니다.">
+    <meta property="twitter:image" content="https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -136,12 +139,33 @@
             pointer-events: none;
         }
 
-
         .ql-toolbar { border: 1px solid var(--border-color) !important; border-top-left-radius: 6px; border-top-right-radius: 6px; }
         .ql-container { border: 1px solid var(--border-color) !important; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; font-family: var(--font-body) !important;}
         .ql-editor { color: var(--text-primary); min-height: 300px; font-size: 0.95rem; }
         .ql-snow .ql-stroke { stroke: var(--text-secondary); }
         .ql-snow .ql-picker-label { color: var(--text-secondary) !important; }
+
+        /* YouTube Embed Styles */
+        .youtube-embed-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            margin: 1.5em 0;
+            border-radius: 8px;
+        }
+        .youtube-embed-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .ql-video-embed-wrapper {
+            margin: 1em 0;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -193,6 +217,15 @@
             const title = post ? post.title : defaultMeta.title;
             const description = post ? (post.summary || defaultMeta.description) : defaultMeta.description;
             const url = post ? `${SITE_URL}/#/post/${post.id}` : SITE_URL;
+            const defaultImage = 'https://fzfnjtlzovbpbglvkroh.supabase.co/storage/v1/object/public/thought-images/00dc2292-d179-4e54-b717-68a040a4e3a5/cortexlog.webp';
+            let imageUrl = defaultImage;
+
+            if (post && post.refined_content) {
+                const match = post.refined_content.match(/<img[^>]+src="([^">]+)"/);
+                if (match && match[1]) {
+                    imageUrl = match[1];
+                }
+            }
 
             document.title = title;
             $('meta[name="description"]').setAttribute('content', description);
@@ -200,10 +233,12 @@
             $('meta[property="og:title"]').setAttribute('content', title);
             $('meta[property="og:description"]').setAttribute('content', description);
             $('meta[property="og:url"]').setAttribute('content', url);
+            $('meta[property="og:image"]').setAttribute('content', imageUrl);
 
             $('meta[property="twitter:title"]').setAttribute('content', title);
             $('meta[property="twitter:description"]').setAttribute('content', description);
             $('meta[property="twitter:url"]').setAttribute('content', url);
+            $('meta[property="twitter:image"]').setAttribute('content', imageUrl);
 
             const structuredDataContainer = $('#structured-data-container');
             structuredDataContainer.innerHTML = '';
@@ -214,6 +249,7 @@
                     "@context": "https://schema.org",
                     "@type": "BlogPosting",
                     "headline": post.title,
+                    "image": imageUrl,
                     "datePublished": new Date(post.created_at).toISOString(),
                     "description": post.summary,
                     "author": { "@type": "Person", "name": "CortexLog Author" }
@@ -359,6 +395,13 @@
                 if (callback) await callback(nextView);
                 nextView.classList.add('active');
                 animations.pageEnter(nextView);
+                
+                // AdSense SPA Logic: 페이지 뷰가 변경될 때마다 광고를 요청합니다.
+                try {
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.error("AdSense push error:", e);
+                }
             }
         }
         
@@ -366,19 +409,23 @@
             if (!state.isAuthReady) return;
             const hash = window.location.hash || '#/';
             const parts = hash.substring(2).split('/');
-            const [path, param1, param2] = parts;
             
+            let path = parts[0] || '';
             let id = null;
             let page = 1;
 
-            if (path === 'post') {
-                id = param1;
-            } else if (path === 'writer' && param1) {
-                id = param1;
-            } else if (path === 'dashboard' && param1 === 'page') {
-                page = parseInt(param2, 10) || 1;
-            } else if (param1 === 'page') {
-                page = parseInt(param2, 10) || 1;
+            if (path === 'page') {
+                page = parseInt(parts[1], 10) || 1;
+                path = ''; 
+            } 
+            else if (path === 'dashboard' && parts[1] === 'page') {
+                page = parseInt(parts[2], 10) || 1;
+            } 
+            else if (path === 'post') {
+                id = parts[1];
+            }
+            else if (path === 'writer') {
+                id = parts[1];
             }
 
             if (!state.user && (path === 'dashboard' || path === 'writer')) {
@@ -464,6 +511,17 @@
                     <p class="text-sm text-gray-500 mb-8">${new Date(post.created_at).toLocaleString('ko-KR')}</p>
                     <div>${post.refined_content || ''}</div>
                 </article>`;
+            
+            const adHtml = `
+                <div class="my-12">
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-5239497835591112"
+                         data-ad-slot="2069100221"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                </div>`;
+
             const shareHtml = `
                 <div class="mt-12 py-8 mb-12 border-t border-border-color">
                     <h3 class="text-center text-sm font-bold text-gray-400 mb-4">공유하기</h3>
@@ -493,7 +551,7 @@
                             </a>`).join('')}
                     </div>
                 </div>` : '';
-            container.innerHTML = postHtml + relatedPostsHtml + shareHtml;
+            container.innerHTML = postHtml + adHtml + relatedPostsHtml + shareHtml;
         }
 
         function findRelatedPosts(currentPost, otherPosts, count = 2) {
@@ -652,15 +710,53 @@
         // --- Quill Editor & Image Handling ---
         function initQuillEditor(initialContent) {
             if (state.quill) state.quill = null;
+        
+            const BlockEmbed = Quill.import('blots/block/embed');
+            class VideoEmbedBlot extends BlockEmbed {
+                static create(value) {
+                    let node = super.create();
+                    node.innerHTML = value;
+                    node.setAttribute('contenteditable', 'false');
+                    return node;
+                }
+                static value(node) {
+                    return node.innerHTML;
+                }
+            }
+            VideoEmbedBlot.blotName = 'video-embed';
+            VideoEmbedBlot.tagName = 'div';
+            VideoEmbedBlot.className = 'ql-video-embed-wrapper';
+            Quill.register(VideoEmbedBlot);
+
             state.quill = new Quill('#editor', {
                 theme: 'snow',
-                modules: { toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image'], ['clean']
-                ] }
+                modules: { 
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'image'], ['clean']
+                    ] 
+                }
             });
+            
+            const Delta = Quill.import('delta');
+            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:(?:m|www)\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+            state.quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
+                const text = node.data;
+                const match = text.match(youtubeRegex);
+                if (match && match[1]) {
+                    const videoId = match[1];
+                    const embedHtml = `
+                        <div class="youtube-embed-container">
+                            <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>`;
+                    return new Delta().insert({ 'video-embed': embedHtml }).insert('\n');
+                }
+                return delta;
+            });
+
             state.quill.root.innerHTML = initialContent;
             state.quill.getModule('toolbar').addHandler('image', selectLocalImage);
         }
@@ -703,7 +799,8 @@
 1.  **페르소나:** 친절하고 인내심 있는 전문가. 독자를 동료 개발자로 대하며, 전문 용어를 사용하되 항상 쉽게 풀어서 설명합니다.
 2.  **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다.
 3.  **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 단순히 'A를 하세요'가 아니라 'A를 해야 합니다. 왜냐하면 B라는 원리 때문이며, 이렇게 하면 C라는 장점이 있기 때문입니다.' 와 같이 상세하게 설명합니다.
-4.  **형식:** 생성할 내용은 제목, 짧은 요약(2-3문장), 그리고 HTML 형식의 본문입니다. 본문은 h2, h3, p, blockquote, pre, code 태그를 적극적으로 사용하여 가독성을 극대화해야 합니다.`;
+4.  **형식:** 생성할 내용은 제목(title), 짧은 요약(summary), 그리고 HTML 형식의 본문(body)입니다.
+5.  **본문 HTML 규칙:** 본문(body) 내용은 반드시 유효한 HTML이어야 합니다. **모든 소제목은 반드시 '<h2>' 또는 '<h3>' 태그로 감싸야 합니다.** 일반 텍스트나 마크다운(#) 형식을 사용해서는 안 됩니다. 가독성을 위해 p, blockquote, pre, code 태그도 적극적으로 사용해주세요.`;
             const userQuery = `주제: "${topic}"`;
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
@@ -855,7 +952,7 @@
                                 showToast('글과 이미지 삭제를 시작합니다...');
                                 await deletePostAndAssociatedImages(id);
                                 showToast('글이 완전히 삭제되었습니다.');
-                                handleRouting(); // Refresh the entire view to handle pagination correctly
+                                handleRouting(); 
                             } catch (error) {
                                 console.error('Deletion Error:', error);
                                 showToast(`삭제 중 오류 발생: ${error.message}`, true);
