@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow:
 ​Sitemap: https://mapia.vercel.app/api/sitemap
