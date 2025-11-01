@@ -87,6 +87,24 @@
         .prose-custom p { margin-bottom: 1.25em; } 
         .prose-custom h1, .prose-custom h2, .prose-custom h3 { color: var(--text-primary); font-family: var(--font-heading); font-weight: 700; margin-top: 2em; margin-bottom: 1em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
         .prose-custom h1 { font-size: 1.8rem; } .prose-custom h2 { font-size: 1.4rem; } .prose-custom h3 { font-size: 1.2rem; }
+        
+        /* * === h4, h5, h6 스타일 추가 ===
+         * h1-h3와 일관되도록 제목 폰트와 색상을 지정하고,
+         * 계층 구조에 맞게 폰트 크기와 마진을 조정합니다.
+         * (h1-h3와 구분하기 위해 하단 테두리는 제외)
+         */
+        .prose-custom h4, .prose-custom h5, .prose-custom h6 {
+            color: var(--text-primary);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+        .prose-custom h4 { font-size: 1.1rem; }
+        .prose-custom h5 { font-size: 1.0rem; }
+        .prose-custom h6 { font-size: 0.9rem; font-weight: 500; }
+        /* === 스타일 추가 끝 === */
+
         .prose-custom a { 
             color: var(--accent); text-decoration: none; font-weight: 500; 
             border-bottom: 1px solid #555; 
@@ -100,6 +118,50 @@
         .prose-custom code { background-color: #222; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; color: #eee; }
         .prose-custom blockquote { border-left: 2px solid var(--text-secondary); padding-left: 1.2rem; color: var(--text-secondary); font-style: italic; }
         .prose-custom img { border-radius: 8px; max-width: 100%; height: auto; margin-top: 2.5em; margin-bottom: 2.5em; }
+        
+        /* * === 테이블 반응형 수정 ===
+         * .prose-custom 내의 table 요소에 대한 스타일을 추가합니다.
+         * 모바일에서 테이블이 잘리는 현상을 방지합니다.
+         */
+        .prose-custom table {
+            /* * 응답성 수정: 테이블 반응형 처리
+             * display: block; 과 overflow-x: auto; 를 사용하여
+             * 테이블이 부모 요소(prose-custom)의 너비를 초과할 경우
+             * 가로 스크롤바를 생성하여 모바일에서도 잘리지 않게 합니다.
+             */
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            
+            /*
+             * 스타일링: 이미지와 유사한 다크 모드 테이블 스타일
+             */
+            border-collapse: collapse; /* 테두리 겹침 */
+            margin-top: 2em;
+            margin-bottom: 2em;
+            white-space: nowrap; /* 셀 내부 텍스트 줄바꿈 방지 */
+            font-size: 0.9rem; /* 폰트 크기 살짝 줄임 */
+            border: 1px solid var(--border-color);
+        }
+        .prose-custom th,
+        .prose-custom td {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem; /* 패딩 조정 */
+            vertical-align: middle; /* 수직 중앙 정렬 */
+            text-align: left; /* 기본 정렬 */
+        }
+        .prose-custom thead th,
+        .prose-custom thead td { /* thead 안의 td도 포함 */
+            background-color: var(--bg-content); /* 헤더 배경색 */
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        /* 홀수 행에 미세한 배경색을 주어 가독성 향상 */
+        .prose-custom tbody tr:nth-child(odd) {
+             background-color: rgba(255, 255, 255, 0.02);
+        }
+        /* === 테이블 수정 끝 === */
+
         .pagination-controls a, .pagination-controls span { padding: 0.4rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.8rem; transition: all 0.2s ease; }
         .pagination-controls a:hover { background-color: var(--accent-hover); color: var(--text-primary); }
         .pagination-controls .active { background-color: var(--accent); color: var(--bg-main); border-color: var(--accent); }
@@ -475,7 +537,7 @@
         // =================================================================================
         // --- GEMINI API & IMAGE HANDLING ---
         // =================================================================================
-        async function generateText(topic, isInitial = true, draft = null, instruction = null) { const apiKey = ""; const apiUrl = `https://generativelace.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`; const initialSystemPrompt = `당신은 'CortexLog'의 수석 개발자이자 기술 문제 해결 전문가입니다. 당신의 목표는 독자가 복잡한 기술적 과제를 단순히 해결하는 것을 넘어, 그 원리를 깊이 이해하고 스스로 문제를 해결할 수 있도록 돕는 것입니다. 다음과 같은 스타일로 글을 작성해주세요. 1. **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다. 2. **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 3. **형식:** 생성할 내용은 제목(title), 짧은 요약(summary), 그리고 HTML 형식의 본문(body)입니다. 4. **본문 HTML 규칙:** 본문(body) 내용은 반드시 유효한 HTML이어야 합니다. **모든 소제목은 반드시 '<h2>' 또는 '<h3>' 태그로 감싸야 합니다.** 가독성을 위해 p, blockquote, pre, code 태그도 적극적으로 사용해주세요.`; const editorSystemPrompt = `당신은 'CortexLog'의 유능한 편집자입니다. 사용자가 제공한 초안(draft)과 수정 요청(instruction)을 바탕으로, 글 전체를 수정하고 완성된 결과물을 JSON 형식으로 반환하는 임무를 맡았습니다. 반드시 전체 글의 맥락을 유지하면서 요청사항을 반영해야 합니다. 응답은 반드시 제목(title), 요약(summary), 본문(body) 필드를 포함한 단일 JSON 객체여야 합니다. 원본의 HTML 구조를 최대한 유지해주세요.`; let systemPrompt, userQuery; if (isInitial) { systemPrompt = initialSystemPrompt; userQuery = `주제: "${topic}"`; } else { systemPrompt = editorSystemPrompt; userQuery = `{"draft": ${JSON.stringify(draft)}, "instruction": "${instruction}"}`; } const payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { "title": { "type": "STRING" }, "summary": { "type": "STRING" }, "body": { "type": "STRING" } }, required: ["title", "summary", "body"] } } }; const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error(`Gemini API 오류: ${response.statusText}`); const result = await response.json(); const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text; if (!textContent) throw new Error("Gemini API로부터 유효한 콘텐츠를 받지 못했습니다."); return JSON.parse(textContent); }
+        async function generateText(topic, isInitial = true, draft = null, instruction = null) { const apiKey = ""; const apiUrl = `https://generativelace.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`; const initialSystemPrompt = `당신은 'CortexLog'의 수석 개발자이자 기술 문제 해결 전문가입니다. 당신의 목표는 독자가 복잡한 기술적 과제를 단순히 해결하는 것을 넘어, 그 원리를 깊이 이해하고 스스로 문제를 해결할 수 있도록 돕는 것입니다. 다음과 같은 스타일로 글을 작성해주세요. 1. **구조:** 문제 정의 -> 원인 분석 -> 단계별 해결책 제시 -> 각 단계의 이유 설명 -> 최종 코드 예시 또는 결과 요약 순으로 명확하게 구성합니다. 2. **내용:** '왜' 그렇게 해야 하는지에 대한 이유와 기술적 배경을 반드시 포함합니다. 3. **형식:** 생성할 내용은 제목(title), 짧은 요약(summary), 그리고 HTML 형식의 본문(body)입니다. 4. **본문 HTML 규칙:** 본문(body) 내용은 반드시 유효한 HTML이어야 합니다. **모든 소제목은 반드시 '<h2>' 또는 '<h3>' 태그로 감싸야 합니다.** 가독성을 위해 p, blockquote, pre, code, 그리고 테이블(table, thead, tbody, th, td) 태그도 적극적으로 사용해주세요.`; const editorSystemPrompt = `당신은 'CortexLog'의 유능한 편집자입니다. 사용자가 제공한 초안(draft)과 수정 요청(instruction)을 바탕으로, 글 전체를 수정하고 완성된 결과물을 JSON 형식으로 반환하는 임무를 맡았습니다. 반드시 전체 글의 맥락을 유지하면서 요청사항을 반영해야 합니다. 응답은 반드시 제목(title), 요약(summary), 본문(body) 필드를 포함한 단일 JSON 객체여야 합니다. 원본의 HTML 구조를 최대한 유지해주세요.`; let systemPrompt, userQuery; if (isInitial) { systemPrompt = initialSystemPrompt; userQuery = `주제: "${topic}"`; } else { systemPrompt = editorSystemPrompt; userQuery = `{"draft": ${JSON.stringify(draft)}, "instruction": "${instruction}"}`; } const payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { "title": { "type": "STRING" }, "summary": { "type": "STRING" }, "body": { "type": "STRING" } }, required: ["title", "summary", "body"] } } }; const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error(`Gemini API 오류: ${response.statusText}`); const result = await response.json(); const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text; if (!textContent) throw new Error("Gemini API로부터 유효한 콘텐츠를 받지 못했습니다."); return JSON.parse(textContent); }
         async function generateImage(title) { const apiKey = ""; const apiUrl = `https://generativelace.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`; const prompt = `A minimalist illustration on a pure black background, drawn only with thin white outlines. The style is simple, futuristic, and monochrome. Depict "${title}" in a clean and abstract way.`; const payload = { instances: [{ prompt }], parameters: { "sampleCount": 1 } }; const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error(`Imagen API 오류: ${response.statusText}`); const result = await response.json(); const base64Data = result.predictions?.[0]?.bytesBase64Encoded; if (!base64Data) throw new Error("Imagen API로부터 유효한 이미지 데이터를 받지 못했습니다."); return base64Data; }
         async function uploadBase64Image(base64Data) { if (!base64Data) throw new Error("이미지 데이터가 없습니다."); const imageBlob = base64ToBlob(base64Data); const fileName = `${state.user.id}/${Date.now()}.webp`; const { error } = await supabase.storage.from(IMAGE_BUCKET_NAME).upload(fileName, imageBlob); if (error) throw new Error(`이미지 업로드 실패: ${error.message}`); const { data } = supabase.storage.from(IMAGE_BUCKET_NAME).getPublicUrl(fileName); return data.publicUrl; }
 
@@ -522,6 +584,29 @@
         // =================================================================================
         // --- INITIALIZATION ---
         // =================================================================================
+        
+        /*
+         * === 로딩 속도 개선 ===
+         * IIFE (즉시 실행 함수) 대신 일반 함수로 변경합니다.
+         * 앱 초기화(initializeApp)가 호출된 *후*에
+         * 이 함수를 호출하여, 덜 중요한 리소스(배경 애니메이션)가
+         * 메인 앱 로직을 방해하지 않도록 합니다.
+         */
+        function setupDynamicBackground() { 
+            const canvas = $('#app-background'); 
+            if (!canvas) return; 
+            const ctx = canvas.getContext('2d'); 
+            let particles = []; 
+            const particleCount = Math.min(40, window.innerWidth / 30); 
+            const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; 
+            window.addEventListener('resize', resize, { passive: true }); 
+            resize(); 
+            class Particle { constructor() { this.reset(); this.radius = Math.random() * 1.2 + 0.3; } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fill(); } } 
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle()); 
+            function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } 
+            animate(); 
+        }
+
         function initializeApp() {
             window.addEventListener('hashchange', handleRouting);
             document.addEventListener('click', (e) => { const target = e.target.closest('[data-action]'); if (target) { e.preventDefault(); handleGlobalClick(target); } });
@@ -541,9 +626,9 @@
             });
         }
         
-        (function setupDynamicBackground() { const canvas = $('#app-background'); if (!canvas) return; const ctx = canvas.getContext('2d'); let particles = []; const particleCount = Math.min(40, window.innerWidth / 30); const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.addEventListener('resize', resize, { passive: true }); resize(); class Particle { constructor() { this.reset(); this.radius = Math.random() * 1.2 + 0.3; } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.15; this.vy = (Math.random() - 0.5) * 0.15; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fill(); } } for (let i = 0; i < particleCount; i++) particles.push(new Particle()); function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate(); })();
-
         initializeApp();
+        setupDynamicBackground(); // 메인 앱 초기화 후 배경 애니메이션 시작
     </script>
 </body>
 </html>
+
