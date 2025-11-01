@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- AdSense Script: This script should be included only once in the head. -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112" crossorigin="anonymous"></script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 
+      성능 최적화 #1: Preconnect 힌트 추가
+      - 렌더링에 필수적인 외부 리소스(폰트, 스크립트 CDN, API)에 미리 연결하여 
+      - DNS 조회, TCP 핸드셰이크, TLS 협상 시간을 절약합니다.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fzfnjtlzovbpbglvkroh.supabase.co" crossorigin>
+    
+    <!-- AdSense Script: async로 이미 잘 설정되어 있습니다. -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5239497835591112" crossorigin="anonymous"></script>
     
     <!-- Meta Tags -->
     <title>CortexLog</title>
@@ -27,13 +39,22 @@
 
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 
+      성능 최적화 #2: 폰트 비동기 로딩
+      - 폰트 CSS가 렌더링을 차단하는 것을 막기 위해 'media="print"' 트릭을 사용합니다.
+      - 로드가 완료되면 'onload' 이벤트로 media를 'all'로 변경하여 폰트를 적용합니다.
+      - JavaScript가 비활성화된 환경을 위해 <noscript> 폴백을 제공합니다.
+    -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Pretendard:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Pretendard:wght@400;500;700&display=swap"></noscript>
 
+    <!-- 
+      성능 최적화 #3: Quill CSS 동적 로딩
+      - Quill 에디터가 필요한 페이지(Writer)에서만 CSS를 로드하도록 <head>에서 제거했습니다.
+      - CSS는 메인 스크립트 내의 'initQuillEditor' 함수에서 동적으로 주입됩니다.
+    -->
+    
     <!-- Main Styles -->
     <style>
         :root {
@@ -113,6 +134,14 @@
     <div id="modal-container"></div>
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-3"></div>
     
+    <!-- 
+      성능 최적화 #4: 스크립트 지연 로드 (defer)
+      - 렌더링을 차단하지 않도록 anime.js 스크립트를 <body> 끝으로 이동하고 'defer' 속성을 추가했습니다.
+      - 'defer'는 HTML 파싱과 병렬로 스크립트를 다운로드하고, 파싱이 끝난 후 실행되도록 보장합니다.
+      - Quill.js는 <head>에서 제거되었으며, 필요시 동적으로 로드됩니다.
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" defer></script>
+    
     <script type="module">
         // =================================================================================
         // --- SETUP & STATE MANAGEMENT ---
@@ -132,8 +161,51 @@
             quill: null,
             isAuthReady: false,
             draftArticle: null,
+            quillLoaded: false, // 성능 최적화: Quill 로드 상태 추적
         };
         const $ = (selector) => document.querySelector(selector);
+
+        // =================================================================================
+        // --- 성능 최적화: 동적 리소스 로더 ---
+        // =================================================================================
+        
+        /**
+         * 스크립트를 동적으로 로드하고, 이미 로드된 경우 건너뜁니다.
+         * @param {string} src - 스크립트 URL
+         * @param {string} id - 스크립트 태그의 고유 ID
+         * @returns {Promise<void>}
+         */
+        function loadScript(src, id) {
+            return new Promise((resolve, reject) => {
+                if (document.getElementById(id)) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = src;
+                script.id = id;
+                script.defer = true; // 파싱 후 실행 보장
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Script load error for ${src}`));
+                document.body.appendChild(script);
+            });
+        }
+
+        /**
+         * CSS 파일을 동적으로 로드하고, 이미 로드된 경우 건너뜁니다.
+         * @param {string} href - CSS URL
+         * @param {string} id - <link> 태그의 고유 ID
+         */
+        function loadCss(href, id) {
+            if (document.getElementById(id)) {
+                return;
+            }
+            const link = document.createElement('link');
+            link.href = href;
+            link.id = id;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
 
         // =================================================================================
         // --- SEO & META TAGS ---
@@ -331,6 +403,8 @@
                 post = data;
             }
             container.innerHTML = `<div class="py-12"><div class="mb-8"><button class="btn" data-action="go-back"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>대시보드로</button></div><h1 class="text-2xl font-bold font-heading mb-8">${id ? '글 수정하기' : '새 글 작성하기'}</h1><form id="writer-form" class="space-y-6"><input type="hidden" id="post-id" value="${id || ''}"><input type="hidden" id="is-draft-publish" value="${draft ? 'true' : 'false'}"><div><label for="title" class="block text-sm font-medium text-gray-300 mb-2">제목</label><input type="text" id="title" class="form-input" required value="${post.title}"></div><div><label for="summary" class="block text-sm font-medium text-gray-300 mb-2">요약</label><textarea id="summary" class="form-textarea" rows="3" required>${post.summary}</textarea></div><div><label class="block text-sm font-medium text-gray-300 mb-2">본문</label><div id="editor"></div></div><div class="flex justify-end pt-4"><button type="submit" id="submit-btn" class="btn btn-primary">저장하기</button></div></form></div>`;
+            
+            // initQuillEditor를 비동기로 호출합니다.
             initQuillEditor(post.refined_content || '');
         }
         
@@ -342,7 +416,61 @@
         function findRelatedPosts(currentPost, otherPosts, count = 2) { const currentTitleWords = currentPost.title.toLowerCase().split(/\s+/); const scoredPosts = otherPosts.map(post => { let score = 0; const targetTitle = post.title.toLowerCase(); currentTitleWords.forEach(word => { if (word.length > 1 && targetTitle.includes(word)) score++; }); return { ...post, score }; }); return scoredPosts.filter(post => post.score > 0).sort((a, b) => b.score - a.score).slice(0, count); }
         function createShareButtonsHtml(url, title) { return `<div class="mt-12 py-8 mb-12 border-t border-border-color"><h3 class="text-center text-sm font-bold text-gray-400 mb-4">공유하기</h3><div class="flex justify-center items-center gap-4"><a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}" target="_blank" class="btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg><span>X</span></a><a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4z"></path></svg><span>Facebook</span></a><button class="btn" data-action="copy-link" data-url="${url}"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>링크 복사</span></button></div></div>`; }
         function createRelatedPostsHtml(relatedPosts) { if (relatedPosts.length === 0) return ''; return `<div class="mt-8 pt-8 border-t border-border-color"><h3 class="text-xl font-bold font-heading mb-4">관련 글</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${relatedPosts.map(p => `<a href="#/post/${p.id}" data-action="route" class="block p-4 bg-content/50 border border-transparent hover:border-border-color rounded-lg transition-all duration-300 group"><h4 class="font-bold text-gray-200 group-hover:text-white transition-colors">${p.title}</h4><p class="text-gray-400 text-sm mt-1">${p.summary}</p></a>`).join('')}</div></div>`; }
-        function initQuillEditor(initialContent) { if (state.quill) state.quill = null; const BlockEmbed = Quill.import('blots/block/embed'); class VideoEmbedBlot extends BlockEmbed { static create(value) { let node = super.create(); node.innerHTML = value; node.setAttribute('contenteditable', 'false'); return node; } static value(node) { return node.innerHTML; } } VideoEmbedBlot.blotName = 'video-embed'; VideoEmbedBlot.tagName = 'div'; VideoEmbedBlot.className = 'ql-video-embed-wrapper'; Quill.register(VideoEmbedBlot); state.quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean']] } }); const Delta = Quill.import('delta'); const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:(?:m|www)\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/; state.quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => { const text = node.data; const match = text.match(youtubeRegex); if (match && match[1]) { const embedHtml = `<div class="youtube-embed-container"><iframe src="https://www.youtube.com/embed/${match[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`; return new Delta().insert({ 'video-embed': embedHtml }).insert('\n'); } return delta; }); state.quill.root.innerHTML = initialContent; }
+        
+        /**
+         * 성능 최적화: Quill 에디터 동적 로딩
+         * - 이 함수는 이제 async이며, Quill 스크립트와 CSS를 필요할 때만 로드합니다.
+         */
+        async function initQuillEditor(initialContent) {
+            // 1. Quill 리소스가 로드되지 않았다면 로드합니다.
+            if (!state.quillLoaded) {
+                try {
+                    showToast('에디터를 불러오는 중입니다...');
+                    // CSS와 JS를 병렬로 요청합니다.
+                    await Promise.all([
+                        loadCss('https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css', 'quill-css'),
+                        loadScript('https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js', 'quill-js')
+                    ]);
+                    state.quillLoaded = true;
+                } catch (error) {
+                    console.error("Quill loading failed:", error);
+                    showToast("에디터를 불러오는 데 실패했습니다.", true);
+                    return;
+                }
+            }
+
+            // 2. 스크립트가 로드되고 전역 'Quill' 객체가 사용 가능할 때까지 기다립니다.
+            await new Promise(resolve => {
+                const checkQuill = () => {
+                    if (typeof Quill !== 'undefined') {
+                        resolve();
+                    } else {
+                        setTimeout(checkQuill, 100); // 100ms 간격으로 확인
+                    }
+                };
+                checkQuill();
+            });
+
+            // 3. Quill 인스턴스를 생성합니다. (기존 로직)
+            if (state.quill) state.quill = null; 
+            const BlockEmbed = Quill.import('blots/block/embed'); 
+            class VideoEmbedBlot extends BlockEmbed { static create(value) { let node = super.create(); node.innerHTML = value; node.setAttribute('contenteditable', 'false'); return node; } static value(node) { return node.innerHTML; } } VideoEmbedBlot.blotName = 'video-embed'; VideoEmbedBlot.tagName = 'div'; VideoEmbedBlot.className = 'ql-video-embed-wrapper'; Quill.register(VideoEmbedBlot); 
+            
+            // #editor 요소가 DOM에 있는지 확인
+            const editorEl = $('#editor');
+            if (!editorEl) {
+                console.error("#editor 요소를 찾을 수 없습니다.");
+                return;
+            }
+
+            state.quill = new Quill(editorEl, { theme: 'snow', modules: { toolbar: [[{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean']] } }); 
+            const Delta = Quill.import('delta'); 
+            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:(?:m|www)\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/; 
+            state.quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => { const text = node.data; const match = text.match(youtubeRegex); if (match && match[1]) { const embedHtml = `<div class="youtube-embed-container"><iframe src="https://www.youtube.com/embed/${match[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`; return new Delta().insert({ 'video-embed': embedHtml }).insert('\n'); } return delta; }); 
+            
+            state.quill.root.innerHTML = initialContent; 
+        }
+
         function base64ToBlob(base64, contentType = 'image/webp') { const byteCharacters = atob(base64); const byteArrays = []; for (let offset = 0; offset < byteCharacters.length; offset += 512) { const slice = byteCharacters.slice(offset, offset + 512); const byteNumbers = new Array(slice.length); for (let i = 0; i < slice.length; i++) byteNumbers[i] = slice.charCodeAt(i); byteArrays.push(new Uint8Array(byteNumbers)); } return new Blob(byteArrays, { type: contentType }); }
         
         // =================================================================================
@@ -420,5 +548,3 @@
     </script>
 </body>
 </html>
-
-
