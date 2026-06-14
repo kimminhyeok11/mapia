@@ -1,0 +1,203 @@
+{
+  "cameras": [
+    {
+      "make": "Samsung",
+      "model": "Galaxy S23 Ultra",
+      "software": "S23 Ultra",
+      "resolutions": [
+        { "width": 12000, "height": 9000 },
+        { "width": 8000, "height": 6000 },
+        { "width": 4000, "height": 3000 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.7", "f/2.4"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000", "1/2000"],
+      "colorProfiles": ["sRGB", "P3"],
+      "lensModel": "Samsung S23 Ultra Main Camera"
+    },
+    {
+      "make": "Samsung",
+      "model": "Galaxy S24 Ultra",
+      "software": "S24 Ultra",
+      "resolutions": [
+        { "width": 12000, "height": 9000 },
+        { "width": 8000, "height": 6000 },
+        { "width": 4000, "height": 3000 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.7", "f/2.4"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000", "1/2000"],
+      "colorProfiles": ["sRGB", "P3"],
+      "lensModel": "Samsung S24 Ultra Main Camera"
+    },
+    {
+      "make": "Apple",
+      "model": "iPhone 14 Pro",
+      "software": "iOS 16.0",
+      "resolutions": [
+        { "width": 4032, "height": 3024 },
+        { "width": 2016, "height": 1512 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.78", "f/2.8"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000"],
+      "colorProfiles": ["sRGB", "Display P3"],
+      "lensModel": "iPhone 14 Pro Main Camera"
+    },
+    {
+      "make": "Apple",
+      "model": "iPhone 15 Pro",
+      "software": "iOS 17.0",
+      "resolutions": [
+        { "width": 4032, "height": 3024 },
+        { "width": 2016, "height": 1512 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.78", "f/2.8"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000"],
+      "colorProfiles": ["sRGB", "Display P3"],
+      "lensModel": "iPhone 15 Pro Main Camera"
+    },
+    {
+      "make": "Sony",
+      "model": "ILCE-7M4",
+      "software": "ILCE-7M4 v2.00",
+      "resolutions": [
+        { "width": 6000, "height": 4000 },
+        { "width": 3000, "height": 2000 }
+      ],
+      "isoRange": [100, 51200],
+      "apertureRange": ["f/1.4", "f/2.8", "f/4.0", "f/5.6", "f/8.0", "f/11", "f/16"],
+      "shutterSpeeds": ["1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000", "1/4000"],
+      "colorProfiles": ["sRGB", "Adobe RGB"],
+      "lensModel": "Sony FE 24-70mm F2.8 GM"
+    },
+    {
+      "make": "Canon",
+      "model": "Canon EOS R5",
+      "software": "Canon EOS R5",
+      "resolutions": [
+        { "width": 8192, "height": 5464 },
+        { "width": 4096, "height": 2732 }
+      ],
+      "isoRange": [100, 51200],
+      "apertureRange": ["f/1.2", "f/2.8", "f/4.0", "f/5.6", "f/8.0", "f/11", "f/16"],
+      "shutterSpeeds": ["1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000", "1/4000", "1/8000"],
+      "colorProfiles": ["sRGB", "Adobe RGB"],
+      "lensModel": "Canon RF 24-70mm F2.8 L IS USM"
+    },
+    {
+      "make": "Nikon",
+      "model": "Nikon Z8",
+      "software": "Nikon Z8",
+      "resolutions": [
+        { "width": 8256, "height": 5504 },
+        { "width": 4128, "height": 2752 }
+      ],
+      "isoRange": [64, 25600],
+      "apertureRange": ["f/1.4", "f/2.8", "f/4.0", "f/5.6", "f/8.0", "f/11", "f/16"],
+      "shutterSpeeds": ["1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000", "1/4000", "1/8000"],
+      "colorProfiles": ["sRGB", "Adobe RGB"],
+      "lensModel": "NIKKOR Z 24-70mm f/2.8 S"
+    },
+    {
+      "make": "Google",
+      "model": "Pixel 8 Pro",
+      "software": "Pixel 8 Pro",
+      "resolutions": [
+        { "width": 5040, "height": 3780 },
+        { "width": 2520, "height": 1890 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.68", "f/2.2"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000"],
+      "colorProfiles": ["sRGB", "P3"],
+      "lensModel": "Pixel 8 Pro Main Camera"
+    },
+    {
+      "make": "Xiaomi",
+      "model": "Xiaomi 14 Ultra",
+      "software": "Xiaomi 14 Ultra",
+      "resolutions": [
+        { "width": 12000, "height": 9000 },
+        { "width": 8000, "height": 6000 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.63", "f/1.8", "f/2.5"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000", "1/2000"],
+      "colorProfiles": ["sRGB", "P3"],
+      "lensModel": "Xiaomi 14 Ultra Main Camera"
+    },
+    {
+      "make": "OnePlus",
+      "model": "OnePlus 12",
+      "software": "OnePlus 12",
+      "resolutions": [
+        { "width": 8000, "height": 6000 },
+        { "width": 4000, "height": 3000 }
+      ],
+      "isoRange": [50, 3200],
+      "apertureRange": ["f/1.6", "f/2.2"],
+      "shutterSpeeds": ["1/60", "1/120", "1/240", "1/500", "1/1000"],
+      "colorProfiles": ["sRGB", "P3"],
+      "lensModel": "OnePlus 12 Main Camera"
+    }
+  ],
+  "seoulLocations": [
+    { "name": "강남역", "lat": 37.5172, "lon": 127.0473 },
+    { "name": "홍대입구역", "lat": 37.5569, "lon": 126.9238 },
+    { "name": "종각역", "lat": 37.5701, "lon": 126.9830 },
+    { "name": "서울역", "lat": 37.5547, "lon": 126.9707 },
+    { "name": "명동", "lat": 37.5637, "lon": 126.9820 },
+    { "name": "이태원", "lat": 37.5344, "lon": 126.9930 },
+    { "name": "삼성동", "lat": 37.5113, "lon": 127.0588 },
+    { "name": "코엑스", "lat": 37.5131, "lon": 127.0295 },
+    { "name": "잠실역", "lat": 37.5130, "lon": 127.1006 },
+    { "name": "건대입구역", "lat": 37.5405, "lon": 127.0702 },
+    { "name": "왕십리역", "lat": 37.5445, "lon": 127.0462 },
+    { "name": "청량리역", "lat": 37.5850, "lon": 127.0479 },
+    { "name": "을지로입구역", "lat": 37.5660, "lon": 126.9789 },
+    { "name": "충정로역", "lat": 37.5629, "lon": 126.9634 },
+    { "name": "합정역", "lat": 37.5504, "lon": 126.9150 },
+    { "name": "신촌역", "lat": 37.5552, "lon": 126.9366 },
+    { "name": "광화문", "lat": 37.5759, "lon": 126.9768 },
+    { "name": "경복궁", "lat": 37.5796, "lon": 126.9770 },
+    { "name": "남산타워", "lat": 37.5512, "lon": 126.9882 },
+    { "name": "롯데타워", "lat": 37.5124, "lon": 127.1026 },
+    { "name": "여의도", "lat": 37.5199, "lon": 126.9232 },
+    { "name": "마포대교", "lat": 37.5401, "lon": 126.9516 },
+    { "name": "한강공원", "lat": 37.5275, "lon": 126.9930 },
+    { "name": "상암동", "lat": 37.5774, "lon": 126.8946 },
+    { "name": "목동", "lat": 37.5164, "lon": 126.8749 },
+    { "name": "양재역", "lat": 37.4835, "lon": 127.0324 },
+    { "name": "교대역", "lat": 37.4949, "lon": 127.0329 },
+    { "name": "선릉역", "lat": 37.5045, "lon": 127.0494 },
+    { "name": "역삼역", "lat": 37.5007, "lon": 127.0368 },
+    { "name": "삼성역", "lat": 37.5100, "lon": 127.0588 },
+    { "name": "대치동", "lat": 37.4935, "lon": 127.0628 },
+    { "name": "청담동", "lat": 37.5271, "lon": 127.0489 },
+    { "name": "압구정동", "lat": 37.5273, "lon": 127.0296 },
+    { "name": "신사역", "lat": 37.5171, "lon": 127.0202 },
+    { "name": "장충단", "lat": 37.5596, "lon": 127.0068 },
+    { "name": "동대문", "lat": 37.5716, "lon": 127.0077 },
+    { "name": "을지로3가", "lat": 37.5690, "lon": 126.9880 },
+    { "name": "을지로4가", "lat": 37.5665, "lon": 126.9920 },
+    { "name": "을지로5가", "lat": 37.5640, "lon": 126.9960 },
+    { "name": "종로5가", "lat": 37.5715, "lon": 126.9890 },
+    { "name": "종로3가", "lat": 37.5755, "lon": 126.9810 },
+    { "name": "안국역", "lat": 37.5767, "lon": 126.9850 },
+    { "name": "경희대", "lat": 37.5909, "lon": 127.0440 },
+    { "name": "고려대", "lat": 37.5879, "lon": 127.0288 },
+    { "name": "서울대", "lat": 37.4599, "lon": 126.9514 },
+    { "name": "연세대", "lat": 37.5642, "lon": 126.9388 },
+    { "name": "이화여대", "lat": 37.5650, "lon": 126.9380 },
+    { "name": "숙명여대", "lat": 37.5448, "lon": 126.9635 },
+    { "name": "중앙대", "lat": 37.5136, "lon": 126.9569 },
+    { "name": "한국외대", "lat": 37.6014, "lon": 127.0584 },
+    { "name": "서강대", "lat": 37.5508, "lon": 126.9427 },
+    { "name": "홍릉", "lat": 37.5865, "lon": 127.0420 },
+    { "name": "성북동", "lat": 37.5895, "lon": 127.0165 },
+    { "name": "평창동", "lat": 37.5935, "lon": 127.0085 },
+    { "name": "삼청동", "lat": 37.5825, "lon": 126.9815 }
+  ]
+}

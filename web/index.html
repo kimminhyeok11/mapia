@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiveDot - 이미지 최적화 서비스</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #FFFFFF;
+      color: #080B0F;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hook-section {
+      text-align: center;
+      padding: 64px 0;
+      margin-bottom: 32px;
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .scroll-animate {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease-out;
+    }
+
+    .scroll-animate.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hook-section h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: #080B0F;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+
+    .hook-section p {
+      font-size: 24px;
+      color: #6B7280;
+      font-weight: 400;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hook-section .highlight {
+      color: #2563EB;
+      font-weight: 600;
+    }
+
+    .cta-button {
+      background: #2563EB;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 32px;
+      display: inline-block;
+    }
+
+    .cta-button:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .cta-button:active {
+      transform: translateY(0);
+    }
+
+    .top-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 64px;
+      animation: fadeIn 0.6s ease-in;
+      animation-delay: 0.2s;
+      animation-fill-mode: both;
+    }
+
+    .upload-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+
+    .upload-card h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .upload-area {
+      border: 2px dashed #E5E7EB;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #F8FAFC;
+    }
+
+    .upload-area:hover {
+      border-color: #2563EB;
+      background: #F0F9FF;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+
+    .upload-area.dragover {
+      border-color: #2563EB;
+      background: #E0F2FE;
+      transform: scale(1.02);
+    }
+
+    .upload-area.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .upload-area.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      background: #F8FAFC;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .upload-icon svg {
+      width: 24px;
+      height: 24px;
+      color: #2563EB;
+    }
+
+    .upload-text {
+      color: #080B0F;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .upload-subtext {
+      color: #6B7280;
+      font-size: 14px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .upload-options {
+      margin-top: 16px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .upload-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #080B0F;
+      cursor: pointer;
+    }
+
+    .upload-option input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #2563EB;
+    }
+
+    .progress {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #E5E7EB;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563EB 0%, #3B82F6 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 3px;
+    }
+
+    .progress-text {
+      margin-top: 8px;
+      color: #6B7280;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .success {
+      margin-top: 16px;
+      padding: 12px;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      color: #166534;
+      text-align: center;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .error {
+      margin-top: 16px;
+      padding: 12px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      color: #991B1B;
+      text-align: center;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stream-section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+
+    .stream-description {
+      font-size: 16px;
+      color: #6B7280;
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.6;
+      background: #F8FAFC;
+      padding: 16px 24px;
+      border-radius: 12px;
+      border-left: 4px solid #2563EB;
+    }
+
+    .stream-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      background: #F8FAFC;
+    }
+
+    .stream-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .banner {
+      background: #F8FAFC;
+      border: 2px dashed #9CA3AF;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .banner h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .banner p {
+      font-size: 16px;
+      color: #6B7280;
+      margin-bottom: 8px;
+    }
+
+    .banner .price {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2563EB;
+    }
+
+    .banner .cta {
+      display: inline-flex;
+      background: #2563EB;
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 16px;
+      transition: all 0.2s ease;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(0);
+    }
+
+    .banner .cta:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .banner .cta:active {
+      transform: translateY(0);
+    }
+
+    .features {
+      margin-bottom: 64px;
+    }
+
+    .features h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #080B0F;
+      margin-bottom: 32px;
+      letter-spacing: -0.02em;
+    }
+
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .feature-item {
+      padding: 24px;
+      background: #F8FAFC;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      animation: slideIn 0.4s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .feature-item:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .feature-item:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .feature-item:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .stats-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .stats-section h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 40px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #EFF6FF;
+      border-radius: 12px;
+      color: #2563EB;
+    }
+
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .stat-content {
+      text-align: left;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #6B7280;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+      color: #2563EB;
+    }
+
+    .feature-content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-content p {
+      font-size: 16px;
+      color: #6B7280;
+      line-height: 1.7;
+    }
+
+    .share-section {
+      text-align: center;
+      padding: 32px;
+      background: #F8FAFC;
+      border-radius: 16px;
+      margin-bottom: 64px;
+      animation: fadeIn 0.6s ease-in;
+      animation-delay: 0.4s;
+      animation-fill-mode: both;
+    }
+
+    .share-section h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .share-btn {
+      background: #2563EB;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transform: translateY(0);
+    }
+
+    .share-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .share-btn:active {
+      transform: translateY(0);
+    }
+
+    .share-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid #E5E7EB;
+      animation: fadeIn 0.6s ease-in;
+      animation-delay: 0.5s;
+      animation-fill-mode: both;
+    }
+
+    .footer p {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 8px;
+    }
+
+    .footer .contact {
+      color: #2563EB;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer .contact:hover {
+      text-decoration: underline;
+    }
+
+    .footer-social {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      background: #F8FAFC;
+      border: 1px solid #E5E7EB;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .social-link:hover {
+      background: #2563EB;
+      border-color: #2563EB;
+      transform: translateY(-2px);
+    }
+
+    .social-link svg {
+      width: 20px;
+      height: 20px;
+      color: #6B7280;
+    }
+
+    .social-link:hover svg {
+      color: white;
+    }
+
+    .faq-section {
+      margin-bottom: 64px;
+    }
+
+    .faq-section h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #080B0F;
+      margin-bottom: 32px;
+      letter-spacing: -0.02em;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 20px;
+      background: none;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #080B0F;
+      text-align: left;
+    }
+
+    .faq-question:hover {
+      background: #F8FAFC;
+    }
+
+    .faq-icon {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 200px;
+    }
+
+    .faq-answer p {
+      padding: 0 20px 20px;
+      font-size: 16px;
+      color: #6B7280;
+      line-height: 1.7;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #080B0F;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .modal ul {
+      font-size: 16px;
+      color: #6B7280;
+      margin-left: 20px;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .modal li {
+      margin-bottom: 8px;
+    }
+
+    .modal-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .modal-checkbox input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #2563EB;
+    }
+
+    .modal-checkbox label {
+      font-size: 16px;
+      color: #080B0F;
+      cursor: pointer;
+    }
+
+    .modal-btn {
+      width: 100%;
+      background: #2563EB;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      height: 44px;
+    }
+
+    .modal-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .modal-btn:disabled {
+      background: #E5E7EB;
+      cursor: not-allowed;
+      color: #6B7280;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+
+      .hook-section h1 {
+        font-size: 28px;
+        line-height: 1.3;
+      }
+
+      .hook-section p {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .features h2 {
+        font-size: 20px;
+      }
+
+      .upload-card {
+        padding: 20px;
+      }
+
+      .upload-area {
+        padding: 40px 20px;
+      }
+
+      .upload-text {
+        font-size: 18px;
+      }
+
+      .upload-subtext {
+        font-size: 14px;
+      }
+
+      .upload-options {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .upload-option {
+        font-size: 14px;
+      }
+
+      .progress {
+        height: 8px;
+      }
+
+      .stream-section {
+        padding: 20px;
+      }
+
+      .stream-section h3 {
+        font-size: 18px;
+      }
+
+      .stream-iframe {
+        height: 200px;
+      }
+
+      .faq-section h2 {
+        font-size: 24px;
+      }
+
+      .faq-item h3 {
+        font-size: 16px;
+      }
+
+      .faq-item p {
+        font-size: 14px;
+      }
+
+      .modal {
+        padding: 20px;
+        max-width: 90%;
+      }
+
+      .modal h3 {
+        font-size: 18px;
+      }
+
+      .modal p {
+        font-size: 14px;
+      }
+
+      .modal-checkbox label {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hook-section h1 {
+        font-size: 24px;
+      }
+
+      .hook-section p {
+        font-size: 15px;
+      }
+
+      .upload-card {
+        padding: 16px;
+      }
+
+      .upload-area {
+        padding: 30px 16px;
+      }
+
+      .upload-text {
+        font-size: 16px;
+      }
+
+      .upload-subtext {
+        font-size: 13px;
+      }
+
+      .cta-button {
+        padding: 12px 24px;
+        font-size: 16px;
+      }
+
+      .modal {
+        padding: 16px;
+        max-width: 95%;
+      }
+
+      .modal-btn {
+        padding: 10px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hook-section">
+      <h1>블로그 이미지 최적화를 <span class="highlight">간편히</span> 할 수 있다면?</h1>
+      <p>폴더에 이미지를 옮기는 것만으로 <span class="highlight">최적화</span>가 된다면? 모바일에 있는 이미지를 바로 <span class="highlight">내 컴퓨터</span>에 옮길 수 있다면?</p>
+      <button class="cta-button" onclick="document.getElementById('uploadArea').click()">지금 시작하기</button>
+    </div>
+
+    <div class="top-section">
+      <div class="upload-card">
+        <h2>이미지 업로드</h2>
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="upload-text">클릭하거나 이미지를 드래그하세요</div>
+          <div class="upload-subtext">JPG, PNG, WebP 지원</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
+        
+        <div class="upload-options">
+          <label class="upload-option">
+            <input type="checkbox" id="webCornerCrop">
+            모서리 크롭
+          </label>
+          <label class="upload-option">
+            <input type="checkbox" id="webCornerRadius">
+            모서리 둥글게
+          </label>
+        </div>
+        
+        <div class="progress" id="progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">업로드 중...</div>
+        </div>
+        <div class="success" id="success">
+          업로드 및 처리 완료!
+        </div>
+        <div class="error" id="error">
+          업로드 실패
+        </div>
+      </div>
+
+      <div class="stream-section">
+        <h2>업로드하고 내 컴퓨터 폴더 확인하기</h2>
+        <p class="stream-description">업로드를 하면 내 컴퓨터에 WebP로 전환되어 저장되는 모습을 실시간으로 볼 수 있습니다. 실시간으로 보여주는 영상입니다.</p>
+        <div class="stream-container">
+          <iframe 
+            id="streamIframe"
+            src="" 
+            title="Live Stream" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+
+      <div class="banner">
+        <h2>배너 스폰서 모집</h2>
+        <p>사이드 프로젝트 수익화를 위해 배너 광고를 24시간 동안 노출합니다</p>
+        <p>가격: <span class="price">2,000원</span></p>
+        <p>문의는 쓰레드 주소로 DM 바랍니다</p>
+        <a href="https://www.threads.com/@ilovemom_2026" target="_blank" rel="noopener" class="cta">문의하기</a>
+      </div>
+    </div>
+
+    <div class="features scroll-animate">
+      <h2>이게 무엇인가요?</h2>
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>자동 이미지 최적화</h3>
+            <p>이미지를 자동으로 최적화하여 페이지 검색노출을 유리하게 만듭니다. WebP 변환, 압축, 크기 조정 자동화.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>외부 모바일 저장</h3>
+            <p>외부에서 모바일로 찍은 사진을 내 컴퓨터 지정 폴더에 바로 저장합니다. 이메일 전송 없이 즉시 전송.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>GPS/Exif 데이터 추가</h3>
+            <p>GPS/Exif 데이터가 없는 경우 자동으로 생성하여 추가합니다. 위치 정보, 촬영 시간 등 메타데이터 자동 생성.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <path d="M12 11l-2 2-2-2"></path>
+              <path d="M12 13v6"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>폴더 감시 자동 최적화</h3>
+            <p>폴더로 파일을 이동하기만 해도 최적화 상태로 자동 저장됩니다. 별도 작업 없이 자동 처리.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <path d="M12 8v8"></path>
+              <path d="M8 12h8"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>배치 처리 지원</h3>
+            <p>여러 파일을 동시에 업로드하여 한 번에 처리할 수 있습니다. 대량 작업에 효율적.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>이미지 미리보기</h3>
+            <p>업로드 전 이미지를 미리보기하여 확인할 수 있습니다. 최적화 전후 비교 지원.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>알림 기능</h3>
+            <p>처리 완료 및 오류 발생 시 알림을 받을 수 있습니다. 실시간 상황 파악.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>통계 대시보드</h3>
+            <p>처리된 파일 수, 저장된 용량, 최적화 효과 등 통계를 한눈에 확인할 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>히스토리 관리</h3>
+            <p>처리 기록을 확인하고 필요한 경우 재처리할 수 있습니다. 과거 작업 관리.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>클립보드 이미지 지원</h3>
+            <p>서버 프로그램에서 클립보드 이미지를 바로 처리할 수 있습니다. 스크린샷 즉시 최적화.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h2>처리 통계</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="totalProcessed">0</div>
+            <div class="stat-label">처리된 파일</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="totalSaved">0 MB</div>
+            <div class="stat-label">저장된 용량</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="reductionPercentage">0%</div>
+            <div class="stat-label">평균 절감율</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="share-section">
+      <h2>서비스 공유하기</h2>
+      <div class="share-buttons">
+        <button class="share-btn" id="shareBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M22 2L11 13"></path>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+          </svg>
+          공유하기
+        </button>
+        <button class="share-btn" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          URL 복사
+        </button>
+      </div>
+    </div>
+
+    <div class="faq-section scroll-animate">
+      <h2>자주 묻는 질문</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>이미지가 어디에 저장되나요?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>이미지는 운영자의 컴퓨터에 자동으로 저장됩니다. 1시간 후 자동으로 삭제되어 개인정보 보호됩니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>어떤 이미지 형식을 지원하나요?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>JPG, PNG, GIF, BMP, WebP 등 대부분의 이미지 형식을 지원합니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>GPS/Exif 데이터가 어떻게 추가되나요?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>GPS/Exif 데이터가 없는 경우 자동으로 위치 정보, 촬영 시간 등 메타데이터를 생성하여 추가합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-social">
+        <a href="https://www.threads.com/@ilovemom_2026" target="_blank" rel="noopener" class="social-link" title="Threads">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path>
+          </svg>
+        </a>
+      </div>
+      <p>문의: <a href="https://www.threads.com/@ilovemom_2026" target="_blank" rel="noopener" class="contact">@ilovemom_2026</a></p>
+      <p>이미지는 1시간 후 자동으로 삭제되어 개인정보 보호됩니다.</p>
+      <p>이 서비스를 내 컴퓨터에 직접 구축할 수 있습니다. 쓰레드 계정을 통해 더욱 자세히 알수 있습니다.</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="termsModal">
+    <div class="modal">
+      <h3>이용약관 동의</h3>
+      <ul>
+        <li>업로드된 이미지는 운영자의 컴퓨터에 자동으로 저장됩니다</li>
+        <li>개인적인 사진을 올려도 운영자의 책임이 아닙니다</li>
+        <li>운영자의 주관에 따라 즉시 삭제할 수 있습니다</li>
+        <li>이미지는 1시간 후 자동으로 삭제됩니다</li>
+        <li>저작권, 초상권, 명예훼손 등 법적 문제는 업로더의 책임입니다</li>
+      </ul>
+      <div class="modal-checkbox">
+        <input type="checkbox" id="modalTermsCheckbox">
+        <label for="modalTermsCheckbox">위 내용을 모두 읽었으며 동의합니다</label>
+      </div>
+      <button class="modal-btn" id="modalConfirmBtn" disabled>확인</button>
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const success = document.getElementById('success');
+    const error = document.getElementById('error');
+    const shareBtn = document.getElementById('shareBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const termsModal = document.getElementById('termsModal');
+    const modalTermsCheckbox = document.getElementById('modalTermsCheckbox');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const streamIframe = document.getElementById('streamIframe');
+
+    let termsAccepted = false;
+
+    // 동영상 주소 로드
+    async function loadVideoUrl() {
+      try {
+        const response = await fetch('/api/video-url');
+        const data = await response.json();
+        if (data.success && data.videoUrl) {
+          streamIframe.src = data.videoUrl;
+        }
+      } catch (error) {
+        console.error('동영상 주소 로드 실패:', error);
+      }
+    }
+
+    loadVideoUrl();
+
+    // 스크롤 애니메이션
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.scroll-animate').forEach(el => {
+      observer.observe(el);
+    });
+
+    // FAQ 아코디언
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const faqItem = button.parentElement;
+        const isActive = faqItem.classList.contains('active');
+        
+        // 모든 FAQ 닫기
+        document.querySelectorAll('.faq-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        
+        // 클릭한 것만 열기
+        if (!isActive) {
+          faqItem.classList.add('active');
+        }
+      });
+    });
+
+    uploadArea.addEventListener('click', () => {
+      if (!termsAccepted) {
+        termsModal.classList.add('active');
+      } else {
+        fileInput.click();
+      }
+    });
+
+    modalTermsCheckbox.addEventListener('change', () => {
+      modalConfirmBtn.disabled = !modalTermsCheckbox.checked;
+    });
+
+    modalConfirmBtn.addEventListener('click', () => {
+      if (modalTermsCheckbox.checked) {
+        termsAccepted = true;
+        termsModal.classList.remove('active');
+        uploadArea.classList.remove('disabled');
+        
+        if (fileInput.files.length > 0) {
+          uploadFiles(fileInput.files);
+        }
+      }
+    });
+
+    termsModal.addEventListener('click', (e) => {
+      if (e.target === termsModal) {
+        termsModal.classList.remove('active');
+      }
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      if (!termsAccepted) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      if (!termsAccepted) {
+        e.preventDefault();
+        termsModal.classList.add('active');
+        return;
+      }
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        uploadFiles(files);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0 && termsAccepted) {
+        uploadFiles(e.target.files);
+      }
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'LiveDot - 이미지 최적화 서비스',
+            text: '블로그 이미지 최적화를 간편히 할수 있다면? 폴더에 이미지를 옮기는 것만으로 최적화가 된다면?',
+            url: window.location.href
+          });
+        } catch (err) {
+          console.log('공유 실패:', err);
+        }
+      } else {
+        alert('이 브라우저는 공유 기능을 지원하지 않습니다');
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('URL이 복사되었습니다');
+      }).catch(() => {
+        alert('URL 복사에 실패했습니다');
+      });
+    });
+
+    // 통계 데이터 가져오기
+    async function loadStatistics() {
+      try {
+        const response = await fetch('/api/statistics');
+        const data = await response.json();
+        if (data.success) {
+          const stats = data.statistics;
+          const totalProcessedEl = document.getElementById('totalProcessed');
+          const totalSavedEl = document.getElementById('totalSaved');
+          const reductionPercentageEl = document.getElementById('reductionPercentage');
+          
+          if (totalProcessedEl) totalProcessedEl.textContent = stats.totalProcessed;
+          if (totalSavedEl) totalSavedEl.textContent = formatBytes(stats.totalSaved);
+          if (reductionPercentageEl) reductionPercentageEl.textContent = stats.reductionPercentage + '%';
+        }
+      } catch (error) {
+        console.error('통계 데이터 가져오기 실패:', error);
+      }
+    }
+
+    // 바이트 포맷 함수
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // 페이지 로드 시 통계 데이터 가져오기
+    loadStatistics();
+
+    async function uploadFiles(files) {
+      const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      
+      if (imageFiles.length === 0) {
+        showError('이미지 파일만 업로드할 수 있습니다');
+        return;
+      }
+
+      progress.style.display = 'block';
+      success.style.display = 'none';
+      error.style.display = 'none';
+      progressFill.style.width = '0%';
+      progressText.textContent = `0/${imageFiles.length} 파일 업로드 중...`;
+
+      try {
+        const webCornerCrop = document.getElementById('webCornerCrop').checked;
+        const webCornerRadius = document.getElementById('webCornerRadius').checked;
+        
+        // 다중 파일 업로드 사용
+        const formData = new FormData();
+        imageFiles.forEach(file => formData.append('files', file));
+        formData.append('cornerCrop', webCornerCrop);
+        formData.append('cornerRadius', webCornerRadius);
+
+        const response = await fetch('/upload-multiple', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || '서버 오류');
+        }
+
+        progressFill.style.width = '100%';
+        progressText.textContent = '모든 파일 처리 완료!';
+        success.style.display = 'block';
+        
+        // 최적화 전후비교 정보 표시
+        if (result.results && result.results.length > 0 && result.results[0].comparison) {
+          const comparison = result.results[0].comparison;
+          const comparisonText = `
+            원본: ${comparison.original.sizeFormatted} (${comparison.original.width}x${comparison.original.height})
+            최적화: ${comparison.optimized.sizeFormatted} (${comparison.optimized.width}x${comparison.optimized.height})
+            절감: ${comparison.reduction.percentage}% (${comparison.reduction.bytesFormatted})
+          `;
+          success.innerHTML = `
+            <div>${result.message}</div>
+            <div style="font-size: 12px; margin-top: 8px; color: #6B7280;">${comparisonText}</div>
+          `;
+        }
+        
+        setTimeout(() => {
+          progress.style.display = 'none';
+          success.style.display = 'none';
+          fileInput.value = '';
+          // 통계 다시 로드
+          loadStatistics();
+          // 자동 새로고침 (업로드된 파일이 반영되도록)
+          location.reload();
+        }, 3000);
+      } catch (err) {
+        showError(err.message || '서버 오류');
+      }
+    }
+
+    function showError(message) {
+      progress.style.display = 'none';
+      error.textContent = message;
+      error.style.display = 'block';
+      
+      setTimeout(() => {
+        error.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

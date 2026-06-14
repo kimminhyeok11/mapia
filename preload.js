@@ -1,0 +1,32 @@
+const { contextBridge, ipcRenderer, clipboard } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  processImages: (filePaths) => ipcRenderer.invoke('process-images', filePaths),
+  onProcessingProgress: (callback) => ipcRenderer.on('processing-progress', (event, data) => callback(data)),
+  removeProcessingProgressListener: () => ipcRenderer.removeAllListeners('processing-progress'),
+  startFolderWatch: (folderPath) => ipcRenderer.invoke('start-folder-watch', folderPath),
+  stopFolderWatch: () => ipcRenderer.invoke('stop-folder-watch'),
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
+  onFolderWatchNewFile: (callback) => ipcRenderer.on('folder-watch-new-file', (event, data) => callback(data)),
+  removeFolderWatchNewFileListener: () => ipcRenderer.removeAllListeners('folder-watch-new-file'),
+  readClipboardImage: () => ipcRenderer.invoke('read-clipboard-image'),
+  hasClipboardImage: () => clipboard.has('image/png'),
+  onWebServerStarted: (callback) => ipcRenderer.on('web-server-started', (event, data) => callback(data)),
+  removeWebServerStartedListener: () => ipcRenderer.removeAllListeners('web-server-started'),
+  getWebServerStatus: () => ipcRenderer.invoke('get-web-server-status'),
+  setUploadDir: (dirPath) => ipcRenderer.invoke('set-upload-dir', dirPath),
+  getUploadDir: () => ipcRenderer.invoke('get-upload-dir'),
+  onUploadDirChanged: (callback) => ipcRenderer.on('upload-dir-changed', (event, data) => callback(data)),
+  removeUploadDirChangedListener: () => ipcRenderer.removeAllListeners('upload-dir-changed'),
+  setMaxFileSize: (sizeMB) => ipcRenderer.invoke('set-max-file-size', sizeMB),
+  getMaxFileSize: () => ipcRenderer.invoke('get-max-file-size'),
+  onOpenMaxFileSizeDialog: (callback) => ipcRenderer.on('open-max-file-size-dialog', (event, data) => callback(data)),
+  removeOpenMaxFileSizeDialogListener: () => ipcRenderer.removeAllListeners('open-max-file-size-dialog'),
+  setVideoUrl: (url) => ipcRenderer.invoke('set-video-url', url),
+  getVideoUrl: () => ipcRenderer.invoke('get-video-url'),
+  onOpenVideoUrlDialog: (callback) => ipcRenderer.on('open-video-url-dialog', (event, data) => callback(data)),
+  removeOpenVideoUrlDialogListener: () => ipcRenderer.removeAllListeners('open-video-url-dialog'),
+  onToggleCornerCrop: (callback) => ipcRenderer.on('toggle-corner-crop', (event, data) => callback(data)),
+  onToggleCornerRadius: (callback) => ipcRenderer.on('toggle-corner-radius', (event, data) => callback(data)),
+  setWindowSize: (width, height) => ipcRenderer.invoke('set-window-size', width, height)
+});
