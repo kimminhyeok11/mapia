@@ -203,6 +203,7 @@
         <main id="main-content">
             <div id="view-library" class="app-view"></div>
             <div id="view-post" class="app-view"></div>
+            <div id="view-static-post" class="app-view"></div>
             <div id="view-dashboard" class="app-view"></div>
             <div id="view-writer" class="app-view"></div>
             <div id="view-refiner" class="app-view"></div>
@@ -223,6 +224,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Zm5qdGx6b3ZicGJnbHZrcm9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4OTcyMjEsImV4cCI6MjA3MTQ3MzIyMX0.yg43GbdVBPAzaghmERNGxRu9dte3bcpWTWjrOa0p55I';
         const IMAGE_BUCKET_NAME = 'thought-images';
         const POSTS_PER_PAGE = 5;
+        const GITHUB_POSTS_URL = './generated/posts.json';
         const DRAFT_STORAGE_KEY = 'cortexlog_ai_draft';
         
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -233,6 +235,8 @@
             quill: null,
             isAuthReady: false,
             draftArticle: null,
+            githubPosts: [],
+            githubPostsLoaded: false,
             quillLoaded: false, 
         };
         const $ = (selector) => document.querySelector(selector);
@@ -277,10 +281,11 @@
             };
             const title = post ? post.title : defaultMeta.title;
             const description = post ? (post.summary || defaultMeta.description) : defaultMeta.description;
-            const url = post ? `${SITE_URL}/#/post/${post.id}` : SITE_URL;
+            const url = post ? (post.url || `${SITE_URL}/#/post/${post.id}`) : SITE_URL;
             let imageUrl = defaultMeta.image;
+            if (post && post.image) imageUrl = post.image;
             if (post && post.refined_content) {
-                const match = post.refined_content.match(/<img[^>]+src="([^">]+)"/);
+                const match = post.refined_content.match(/<img[^>]+src="([^"]+)"/);
                 if (match && match[1]) imageUrl = match[1];
             }
             document.title = title;
@@ -388,6 +393,7 @@
             if (path === 'page') { page = parseInt(parts[1], 10) || 1; path = ''; } 
             else if (path === 'dashboard' && parts[1] === 'page') { page = parseInt(parts[2], 10) || 1; } 
             else if (path === 'post') { id = parts[1]; }
+            else if (path === 'posts') { id = parts.slice(1).join('/'); }
             else if (path === 'writer') { id = parts[1]; }
 
             if (!state.user && ['dashboard', 'writer', 'refiner'].includes(path)) {
@@ -398,6 +404,7 @@
 
             switch (path) {
                 case 'post': switchView('view-post', (el) => renderPostView(el, id)); break;
+                case 'posts': switchView('view-static-post', (el) => renderStaticPostView(el, id)); break;
                 case 'dashboard': switchView('view-dashboard', (el) => renderDashboardView(el, page)); break;
                 case 'writer': switchView('view-writer', (el) => renderWriterView(el, id)); break;
                 case 'refiner': switchView('view-refiner', (el) => renderRefinerView(el)); break;
@@ -412,21 +419,59 @@
             $('#main-nav-container').innerHTML = `<nav class="w-full max-w-7xl flex items-center justify-between py-2 px-4 bg-black/30 backdrop-blur-lg border border-border-color rounded-lg"><a href="#/" class="brand-logo" data-action="route">CortexLog</a><div class="flex items-center space-x-2">${state.user ? `<a href="#/dashboard" class="btn" data-action="route">대시보드</a><button data-action="logout" class="btn">로그아웃</button>` : `<button data-action="show-auth" class="btn btn-primary">로그인 / 가입</button>`}</div></nav>`;
         }
         
+        async function loadGithubPosts() {
+            if (state.githubPostsLoaded) return state.githubPosts;
+            try {
+                const response = await fetch(GITHUB_POSTS_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`GitHub 콘텐츠 파일 오류: ${response.status}`);
+                const posts = await response.json();
+                state.githubPosts = Array.isArray(posts) ? posts : [];
+            } catch (error) {
+                console.warn('GitHub 콘텐츠를 불러오지 못했습니다.', error);
+                state.githubPosts = [];
+            } finally {
+                state.githubPostsLoaded = true;
+            }
+            return state.githubPosts;
+        }
+
+        function escapeHtmlClient(value = '') {
+            return String(value).replace(/[&<>\"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[character]));
+        }
+
         async function renderLibraryView(container, page = 1) {
             updateMetaTags();
             $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
             const { from, to } = getPaginationRange(page);
-            const { data, error, count } = await supabase.from('posts').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
-            if (error) { showToast('데이터를 불러오는 데 실패했습니다.', true); container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`; return; }
+            const githubPosts = await loadGithubPosts();
+            const { data: supabasePosts, error: supabaseError, count: supabaseCount } = await supabase.from('posts').select('*', { count: 'exact' }).order('created_at', { ascending: false });
+            const githubPostCards = githubPosts.map(post => ({ ...post, id: post.slug, source: 'github' }));
+            const remotePosts = supabaseError ? [] : (supabasePosts || []);
+            const mergedPosts = [...githubPostCards, ...remotePosts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const data = mergedPosts.slice(from, to + 1);
+            const count = githubPostCards.length + (supabaseError ? 0 : (supabaseCount || 0));
+            if (supabaseError && githubPosts.length === 0) { showToast('글을 불러오는 데 실패했습니다.', true); container.innerHTML = `<p class="text-center text-gray-400 py-20">글을 불러올 수 없습니다.</p>`; return; }
             
             /*
              * 성능 수정 #3: 'transition-all'을 'transition-colors'로 변경
              * Tailwind CSS의 'transition-all' 클래스 대신 'transition-colors'를 사용하여
              * hover 시 색상 관련 속성만 애니메이션되도록 제한합니다.
              */
-            const postsHtml = data.length > 0 ? data.map(post => `<a href="#/post/${post.id}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-colors duration-300 group"><h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${post.title}</h2><p class="text-gray-400 mb-3 text-sm">${post.summary || ''}</p><p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p></a>`).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
+            const postsHtml = data.length > 0 ? data.map(post => { const href = post.source === 'github' ? `#/posts/${post.slug}` : `#/post/${post.id}`; return `<a href="${href}" data-action="route" class="block p-6 bg-content border border-transparent hover:border-border-color rounded-lg transition-colors duration-300 group"><h2 class="text-xl font-bold font-heading mb-2 text-gray-200 group-hover:text-white transition-colors">${escapeHtmlClient(post.title)}</h2><p class="text-gray-400 mb-3 text-sm">${escapeHtmlClient(post.summary || '')}</p><p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString('ko-KR')}</p></a>`; }).join('') : `<p class="text-center text-gray-400 py-20">아직 작성된 글이 없습니다.</p>`;
             
             container.innerHTML = `<div class="py-16"><h1 class="text-4xl font-extrabold text-center font-heading mb-4">Thoughts & Insights</h1><p class="text-center text-gray-400 mb-12">AI, 기술, 그리고 일상에 대한 기록들</p><div class="space-y-4">${postsHtml}</div>${renderPaginationControls(page, count, '#/page/')}</div>`;
+        }
+
+        async function renderStaticPostView(container, slug) {
+            $('#app-container').className = 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8';
+            const posts = await loadGithubPosts();
+            const post = posts.find(item => item.slug === slug || item.id === slug);
+            if (!post) { showToast('GitHub 글을 찾을 수 없습니다.', true); window.location.hash = '/'; return; }
+            updateMetaTags({ ...post, id: post.slug, refined_content: post.html });
+            const postHtml = `<article class="prose-custom max-w-none pt-8 pb-12"><div class="mb-8"><a href="#/" class="btn" data-action="route">목록으로</a></div><p class="text-sm text-gray-500 mb-3">${new Date(post.created_at).toLocaleString('ko-KR')}</p><h1 class="text-3xl font-extrabold !mt-0">${escapeHtmlClient(post.title)}</h1><p class="text-gray-400 mb-8">${escapeHtmlClient(post.summary || '')}</p>${post.image ? `<img src="${escapeHtmlClient(post.image)}" alt="${escapeHtmlClient(post.title)}" class="rounded-lg w-full mb-8">` : ''}<div>${post.html}</div></article>`;
+            const adHtml = `<div class="my-12"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5239497835591112" data-ad-slot="2069100221" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
+            const related = posts.filter(item => item.slug !== post.slug).slice(0, 2).map(item => `<a href="#/posts/${item.slug}" data-action="route" class="block p-4 bg-content/50 border border-transparent hover:border-border-color rounded-lg transition-colors duration-300 group"><h4 class="font-bold text-gray-200 group-hover:text-white transition-colors">${escapeHtmlClient(item.title)}</h4><p class="text-gray-400 text-sm mt-1">${escapeHtmlClient(item.summary || '')}</p></a>`).join('');
+            container.innerHTML = postHtml + adHtml + (related ? `<div class="mt-8 pt-8 border-t border-border-color"><h3 class="text-xl font-bold font-heading mb-4">GitHub에서 발행한 다른 글</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${related}</div></div>` : '');
         }
 
         async function renderPostView(container, id) {

@@ -4,7 +4,12 @@
   "description": "Static build for CortexLog",
   "scripts": {
     "build:css": "npx tailwindcss -i ./input.css -o ./output.css --minify",
-    "build": "npm run build:css"
+    "build:content": "node scripts/build-content.mjs",
+    "build": "npm run build:content && npm run build:css"
+  },
+  "dependencies": {
+    "marked": "^15.0.7",
+    "sanitize-html": "^2.17.6"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.1"

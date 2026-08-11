@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         posts.forEach(post => {
             sitemapXml += `
   <url>
-    <loc>${SITE_URL}/#/post/${post.id}</loc>
+    <loc>${SITE_URL}/posts/${post.id}/</loc>
     <lastmod>${new Date(post.created_at).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
