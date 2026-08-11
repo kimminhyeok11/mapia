@@ -3,7 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 사이트 기본 주소
-const SITE_URL = 'https://mapia.vercel.app';
+const SITE_URL = 'https://kimminhyeok11.github.io/mapia';
 
 // Supabase 접속 정보. Vercel 프로젝트의 환경 변수에서 가져옵니다.
 // Vercel 대시보드 > Settings > Environment Variables 에서 설정해야 합니다.

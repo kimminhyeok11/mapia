@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
 const GENERATED_DIR = path.join(ROOT, 'generated');
 const PUBLIC_POSTS_DIR = path.join(ROOT, 'posts');
-const SITE_URL = (process.env.SITE_URL || 'https://mapia.vercel.app').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://kimminhyeok11.github.io/mapia').replace(/\/$/, '');
 const ADSENSE_CLIENT = process.env.ADSENSE_CLIENT || 'ca-pub-5239497835591112';
 const SANITIZE_OPTIONS = {
   allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'strong', 'em', 'del', 'blockquote', 'pre', 'code', 'ul', 'ol', 'li', 'a', 'img', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'div', 'span', 'iframe'],
